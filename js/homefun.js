@@ -8,7 +8,7 @@ async function loadHotOffers(){
     .from('cards')
     .select('id,name,price,image_url,status')
     .eq('status','Skladem')
-    .eq('hot', true)  // tady je změna
+    .eq('hot', true)
     .limit(4);
 
   if(error){
@@ -36,5 +36,5 @@ async function loadHotOffers(){
   });
 }
 
-document.addEventListener('DOMContentLoaded', loadHotOffers);
 
+document.addEventListener('DOMContentLoaded', loadHotOffers);
