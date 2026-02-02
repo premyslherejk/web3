@@ -2,6 +2,42 @@ const itemsWrap = document.getElementById('cart-items');
 const emptyEl = document.getElementById('cart-empty');
 const totalEl = document.getElementById('totalPrice');
 const summaryEl = document.getElementById('cart-summary');
+const checkoutBtn = document.querySelector('.checkout');
+
+const MIN_ORDER = 99;
+
+// ===== TOAST =====
+function showToast(msg) {
+  let toast = document.querySelector('.toast');
+
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.className = 'toast';
+    document.body.appendChild(toast);
+
+    Object.assign(toast.style, {
+      position: 'fixed',
+      bottom: '30px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      background: '#ff3b3b',
+      color: '#fff',
+      padding: '14px 22px',
+      borderRadius: '999px',
+      fontWeight: '800',
+      zIndex: 9999,
+      opacity: 0,
+      transition: 'opacity .3s'
+    });
+  }
+
+  toast.textContent = msg;
+  toast.style.opacity = 1;
+
+  setTimeout(() => {
+    toast.style.opacity = 0;
+  }, 2500);
+}
 
 // ===== LOAD CART =====
 function loadCart() {
@@ -43,10 +79,33 @@ function loadCart() {
   });
 
   totalEl.textContent = `${total} Kč`;
-
-  // 🔥 Po načtení košíku aktualizuj počet v headeru
+  handleCheckoutState(total);
   updateCartCount();
 }
+
+// ===== CHECKOUT LOGIKA =====
+function handleCheckoutState(total) {
+  if (!checkoutBtn) return;
+
+  if (total < MIN_ORDER) {
+    checkoutBtn.disabled = true;
+    checkoutBtn.style.opacity = '.4';
+    checkoutBtn.style.cursor = 'not-allowed';
+  } else {
+    checkoutBtn.disabled = false;
+    checkoutBtn.style.opacity = '1';
+    checkoutBtn.style.cursor = 'pointer';
+  }
+}
+
+checkoutBtn?.addEventListener('click', e => {
+  const total = parseInt(totalEl.textContent);
+
+  if (total < MIN_ORDER) {
+    e.preventDefault();
+    showToast('Minimální objednávka je 99 Kč');
+  }
+});
 
 // ===== CONFIRM REMOVE FLOW =====
 itemsWrap.addEventListener('click', e => {
@@ -55,7 +114,6 @@ itemsWrap.addEventListener('click', e => {
   const card = e.target.closest('.cart-item');
   const index = Number(card.dataset.index);
 
-  // overlay už existuje?
   if (card.querySelector('.confirm-overlay')) return;
 
   const overlay = document.createElement('div');
@@ -71,13 +129,11 @@ itemsWrap.addEventListener('click', e => {
 
   card.appendChild(overlay);
 
-  // ==== NE ====
   overlay.querySelector('.confirm-no').onclick = () => {
     overlay.classList.add('confirm-exit');
     setTimeout(() => overlay.remove(), 250);
   };
 
-  // ==== ANO ====
   overlay.querySelector('.confirm-yes').onclick = () => {
     card.classList.add('delete-anim');
 
@@ -86,9 +142,7 @@ itemsWrap.addEventListener('click', e => {
       cart.splice(index, 1);
       localStorage.setItem('cart', JSON.stringify(cart));
 
-      // 🔥 Okamžitě aktualizuj header
       document.dispatchEvent(new Event('cartUpdated'));
-
       loadCart();
     }, 450);
   };
@@ -102,7 +156,6 @@ function updateCartCount() {
   if (cartCountEl) cartCountEl.textContent = cart.length;
 }
 
-// 🔥 Reaguj na globální update z detailu karty
 document.addEventListener('cartUpdated', updateCartCount);
 
 // ===== START =====
