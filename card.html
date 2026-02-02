@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Detail karty</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <link rel="stylesheet" href="css/cardvis.css">
   <link rel="stylesheet" href="css/headervis.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
@@ -13,11 +14,12 @@
 
 <header class="site-header">
   <div class="logo" onclick="location.href='index.html'">PokeKusovky</div>
+
   <div class="header-right">
     <div class="cart-icon" onclick="location.href='cart.html'">
       🛒 <span class="cart-count" id="cart-count">0</span>
     </div>
-    <button id="menu-button" class="menu-button">☰</button>
+    <button id="menu-button" class="menu-button" aria-label="Menu">☰</button>
   </div>
 </header>
 
@@ -41,27 +43,37 @@
   <!-- INFO -->
   <div class="info">
     <span class="badge" id="status"></span>
+
     <h1 id="name"></h1>
+
     <div class="psa" id="psa"></div>
     <div class="meta" id="meta"></div>
+
     <p class="description" id="description"></p>
 
     <div class="buy-box">
       <div class="price" id="price"></div>
 
-      <div class="min-order" id="minOrder">
-        * minimální objednávka 99 Kč
+      <!-- 🔴 MINIMÁLNÍ OBJEDNÁVKA – zatím prázdné, řeší JS -->
+      <div id="min-order-info" class="min-order-info" style="display:none;">
+        * Minimální objednávka je 99 Kč
       </div>
 
       <button class="add">Přidat do košíku</button>
     </div>
   </div>
-
 </div>
 
 <div id="psa-info" class="psa-info">
   <h3>Co znamená PSA hodnocení?</h3>
-  <p>PSA je nejuznávanější autorita pro hodnocení sběratelských karet.</p>
+  <p>
+    PSA (Professional Sports Authenticator) je nejuznávanější autorita na světě
+    pro hodnocení sběratelských karet. Karty jsou hodnoceny na stupnici 1–10
+    podle stavu, centrování, rohů a povrchu.
+  </p>
+  <p>
+    <strong>PSA 9</strong> znamená téměř perfektní stav – ideální pro sběratele i investory.
+  </p>
 </div>
 
 <!-- LIGHTBOX -->
