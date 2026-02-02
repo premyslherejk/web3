@@ -1,1 +1,80 @@
-<!DOCTYPE html> <html lang="cs"> <head> <meta charset="UTF-8"> <title>Detail karty</title> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <link rel="stylesheet" href="css/cardvis.css"> <link rel="stylesheet" href="css/headervis.css"> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet"> </head> <body> <header class="site-header"> <div class="logo" onclick="location.href='index.html'">PokeKusovky</div> <div class="header-right"> <div class="cart-icon" onclick="location.href='cart.html'"> 🛒 <span class="cart-count" id="cart-count">0</span> </div> <button id="menu-button" class="menu-button" aria-label="Menu"> ☰ </button> </div> </header> <nav class="menu-overlay" id="menu"> <a href="index.html">Domů</a> <a href="cards.html">Karty</a> <a href="auctions.html">Aukce</a> <a href="contact.html">Kontakt</a> </nav> <div class="product-page"> <!-- GALERIE --> <div class="gallery"> <div class="main-image" id="mainImage"> <img id="current" src="" alt=""> </div> <div class="thumbs" id="thumbs"></div> </div> <!-- INFO --> <div class="info"> <span class="badge" id="status"></span> <h1 id="name"></h1> <div class="psa" id="psa"></div> <div class="meta" id="meta"></div> <p class="description" id="description"></p> <div class="buy-box"> <div class="price" id="price"></div> <button class="add">Přidat do košíku</button> </div> </div> </div> <div id="psa-info" class="psa-info"> <h3>Co znamená PSA hodnocení?</h3> <p> PSA (Professional Sports Authenticator) je nejuznávanější autorita na světě pro hodnocení sběratelských karet. Karty jsou hodnoceny na stupnici 1–10 podle stavu, centrování, rohů a povrchu. </p> <p> <strong>PSA 9</strong> znamená téměř perfektní stav – ideální pro sběratele i investory. </p> </div> <!-- LIGHTBOX --> <div class="lightbox" id="lightbox"> <div class="arrow left" id="prev">‹</div> <img id="lightImg"> <div class="arrow right" id="next">›</div> <div class="close" id="close">✕</div> </div> <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> <script src="js/cardfun.js"></script> <script src="js/headerfun.js"></script> </body> </html>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>Detail karty</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/cardvis.css">
+  <link rel="stylesheet" href="css/headervis.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="logo" onclick="location.href='index.html'">PokeKusovky</div>
+  <div class="header-right">
+    <div class="cart-icon" onclick="location.href='cart.html'">
+      🛒 <span class="cart-count" id="cart-count">0</span>
+    </div>
+    <button id="menu-button" class="menu-button">☰</button>
+  </div>
+</header>
+
+<nav class="menu-overlay" id="menu">
+  <a href="index.html">Domů</a>
+  <a href="cards.html">Karty</a>
+  <a href="auctions.html">Aukce</a>
+  <a href="contact.html">Kontakt</a>
+</nav>
+
+<div class="product-page">
+
+  <!-- GALERIE -->
+  <div class="gallery">
+    <div class="main-image" id="mainImage">
+      <img id="current" src="" alt="">
+    </div>
+    <div class="thumbs" id="thumbs"></div>
+  </div>
+
+  <!-- INFO -->
+  <div class="info">
+    <span class="badge" id="status"></span>
+    <h1 id="name"></h1>
+    <div class="psa" id="psa"></div>
+    <div class="meta" id="meta"></div>
+    <p class="description" id="description"></p>
+
+    <div class="buy-box">
+      <div class="price" id="price"></div>
+
+      <div class="min-order" id="minOrder">
+        * minimální objednávka 99 Kč
+      </div>
+
+      <button class="add">Přidat do košíku</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="psa-info" class="psa-info">
+  <h3>Co znamená PSA hodnocení?</h3>
+  <p>PSA je nejuznávanější autorita pro hodnocení sběratelských karet.</p>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <div class="arrow left" id="prev">‹</div>
+  <img id="lightImg">
+  <div class="arrow right" id="next">›</div>
+  <div class="close" id="close">✕</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/cardfun.js"></script>
+<script src="js/headerfun.js"></script>
+
+</body>
+</html>
