@@ -11,7 +11,8 @@ body{
   padding:40px;
 }
 
-/* LAYOUT */
+/* ===================== LAYOUT ===================== */
+
 .product-page{
   max-width:1200px;
   margin:auto;
@@ -20,8 +21,12 @@ body{
   gap:60px;
 }
 
-/* GALERIE */
-.gallery{display:flex;flex-direction:column;}
+/* ===================== GALERIE ===================== */
+
+.gallery{
+  display:flex;
+  flex-direction:column;
+}
 
 .main-image{
   width:100%;
@@ -58,26 +63,49 @@ body{
   border-color:#ff3b3b;
 }
 
-/* INFO */
-.info{display:flex;flex-direction:column;gap:18px;}
+/* ===================== INFO ===================== */
+
+.info{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+/* STATUS */
 
 .badge{
   padding:6px 14px;
   border-radius:999px;
   font-size:.85rem;
   font-weight:700;
-  background:#1f8f3a;
   width:fit-content;
+  background:#1f8f3a;
+  color:white;
 }
+
+/* PSA */
 
 .psa{
   display:none;
+  align-items:center;
   padding:8px 16px;
   border-radius:999px;
   background:#6c4cff;
+  color:white;
   font-weight:900;
+  font-size:1rem;
+  width:fit-content;
   cursor:pointer;
+  box-shadow:0 6px 20px rgba(108,76,255,.45);
+  transition:.25s;
 }
+
+.psa:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 30px rgba(108,76,255,.6);
+}
+
+/* TITLE */
 
 h1{
   font-size:clamp(2rem,4vw,3rem);
@@ -85,11 +113,24 @@ h1{
   color:#ff3b3b;
 }
 
-.meta{color:#bbb;}
-.description{color:#ccc;line-height:1.7;}
+/* TEXT */
 
-/* BUY */
-.buy-box{display:flex;flex-direction:column;gap:12px;}
+.meta{
+  color:#bbb;
+}
+
+.description{
+  line-height:1.7;
+  color:#ccc;
+}
+
+/* ===================== BUY BOX ===================== */
+
+.buy-box{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
 
 .price{
   font-size:2.4rem;
@@ -97,50 +138,144 @@ h1{
   color:#ffff00;
 }
 
-.min-order{
+/* 🔴 MINIMÁLNÍ OBJEDNÁVKA */
+
+.min-order-info{
   font-size:.85rem;
-  color:#ffb300;
-  display:none;
+  color:#ffb347;
+  font-weight:600;
 }
 
 .add{
   padding:16px 32px;
   border-radius:999px;
   border:none;
+  font-size:1.1rem;
   font-weight:800;
   cursor:pointer;
   background:#ff3b3b;
   color:white;
 }
 
-.add.added{
-  background:linear-gradient(135deg,#2ecc71,#1f8f3a);
-}
+/* ===================== DESKTOP – NESAHEJ ===================== */
 
-/* DESKTOP */
-@media(min-width:901px){
+@media (min-width:901px){
   .buy-box{
     margin-top:auto;
     transform:translateY(-140px);
   }
 }
 
-/* MOBIL */
-@media(max-width:900px){
-  body{padding:20px;}
+/* ===================== MOBIL – SPRÁVNÉ POŘADÍ ===================== */
+
+@media (max-width:900px){
+
+  body{
+    padding:20px;
+  }
 
   .product-page{
+    display:grid;
     grid-template-columns:1fr;
     gap:22px;
   }
 
-  .info{display:contents;}
+  .info{
+    display:contents;
+  }
 
-  h1{order:1;}
-  .psa{display:flex;order:2;}
-  .gallery{order:3;}
-  .badge{order:4;}
-  .buy-box{order:5;}
-  .meta{order:6;}
-  .description{order:7;}
+  h1{ order:1; }
+
+  .psa{
+    display:flex;
+    order:2;
+  }
+
+  .gallery{ order:3; }
+
+  .badge{ order:4; }
+
+  .buy-box{ order:5; }
+
+  .meta{ order:6; }
+
+  .description{ order:7; }
+
+  .price{
+    font-size:2rem;
+  }
+
+  .thumbs img{
+    width:72px;
+  }
+}
+
+/* ===================== PSA INFO ===================== */
+
+.psa-info{
+  display:none;
+  margin-top:80px;
+  padding:32px;
+  background:#15151d;
+  border-radius:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+
+.psa-info h3{
+  font-size:1.3rem;
+  margin-bottom:12px;
+  color:#6c4cff;
+}
+
+.psa-info p{
+  color:#ccc;
+  line-height:1.7;
+  font-size:.95rem;
+}
+
+/* ===================== LIGHTBOX ===================== */
+
+.lightbox{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.95);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  pointer-events:none;
+  transition:.3s;
+  z-index:9999;
+}
+
+.lightbox.active{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.lightbox img{
+  max-width:90%;
+  max-height:90%;
+  border-radius:20px;
+}
+
+.arrow,
+.close{
+  position:absolute;
+  cursor:pointer;
+  font-size:2.5rem;
+}
+
+.arrow.left{ left:20px; }
+.arrow.right{ right:20px; }
+
+.close{
+  top:20px;
+  right:30px;
+}
+
+/* ===================== Buy potvrzení ===================== */
+
+.add.added{
+  background:linear-gradient(135deg,#2ecc71,#1f8f3a);
 }
