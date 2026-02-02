@@ -1,0 +1,270 @@
+/* ===========================
+   RESET + BASE
+=========================== */
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  background:#0f0f14;
+  color:white;
+  font-family:Inter,system-ui,sans-serif;
+  padding:40px;
+}
+
+.cart-page{
+  max-width:900px;
+  margin:auto;
+}
+
+h1{
+  font-size:2.5rem;
+  font-weight:900;
+  color:#ff3b3b;
+  margin-bottom:30px;
+}
+
+.empty{
+  opacity:.6;
+  font-size:1.2rem;
+}
+
+/* ===========================
+   CART LIST
+=========================== */
+.items{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
+.cart-item{
+  position:relative;
+  display:grid;
+  grid-template-columns:120px 1fr auto;
+  gap:20px;
+  align-items:center;
+  background:#15151c;
+  padding:16px;
+  border-radius:16px;
+  overflow:hidden;
+}
+
+.cart-item img{
+  width:120px;
+  aspect-ratio:3/4;
+  object-fit:cover;
+  border-radius:12px;
+}
+
+.item-info{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.item-name{
+  font-weight:800;
+  font-size:1.1rem;
+}
+
+.item-meta{
+  color:#bbb;
+  font-size:.9rem;
+}
+
+.item-price{
+  font-weight:900;
+  color:#ffff00;
+}
+
+/* ===========================
+   REMOVE BUTTON (X)
+=========================== */
+.remove{
+  position:absolute;
+  top:10px;
+  right:10px;
+  z-index:5;
+
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  background:#ff3b3b;
+  color:white;
+  font-weight:900;
+  font-size:1rem;
+  border:none;
+  cursor:pointer;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+
+.remove:hover{
+  transform:scale(1.1);
+  box-shadow:0 6px 18px rgba(255,59,59,.6);
+}
+
+/* ===========================
+   SUMMARY
+=========================== */
+.summary{
+  margin-top:40px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-top:1px solid #333;
+  padding-top:20px;
+}
+
+.total{
+  font-size:1.4rem;
+  font-weight:900;
+}
+
+.checkout{
+  padding:16px 32px;
+  border-radius:999px;
+  border:none;
+  font-size:1.1rem;
+  font-weight:800;
+  cursor:pointer;
+  background:#ff3b3b;
+  color:white;
+}
+
+/* ===========================
+   CONFIRM DELETE OVERLAY
+=========================== */
+.confirm-overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,#1a1a24,#0c0c11);
+  z-index:20;
+
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:14px;
+  text-align:center;
+
+  transform:translateX(-100%);
+  animation:confirmIn .35s cubic-bezier(.2,.8,.2,1) forwards;
+}
+
+.confirm-overlay p{
+  font-weight:900;
+  font-size:1rem;
+  max-width:240px;
+}
+
+.confirm-actions{
+  display:flex;
+  gap:14px;
+}
+
+.confirm-actions button{
+  padding:10px 18px;
+  border-radius:999px;
+  border:none;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.confirm-yes{
+  background:#ff3b3b;
+  color:white;
+}
+
+.confirm-no{
+  background:#2a2a38;
+  color:white;
+}
+
+@keyframes confirmIn{
+  to{ transform:translateX(0); }
+}
+
+.confirm-exit{
+  animation:confirmOut .25s ease forwards;
+}
+
+@keyframes confirmOut{
+  to{ transform:translateX(-100%); }
+}
+
+/* ===========================
+   DELETE "GLASS SHATTER" ANIM
+=========================== */
+.cart-item.delete-anim{
+  animation:shatter .6s cubic-bezier(.2,.9,.3,1) forwards;
+}
+
+@keyframes shatter{
+  0%{
+    transform:scale(1) rotate(0);
+    filter:none;
+  }
+  30%{
+    transform:scale(1.03) rotate(1deg);
+  }
+  55%{
+    transform:scale(.95) rotate(-2deg);
+    filter:blur(1px);
+  }
+  100%{
+    opacity:0;
+    transform:
+      translateX(40px)
+      translateY(-10px)
+      scale(.6)
+      rotate(-12deg);
+    filter:blur(6px) contrast(140%);
+  }
+}
+
+/* ===========================
+   MOBILE
+=========================== */
+@media(max-width:700px){
+  body{
+    padding:20px;
+  }
+
+  .cart-item{
+    grid-template-columns:72px 1fr;
+    gap:12px;
+    padding:14px;
+  }
+
+  .cart-item img{
+    width:72px;
+    border-radius:10px;
+  }
+
+  .item-info{
+    padding-right:36px;
+  }
+
+  .item-name{
+    font-size:.95rem;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .item-meta{
+    font-size:.8rem;
+  }
+
+  .item-price{
+    font-size:1.1rem;
+  }
+}

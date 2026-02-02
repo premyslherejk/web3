@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>Košík</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/cartvis.css">
+  <link rel="stylesheet" href="css/headervis.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="logo" onclick="location.href='index.html'">PokeKusovky</div>
+
+  <div class="header-right">
+    <div class="cart-icon" onclick="location.href='cart.html'">
+      🛒
+      <span class="cart-count" id="cart-count">0</span>
+    </div>
+
+    <button id="menu-button" class="menu-button" aria-label="Menu">
+      ☰
+    </button>
+  </div>
+</header>
+
+<nav class="menu-overlay" id="menu">
+  <a href="index.html">Domů</a>
+  <a href="cards.html">Karty</a>
+  <a href="auctions.html">Aukce</a>
+  <a href="contact.html">Kontakt</a>
+</nav>
+
+<div class="cart-page">
+
+  <h1>Košík</h1>
+
+  <div id="cart-empty" class="empty">
+    Košík je prázdný
+  </div>
+
+  <div id="cart-items" class="items"></div>
+
+  <div id="cart-summary" class="summary">
+    <div class="total">
+      Celkem: <span id="totalPrice">0 Kč</span>
+    </div>
+    <button class="checkout">Pokračovat k objednávce</button>
+  </div>
+
+</div>
+
+<script src="js/cartfun.js"></script>
+<script src="js/headerfun.js"></script>
+</body>
+</html>
