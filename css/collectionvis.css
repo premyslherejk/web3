@@ -192,9 +192,7 @@ body{
   }
 }
 
-
 /* ===================== LAYOUT ===================== */
-/* 🔥 FIX: defaultně 1 sloupec → grid bude mít full šířku a karty budou vedle sebe */
 .collection-layout{
   display:grid;
   grid-template-columns:1fr;
@@ -309,6 +307,7 @@ body{
 }
 
 .card{
+  position:relative; /* ✅ pro badge overlay */
   background:#15151d;
   border-radius:18px;
   padding:12px;
@@ -340,6 +339,49 @@ body{
   font-weight:900;
   margin-top:4px;
 }
+
+/* ===================== BADGES (TOP-LEFT STACK) ===================== */
+.card-badges{
+  position:absolute;
+  top:10px;
+  left:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  z-index:5;
+  pointer-events:none;
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:.78rem;
+  font-weight:900;
+  box-shadow:0 10px 24px rgba(0,0,0,.45);
+  border:1px solid rgba(255,255,255,.08);
+  backdrop-filter:blur(8px);
+  width:fit-content;
+}
+
+/* STATUS */
+.badge-stock{ background:rgba(31,143,58,.95); color:white; }
+.badge-reserved{ background:rgba(160,160,170,.92); color:#0b0b0f; }
+
+/* CONDITION COLORS */
+.badge-ex{ background:rgba(20,120,55,.95); color:white; }     /* Excellent - tmavě zelená */
+.badge-nm{ background:rgba(80,220,140,.95); color:#0b0b0f; }  /* Near Mint - světle zelená */
+.badge-gd{ background:rgba(255,215,0,.95); color:#0b0b0f; }   /* Good - žlutá */
+.badge-pl{ background:rgba(255,140,0,.95); color:#0b0b0f; }   /* Played - oranžová */
+.badge-po{ background:rgba(255,59,59,.95); color:white; }     /* Poor - červená */
+
+/* PSA */
+.badge-psa{ background:rgba(108,76,255,.95); color:white; }
+
+/* fallback */
+.badge-unknown{ background:rgba(80,80,95,.92); color:white; }
 
 /* ===================== MOBILE ===================== */
 @media (max-width:900px){
