@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>Pokékusovky – Nabídka karet</title>
+  <link rel="stylesheet" href="cards.css">
+
+  <!-- Supabase -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<header>
+  <h1>Pokékusovky</h1>
+
+  <div class="lang-switch">
+    <button data-lang="EN" class="active">EN</button>
+    <button data-lang="JP">JP</button>
+  </div>
+</header>
+
+<section class="quick-sections">
+  <button data-section="all" class="active">Vše</button>
+  <button data-section="new">Novinky</button>
+  <button data-section="hot">🔥 Žhavé</button>
+  <button data-section="psa">PSA</button>
+</section>
+
+<section class="layout">
+  <aside class="filters">
+    <input type="text" id="search" placeholder="Hledat kartu...">
+
+    <select id="condition">
+      <option value="">Stav</option>
+      <option value="Mint">Mint</option>
+      <option value="Near Mint">Near Mint</option>
+      <option value="Lightly Played">Lightly Played</option>
+    </select>
+
+    <select id="rarity">
+      <option value="">Rarity</option>
+      <option value="Common">Common</option>
+      <option value="Rare">Rare</option>
+      <option value="Ultra Rare">Ultra Rare</option>
+      <option value="Secret Rare">Secret Rare</option>
+    </select>
+
+    <label>Cena</label>
+    <input type="number" id="priceMin" placeholder="Od">
+    <input type="number" id="priceMax" placeholder="Do">
+
+    <select id="sort">
+      <option value="new">Nejnovější</option>
+      <option value="price_asc">Cena ↑</option>
+      <option value="price_desc">Cena ↓</option>
+      <option value="name">Abeceda</option>
+    </select>
+
+    <button id="apply">Použít filtry</button>
+  </aside>
+
+  <main>
+    <div id="cards" class="cards-grid"></div>
+  </main>
+</section>
+
+<script src="cards.js"></script>
+</body>
+</html>
