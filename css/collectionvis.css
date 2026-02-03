@@ -12,19 +12,84 @@ body{
 }
 
 /* ===================== PAGE ===================== */
-
 .collection-page{
   max-width:1400px;
   margin:auto;
   padding:40px 24px;
 }
 
-/* ===================== TOP BAR ===================== */
+/* ===================== TOP PICKS (EN/JP + NEW/HOT) ===================== */
+.top-picks{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  margin-bottom:18px;
+}
 
+.pick-group{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:12px;
+}
+
+.pick-card{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px 16px;
+  border-radius:18px;
+  border:1px solid #2a2a33;
+  background:#15151d;
+  color:white;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.pick-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 18px 40px rgba(0,0,0,.45);
+}
+
+.pick-card.active{
+  border-color:#ff3b3b;
+  box-shadow:0 0 0 2px rgba(255,59,59,.25);
+}
+
+.pick-alt.active{
+  border-color:#6c4cff;
+  box-shadow:0 0 0 2px rgba(108,76,255,.25);
+}
+
+.pick-icon{
+  font-size:1.6rem;
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#0f0f14;
+  border:1px solid #2a2a33;
+  flex:0 0 auto;
+}
+
+.pick-title{
+  font-weight:900;
+  font-size:1.05rem;
+  line-height:1.1;
+}
+
+.pick-sub{
+  opacity:.75;
+  font-size:.85rem;
+  margin-top:2px;
+}
+
+/* ===================== TOP BAR (SEARCH + FILTER BTN) ===================== */
 .collection-top{
   display:flex;
-  gap:16px;
-  margin-bottom:24px;
+  gap:12px;
+  margin-bottom:22px;
 }
 
 .search-input{
@@ -38,9 +103,7 @@ body{
   outline:none;
 }
 
-.search-input::placeholder{
-  color:#777;
-}
+.search-input::placeholder{ color:#777; }
 
 .filter-toggle{
   padding:14px 22px;
@@ -48,17 +111,20 @@ body{
   border:none;
   background:#ff3b3b;
   color:white;
-  font-weight:800;
+  font-weight:900;
   cursor:pointer;
+  transition:.15s;
 }
 
-/* ===================== LAYOUT ===================== */
+.filter-toggle:hover{ transform:scale(1.03); }
 
+/* ===================== LAYOUT ===================== */
+/* 🔥 FIX: defaultně 1 sloupec → grid bude mít full šířku a karty budou vedle sebe */
 .collection-layout{
   display:grid;
-  grid-template-columns:0 1fr;
-  gap:40px;
-  transition:.3s;
+  grid-template-columns:1fr;
+  gap:28px;
+  align-items:start;
 }
 
 .collection-layout.filters-open{
@@ -66,19 +132,18 @@ body{
 }
 
 /* ===================== FILTERS ===================== */
-
 .filters{
   background:#15151d;
   border-radius:20px;
-  padding:24px;
+  padding:20px;
   display:flex;
   flex-direction:column;
-  gap:18px;
+  gap:14px;
 
-  transform:translateX(-40px);
+  transform:translateX(-18px);
   opacity:0;
   pointer-events:none;
-  transition:.3s;
+  transition:.25s;
 }
 
 .filters.show{
@@ -87,9 +152,27 @@ body{
   pointer-events:auto;
 }
 
+.filters-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:4px;
+}
+
 .filters h3{
-  font-size:1.2rem;
-  margin-bottom:6px;
+  font-size:1.15rem;
+  font-weight:900;
+}
+
+.filters-close{
+  width:36px;
+  height:36px;
+  border-radius:12px;
+  border:1px solid #2a2a33;
+  background:#0f0f14;
+  color:white;
+  cursor:pointer;
 }
 
 .filters label{
@@ -109,70 +192,41 @@ body{
   color:white;
 }
 
+.checkline{
+  flex-direction:row !important;
+  align-items:center;
+  gap:10px;
+  color:#ddd !important;
+}
+
+.checkline input{
+  width:18px;
+  height:18px;
+}
+
+.price-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
 .apply-filters{
-  margin-top:10px;
+  margin-top:8px;
   padding:14px;
   border-radius:999px;
   border:none;
-  font-weight:800;
+  font-weight:900;
   cursor:pointer;
   background:linear-gradient(135deg,#ff3b3b,#c40000);
   color:white;
 }
 
 /* ===================== MAIN ===================== */
-
 .collection-main{
-  display:flex;
-  flex-direction:column;
-  gap:26px;
-}
-
-/* ===================== LANGUAGE ===================== */
-
-.lang-switch{
-  display:flex;
-  gap:10px;
-}
-
-.lang-switch button{
-  padding:10px 18px;
-  border-radius:999px;
-  border:1px solid #333;
-  background:#15151d;
-  color:white;
-  font-weight:700;
-  cursor:pointer;
-}
-
-.lang-switch button.active{
-  background:#ff3b3b;
-  border-color:#ff3b3b;
-}
-
-/* ===================== QUICK ===================== */
-
-.quick-filters{
-  display:flex;
-  gap:10px;
-}
-
-.quick-filters button{
-  padding:10px 18px;
-  border-radius:999px;
-  border:1px solid #333;
-  background:#0f0f14;
-  color:white;
-  cursor:pointer;
-}
-
-.quick-filters button.active{
-  background:#6c4cff;
-  border-color:#6c4cff;
+  width:100%;
 }
 
 /* ===================== CARDS ===================== */
-
 .cards-grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
@@ -184,7 +238,7 @@ body{
   border-radius:18px;
   padding:12px;
   cursor:pointer;
-  transition:.25s;
+  transition:.2s;
 }
 
 .card:hover{
@@ -203,17 +257,33 @@ body{
 .card strong{
   display:block;
   font-size:.95rem;
+  font-weight:800;
 }
 
 .card .price{
   color:#ffff00;
-  font-weight:800;
+  font-weight:900;
   margin-top:4px;
 }
 
 /* ===================== MOBILE ===================== */
-
 @media (max-width:900px){
+
+  .collection-page{
+    padding:24px 14px;
+  }
+
+  .pick-group{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .collection-top{
+    flex-direction:column;
+  }
+
+  .filter-toggle{
+    width:100%;
+  }
 
   .collection-layout{
     grid-template-columns:1fr;
@@ -238,18 +308,7 @@ body{
   .cards-grid{
     grid-template-columns:repeat(2,1fr);
   }
-
-  .collection-top{
-    flex-direction:column;
-  }
-
-  .filter-toggle{
-    width:100%;
-  }
 }
 
 /* ===================== HELPERS ===================== */
-
-.hidden{
-  display:none;
-}
+.hidden{ display:none; }
