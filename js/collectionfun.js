@@ -1,89 +1,82 @@
-const supabaseUrl = 'https://hwjbfrhbgeczukcjkmca.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3amJmcmhiZ2VjenVrY2prbWNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0NDU5MjQsImV4cCI6MjA4NTAyMTkyNH0.BlgIov7kFq2EUW17hLs6o1YujL1i9elD7wILJP6h-lQ';
 const { createClient } = supabase;
-const sb = createClient(supabaseUrl, supabaseKey);
+const sb = createClient(
+  'https://hwjbfrhbgeczukcjkmca.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3amJmcmhiZ2VjenVrY2prbWNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0NDU5MjQsImV4cCI6MjA4NTAyMTkyNH0.BlgIov7kFq2EUW17hLs6o1YujL1i9elD7wILJP6h-lQ'
+);
 
-let currentLang = 'EN';
-let currentSection = 'all';
+let currentLang = null;
+let currentSection = null;
+let currentSet = null;
 
 async function loadCards() {
-  let query = sb
-    .from('cards')
-    .select('*')
-    .eq('status', 'Skladem')
-    .eq('language', currentLang);
+  let q = sb.from('cards').select('*').eq('status', 'Skladem');
 
-  if (currentSection === 'new') query = query.eq('new', true);
-  if (currentSection === 'hot') query = query.eq('hot', true);
-  if (currentSection === 'psa') query = query.not('psa_grade', 'is', null);
+  if (currentLang) q = q.eq('language', currentLang);
+  if (currentSection === 'new') q = q.eq('new', true);
+  if (currentSection === 'hot') q = q.eq('hot', true);
+  if (currentSet) q = q.eq('set', currentSet);
 
-  const search = document.getElementById('search').value;
-  if (search) query = query.ilike('name', `%${search}%`);
-
-  const condition = document.getElementById('condition').value;
-  if (condition) query = query.eq('condition', condition);
-
-  const rarity = document.getElementById('rarity').value;
-  if (rarity) query = query.eq('rarity', rarity);
-
-  const min = document.getElementById('priceMin').value;
-  const max = document.getElementById('priceMax').value;
-  if (min) query = query.gte('price', min);
-  if (max) query = query.lte('price', max);
-
-  const sort = document.getElementById('sort').value;
-  if (sort === 'price_asc') query = query.order('price', { ascending: true });
-  if (sort === 'price_desc') query = query.order('price', { ascending: false });
-  if (sort === 'name') query = query.order('name');
-  if (sort === 'new') query = query.order('created_at', { ascending: false });
-
-  const { data, error } = await query;
-  if (error) return console.error(error);
-
+  const { data } = await q.order('created_at', { ascending: false });
   renderCards(data);
 }
 
 function renderCards(cards) {
-  const container = document.getElementById('cards');
-  container.innerHTML = '';
-
+  const c = document.getElementById('cards');
+  c.innerHTML = '';
   cards.forEach(card => {
-    const div = document.createElement('div');
-    div.className = 'card';
-    div.onclick = () => location.href = `card.html?id=${card.id}`;
-
-    div.innerHTML = `
-      <div class="badges">
-        ${card.new ? '<span class="badge">NEW</span>' : ''}
-        ${card.hot ? '<span class="badge">HOT</span>' : ''}
-        ${card.psa_grade ? `<span class="badge">PSA ${card.psa_grade}</span>` : ''}
-      </div>
+    const d = document.createElement('div');
+    d.className = 'card';
+    d.onclick = () => location.href = `card.html?id=${card.id}`;
+    d.innerHTML = `
       <img src="${card.image_url}">
       <strong>${card.name}</strong>
       <div>${card.price} Kč</div>
     `;
-
-    container.appendChild(div);
+    c.appendChild(d);
   });
 }
 
-document.querySelectorAll('.lang-switch button').forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll('.lang-switch button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentLang = btn.dataset.lang;
+async function loadEditions() {
+  const { data } = await sb
+    .from('cards')
+    .select('set')
+    .eq('language', currentLang);
+
+  const sets = [...new Set(data.map(d => d.set))];
+  const container = document.getElementById('editions');
+  container.innerHTML = '';
+  container.classList.remove('hidden');
+
+  sets.forEach(s => {
+    const b = document.createElement('button');
+    b.textContent = s;
+    b.onclick = () => {
+      currentSet = s;
+      loadCards();
+    };
+    container.appendChild(b);
+  });
+}
+
+document.querySelectorAll('.lang-card').forEach(c => {
+  c.onclick = () => {
+    currentLang = c.dataset.lang;
+    document.getElementById('langSelect').classList.add('hidden');
+    loadEditions();
     loadCards();
   };
 });
 
-document.querySelectorAll('.quick-sections button').forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll('.quick-sections button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentSection = btn.dataset.section;
+document.querySelectorAll('.quick button').forEach(b => {
+  b.onclick = () => {
+    currentSection = b.dataset.section;
     loadCards();
   };
 });
 
-document.getElementById('apply').onclick = loadCards;
-document.addEventListener('DOMContentLoaded', loadCards);
+document.getElementById('openFilters').onclick = () =>
+  document.getElementById('filtersPanel').classList.toggle('hidden');
+
+document.getElementById('applyFilters').onclick = loadCards;
+
+loadCards();
