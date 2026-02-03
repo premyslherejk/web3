@@ -36,25 +36,42 @@
   <!-- TOP: CTA karty pro rychlé filtry -->
   <section class="top-picks">
     <div class="pick-group" id="langSwitch">
+
+      <!-- 🇬🇧 EN -->
       <button type="button" class="pick-card" data-lang="EN">
         <div class="pick-icon">
-  <img src="img/flag-en.svg" alt="EN" class="flag-icon">
-</div>
+          <svg class="flag-svg" viewBox="0 0 60 30" aria-label="EN">
+            <rect width="60" height="30" fill="#012169"/>
+            <polygon points="0,0 25,0 60,18 60,30 35,30 0,12" fill="#FFF"/>
+            <polygon points="60,0 35,0 0,18 0,30 25,30 60,12" fill="#FFF"/>
+            <polygon points="0,0 27,0 60,16 60,22 33,22 0,6" fill="#C8102E"/>
+            <polygon points="60,0 33,0 0,16 0,22 27,22 60,6" fill="#C8102E"/>
+            <rect x="25" width="10" height="30" fill="#FFF"/>
+            <rect y="10" width="60" height="10" fill="#FFF"/>
+            <rect x="27" width="6" height="30" fill="#C8102E"/>
+            <rect y="12" width="60" height="6" fill="#C8102E"/>
+          </svg>
+        </div>
         <div class="pick-text">
           <div class="pick-title">EN</div>
           <div class="pick-sub">Anglické karty</div>
         </div>
       </button>
 
+      <!-- 🇯🇵 JP -->
       <button type="button" class="pick-card" data-lang="JP">
         <div class="pick-icon">
-  <img src="img/flag-jp.svg" alt="JP" class="flag-icon">
-</div>
+          <svg class="flag-svg" viewBox="0 0 60 30" aria-label="JP">
+            <rect width="60" height="30" fill="#FFF"/>
+            <circle cx="30" cy="15" r="9" fill="#BC002D"/>
+          </svg>
+        </div>
         <div class="pick-text">
           <div class="pick-title">JP</div>
           <div class="pick-sub">Japonské karty</div>
         </div>
       </button>
+
     </div>
 
     <div class="pick-group" id="quickFilters">
@@ -92,11 +109,10 @@
   </div>
 
   <!-- ACTIVE FILTER CHIPS -->
-<div class="active-filters hidden" id="activeFilters">
-  <div class="chips" id="filterChips"></div>
-  <button type="button" class="clear-all" id="clearAllFilters">Vymazat vše</button>
-</div>
-
+  <div class="active-filters hidden" id="activeFilters">
+    <div class="chips" id="filterChips"></div>
+    <button type="button" class="clear-all" id="clearAllFilters">Vymazat vše</button>
+  </div>
 
   <!-- LAYOUT -->
   <div class="collection-layout" id="collectionLayout">
@@ -105,7 +121,7 @@
     <aside class="filters hidden" id="filtersPanel">
       <div class="filters-head">
         <h3>Filtry</h3>
-        <button class="filters-close" id="closeFilters" type="button" aria-label="Zavřít filtry">✕</button>
+        <button class="filters-close" id="closeFilters" type="button">✕</button>
       </div>
 
       <label>
@@ -152,7 +168,6 @@
           Cena od
           <input type="number" id="priceMin" placeholder="0" min="0">
         </label>
-
         <label>
           Cena do
           <input type="number" id="priceMax" placeholder="9999" min="0">
