@@ -13,7 +13,6 @@
 </head>
 <body>
 
-<!-- ✅ STEJNÝ HEADER JAKO VŠUDE -->
 <header class="site-header">
   <div class="logo" onclick="location.href='index.html'">PokeKusovky</div>
 
@@ -32,28 +31,24 @@
   <a href="contact.html">Kontakt</a>
 </nav>
 
-<!-- ================= CONTENT ================= -->
-
 <div class="collection-page">
 
-  <!-- 🔍 SEARCH + FILTER BUTTON -->
   <div class="collection-top">
     <input
       type="text"
       id="search"
       placeholder="Hledat kartu..."
       class="search-input"
+      autocomplete="off"
     />
 
-    <button id="toggleFilters" class="filter-toggle">
+    <button id="toggleFilters" class="filter-toggle" type="button">
       ☰ Filtry
     </button>
   </div>
 
-  <!-- 🧩 LAYOUT -->
-  <div class="collection-layout">
+  <div class="collection-layout" id="collectionLayout">
 
-    <!-- ========== FILTER SIDEBAR (HIDDEN) ========== -->
     <aside class="filters hidden" id="filtersPanel">
       <h3>Filtry</h3>
 
@@ -61,8 +56,8 @@
         Stav
         <select id="condition">
           <option value="">Vše</option>
-          <option value="Near Mint">Near Mint</option>
           <option value="Excellent">Excellent</option>
+          <option value="Near Mint">Near Mint</option>
           <option value="Good">Good</option>
           <option value="Played">Played</option>
           <option value="Poor">Poor</option>
@@ -86,12 +81,12 @@
 
       <label>
         Cena od
-        <input type="number" id="priceMin" placeholder="0">
+        <input type="number" id="priceMin" placeholder="0" min="0">
       </label>
 
       <label>
         Cena do
-        <input type="number" id="priceMax" placeholder="9999">
+        <input type="number" id="priceMax" placeholder="9999" min="0">
       </label>
 
       <label>
@@ -104,30 +99,23 @@
         </select>
       </label>
 
-      <button id="applyFilters" class="apply-filters">
+      <button id="applyFilters" class="apply-filters" type="button">
         Použít filtry
       </button>
     </aside>
 
-    <!-- ========== MAIN CONTENT ========== -->
     <main class="collection-main">
 
-      <!-- 🌍 LANGUAGE -->
       <section class="lang-switch" id="langSwitch">
-        <button data-lang="EN">🇬🇧 EN</button>
-        <button data-lang="JP">🇯🇵 JP</button>
+        <button type="button" data-lang="EN">🇬🇧 EN</button>
+        <button type="button" data-lang="JP">🇯🇵 JP</button>
       </section>
 
-      <!-- 🔥 QUICK FILTERS -->
       <section class="quick-filters" id="quickFilters">
-        <button data-section="new">🆕 Novinky</button>
-        <button data-section="hot">🔥 Žhavé</button>
+        <button type="button" data-section="new">🆕 Novinky</button>
+        <button type="button" data-section="hot">🔥 Žhavé</button>
       </section>
 
-      <!-- 📦 EDITIONS (DYNAMICKY) -->
-      <section class="editions hidden" id="editions"></section>
-
-      <!-- 🃏 CARDS GRID -->
       <section class="cards-grid" id="cards"></section>
 
     </main>
