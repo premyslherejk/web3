@@ -33,11 +33,51 @@
 
 <div class="collection-page">
 
+  <!-- TOP: CTA karty pro rychlé filtry -->
+  <section class="top-picks">
+    <div class="pick-group" id="langSwitch">
+      <button type="button" class="pick-card" data-lang="EN">
+        <div class="pick-icon">🇬🇧</div>
+        <div class="pick-text">
+          <div class="pick-title">EN</div>
+          <div class="pick-sub">Anglické karty</div>
+        </div>
+      </button>
+
+      <button type="button" class="pick-card" data-lang="JP">
+        <div class="pick-icon">🇯🇵</div>
+        <div class="pick-text">
+          <div class="pick-title">JP</div>
+          <div class="pick-sub">Japonské karty</div>
+        </div>
+      </button>
+    </div>
+
+    <div class="pick-group" id="quickFilters">
+      <button type="button" class="pick-card pick-alt" data-section="new">
+        <div class="pick-icon">🆕</div>
+        <div class="pick-text">
+          <div class="pick-title">Novinky</div>
+          <div class="pick-sub">čerstvě přidané</div>
+        </div>
+      </button>
+
+      <button type="button" class="pick-card pick-alt" data-section="hot">
+        <div class="pick-icon">🔥</div>
+        <div class="pick-text">
+          <div class="pick-title">Žhavé</div>
+          <div class="pick-sub">top nabídky</div>
+        </div>
+      </button>
+    </div>
+  </section>
+
+  <!-- SEARCH + FILTER BUTTON -->
   <div class="collection-top">
     <input
       type="text"
       id="search"
-      placeholder="Hledat kartu..."
+      placeholder="Hledat kartu…"
       class="search-input"
       autocomplete="off"
     />
@@ -47,10 +87,22 @@
     </button>
   </div>
 
+  <!-- LAYOUT -->
   <div class="collection-layout" id="collectionLayout">
 
+    <!-- FILTER SIDEBAR -->
     <aside class="filters hidden" id="filtersPanel">
-      <h3>Filtry</h3>
+      <div class="filters-head">
+        <h3>Filtry</h3>
+        <button class="filters-close" id="closeFilters" type="button" aria-label="Zavřít filtry">✕</button>
+      </div>
+
+      <label>
+        Edice
+        <select id="set">
+          <option value="">Vše</option>
+        </select>
+      </label>
 
       <label>
         Stav
@@ -79,15 +131,22 @@
         </select>
       </label>
 
-      <label>
-        Cena od
-        <input type="number" id="priceMin" placeholder="0" min="0">
+      <label class="checkline">
+        <input type="checkbox" id="psaOnly">
+        <span>Hodnocené (PSA)</span>
       </label>
 
-      <label>
-        Cena do
-        <input type="number" id="priceMax" placeholder="9999" min="0">
-      </label>
+      <div class="price-row">
+        <label>
+          Cena od
+          <input type="number" id="priceMin" placeholder="0" min="0">
+        </label>
+
+        <label>
+          Cena do
+          <input type="number" id="priceMax" placeholder="9999" min="0">
+        </label>
+      </div>
 
       <label>
         Řazení
@@ -104,20 +163,9 @@
       </button>
     </aside>
 
+    <!-- MAIN -->
     <main class="collection-main">
-
-      <section class="lang-switch" id="langSwitch">
-        <button type="button" data-lang="EN">🇬🇧 EN</button>
-        <button type="button" data-lang="JP">🇯🇵 JP</button>
-      </section>
-
-      <section class="quick-filters" id="quickFilters">
-        <button type="button" data-section="new">🆕 Novinky</button>
-        <button type="button" data-section="hot">🔥 Žhavé</button>
-      </section>
-
       <section class="cards-grid" id="cards"></section>
-
     </main>
   </div>
 </div>
