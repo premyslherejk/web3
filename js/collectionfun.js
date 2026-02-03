@@ -2,7 +2,7 @@ const { createClient } = supabase;
 
 const sb = createClient(
   'https://hwjbfrhbgeczukcjkmca.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3amJmcmhiZ2VjenVrY2prbWNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0NDU5MjQsImV4cCI6MjA4NTAyMTkyNH0.BlgIov7kFq2EUW17hLs6o1YujL1i9elD7wILJP6h-lQ'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmJzZSIsInJlZiI6Imh3amJmcmhiZ2VjenVrY2prbWNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0NDU5MjQsImV4cCI6MjA4NTAyMTkyNH0.BlgIov7kFq2EUW17hLs6o1YujL1i9elD7wILJP6h-lQ'
 );
 
 const state = {
@@ -28,8 +28,8 @@ function grabEls(){
   els.filtersPanel = document.getElementById('filtersPanel');
   els.applyFilters = document.getElementById('applyFilters');
 
-  // ✅ nové
-  els.serie = document.getElementById('serie'); // MUSÍ existovat v HTML
+  // serie
+  els.serie = document.getElementById('serie');
 
   els.set = document.getElementById('set');
   els.condition = document.getElementById('condition');
@@ -142,7 +142,6 @@ function clearSingleFilter(key){
     case 'language':
       state.language = null;
       setActive(els.langBtns, () => false);
-      // reset série+edice
       if (els.serie) els.serie.value = '';
       els.set.value = '';
       break;
@@ -212,7 +211,40 @@ function clearAllFilters(){
 }
 
 /* =========================
-   RENDER CARDS
+   BADGE HELPERS
+========================= */
+
+function statusBadge(status){
+  const s = (status || '').trim();
+
+  if (s === 'Rezervováno') {
+    return { text: 'Rezervováno', cls: 'badge badge--reserved' };
+  }
+
+  // default
+  return { text: 'Skladem', cls: 'badge badge--in' };
+}
+
+function conditionOrPsaBadge(psaGrade, condition){
+  if (psaGrade != null && String(psaGrade).trim() !== '') {
+    return { text: `PSA ${psaGrade}`, cls: 'badge badge--psa badge--small' };
+  }
+
+  const c = (condition || '').trim();
+
+  const map = {
+    'Excellent': { text: 'EX', cls: 'badge badge--ex badge--small' },
+    'Near Mint': { text: 'NM', cls: 'badge badge--nm badge--small' },
+    'Good':      { text: 'GD', cls: 'badge badge--gd badge--small' },
+    'Played':    { text: 'PL', cls: 'badge badge--pl badge--small' },
+    'Poor':      { text: 'PO', cls: 'badge badge--po badge--small' },
+  };
+
+  return map[c] || { text: 'RAW', cls: 'badge badge--raw badge--small' };
+}
+
+/* =========================
+   RENDER CARDS (✅ BADGES ZPÁTKY)
 ========================= */
 
 function renderCards(cards){
@@ -224,15 +256,26 @@ function renderCards(cards){
   }
 
   for (const c of cards){
-    // ⚠️ render nechávám jednoduchý (jak máš). Badge si máš ve své verzi.
     const el = document.createElement('div');
     el.className = 'card';
     el.onclick = () => location.href = `card.html?id=${c.id}`;
+
+    const b1 = statusBadge(c.status);
+    const b2 = conditionOrPsaBadge(c.psa_grade, c.condition);
+
     el.innerHTML = `
-      <img src="${c.image_url}" alt="${escapeHtml(c.name)}">
+      <div class="card-media">
+        <img src="${c.image_url}" alt="${escapeHtml(c.name)}">
+        <div class="card-badges">
+          <span class="${b1.cls}">${escapeHtml(b1.text)}</span>
+          <span class="${b2.cls}">${escapeHtml(b2.text)}</span>
+        </div>
+      </div>
+
       <strong>${escapeHtml(c.name)}</strong>
       <div class="price">${c.price} Kč</div>
     `;
+
     els.cards.appendChild(el);
   }
 }
@@ -272,7 +315,6 @@ async function loadSeriesIntoFilter(){
 }
 
 async function loadEditionsIntoFilter(){
-  // 🔥 pokud není vybraná série → edice disabled a hláška
   const serieVal = els.serie ? (els.serie.value || '') : '';
 
   if (!serieVal){
@@ -311,10 +353,7 @@ async function loadEditionsIntoFilter(){
 }
 
 async function refreshDependentOptions(){
-  // série závisí na language
   await loadSeriesIntoFilter();
-
-  // pokud série po reloadu spadla na "" → edice se má zamknout
   await loadEditionsIntoFilter();
 }
 
@@ -413,7 +452,7 @@ function wireEvents(){
     renderFilterChips();
   });
 
-  // ✅ série změna: reset edice + reload edic podle série
+  // serie change -> reload sets
   if (els.serie){
     els.serie.addEventListener('change', async () => {
       els.set.value = '';
@@ -437,7 +476,6 @@ function wireEvents(){
       const lang = btn.dataset.lang;
       state.language = (state.language === lang) ? null : lang;
 
-      // reset serie + set (protože oba závisí na language)
       if (els.serie) els.serie.value = '';
       els.set.value = '';
 
@@ -470,7 +508,7 @@ function wireEvents(){
 document.addEventListener('DOMContentLoaded', async () => {
   grabEls();
   wireEvents();
-  await refreshDependentOptions();   // => zamkne edici dokud není série
+  await refreshDependentOptions();
   renderFilterChips();
   loadCards();
 });
