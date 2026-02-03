@@ -2,90 +2,137 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <title>Karty | PokéKusovky</title>
+  <title>Karty | PokeKusovky</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="css/headervis.css">
   <link rel="stylesheet" href="css/collectionvis.css">
+  <link rel="stylesheet" href="css/headervis.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
+<!-- ✅ STEJNÝ HEADER JAKO VŠUDE -->
 <header class="site-header">
   <div class="logo" onclick="location.href='index.html'">PokeKusovky</div>
 
-  <div class="search-top">
-    <input id="searchInput" placeholder="Hledat kartu…">
-  </div>
-
   <div class="header-right">
     <div class="cart-icon" onclick="location.href='cart.html'">
-      🛒 <span id="cart-count">0</span>
+      🛒 <span class="cart-count" id="cart-count">0</span>
     </div>
+    <button id="menu-button" class="menu-button">☰</button>
   </div>
 </header>
 
-<main class="collection-layout">
+<nav class="menu-overlay" id="menu">
+  <a href="index.html">Domů</a>
+  <a href="cards.html">Karty</a>
+  <a href="auctions.html">Aukce</a>
+  <a href="contact.html">Kontakt</a>
+</nav>
 
-  <!-- FILTER SIDEBAR -->
-  <aside class="filters">
-    <h3>Filtry</h3>
+<!-- ================= CONTENT ================= -->
 
-    <label>Stav</label>
-    <select id="condition">
-      <option value="">Vše</option>
-      <option value="NM">Near Mint</option>
-      <option value="EX">Excellent</option>
-    </select>
+<div class="collection-page">
 
-    <label>Rarity</label>
-    <select id="rarity">
-      <option value="">Vše</option>
-      <option value="Common">Common</option>
-      <option value="Rare">Rare</option>
-      <option value="Ultra Rare">Ultra Rare</option>
-    </select>
+  <!-- 🔍 SEARCH + FILTER BUTTON -->
+  <div class="collection-top">
+    <input
+      type="text"
+      id="search"
+      placeholder="Hledat kartu..."
+      class="search-input"
+    />
 
-    <label>Cena</label>
-    <div class="price-range">
-      <input type="number" id="priceMin" placeholder="Od">
-      <input type="number" id="priceMax" placeholder="Do">
-    </div>
+    <button id="toggleFilters" class="filter-toggle">
+      ☰ Filtry
+    </button>
+  </div>
 
-    <label>Řazení</label>
-    <select id="sort">
-      <option value="new">Nejnovější</option>
-      <option value="price_asc">Cena ↑</option>
-      <option value="price_desc">Cena ↓</option>
-      <option value="name">Abeceda</option>
-      <option value="sold">Nejprodávanější</option>
-    </select>
+  <!-- 🧩 LAYOUT -->
+  <div class="collection-layout">
 
-    <button id="applyFilters" class="apply">Použít</button>
-  </aside>
+    <!-- ========== FILTER SIDEBAR (HIDDEN) ========== -->
+    <aside class="filters hidden" id="filtersPanel">
+      <h3>Filtry</h3>
 
-  <!-- CONTENT -->
-  <section class="content">
+      <label>
+        Stav
+        <select id="condition">
+          <option value="">Vše</option>
+          <option value="Near Mint">Near Mint</option>
+          <option value="Excellent">Excellent</option>
+          <option value="Good">Good</option>
+          <option value="Played">Played</option>
+          <option value="Poor">Poor</option>
+        </select>
+      </label>
 
-    <!-- TOP NAV -->
-    <div class="top-categories">
-      <div class="cat-card" data-lang="EN">🇺🇸 EN</div>
-      <div class="cat-card" data-lang="JP">🇯🇵 JP</div>
-      <div class="cat-card" data-section="new">🆕 Novinky</div>
-      <div class="cat-card" data-section="hot">🔥 Žhavé</div>
-    </div>
+      <label>
+        Rarita
+        <select id="rarity">
+          <option value="">Vše</option>
+          <option value="Common">Common</option>
+          <option value="Uncommon">Uncommon</option>
+          <option value="Rare">Rare</option>
+          <option value="Double rare">Double rare</option>
+          <option value="Ultra rare">Ultra rare</option>
+          <option value="Illustration rare">Illustration rare</option>
+          <option value="Special illustration rare">Special illustration rare</option>
+          <option value="Hyper rare">Hyper rare</option>
+        </select>
+      </label>
 
-    <!-- EDITIONS -->
-    <div id="editions" class="editions hidden"></div>
+      <label>
+        Cena od
+        <input type="number" id="priceMin" placeholder="0">
+      </label>
 
-    <!-- CARDS -->
-    <div id="cards" class="cards-grid"></div>
+      <label>
+        Cena do
+        <input type="number" id="priceMax" placeholder="9999">
+      </label>
 
-  </section>
+      <label>
+        Řazení
+        <select id="sort">
+          <option value="new">Nejnovější</option>
+          <option value="price_asc">Cena ↑</option>
+          <option value="price_desc">Cena ↓</option>
+          <option value="name">Abecedně</option>
+        </select>
+      </label>
 
-</main>
+      <button id="applyFilters" class="apply-filters">
+        Použít filtry
+      </button>
+    </aside>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="collection-main">
+
+      <!-- 🌍 LANGUAGE -->
+      <section class="lang-switch" id="langSwitch">
+        <button data-lang="EN">🇬🇧 EN</button>
+        <button data-lang="JP">🇯🇵 JP</button>
+      </section>
+
+      <!-- 🔥 QUICK FILTERS -->
+      <section class="quick-filters" id="quickFilters">
+        <button data-section="new">🆕 Novinky</button>
+        <button data-section="hot">🔥 Žhavé</button>
+      </section>
+
+      <!-- 📦 EDITIONS (DYNAMICKY) -->
+      <section class="editions hidden" id="editions"></section>
+
+      <!-- 🃏 CARDS GRID -->
+      <section class="cards-grid" id="cards"></section>
+
+    </main>
+  </div>
+</div>
 
 <script src="js/collectionfun.js"></script>
 <script src="js/headerfun.js"></script>
