@@ -2,74 +2,92 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <title>Pokékusovky</title>
+  <title>Karty | PokéKusovky</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="css/collectionvis.css">
   <link rel="stylesheet" href="css/headervis.css">
+  <link rel="stylesheet" href="css/collectionvis.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-<header class="topbar">
-  <h1>Pokékusovky</h1>
-  <button id="openFilters">🔍 Filtry</button>
+<header class="site-header">
+  <div class="logo" onclick="location.href='index.html'">PokeKusovky</div>
+
+  <div class="search-top">
+    <input id="searchInput" placeholder="Hledat kartu…">
+  </div>
+
+  <div class="header-right">
+    <div class="cart-icon" onclick="location.href='cart.html'">
+      🛒 <span id="cart-count">0</span>
+    </div>
+  </div>
 </header>
 
-<!-- LANGUAGE SELECT -->
-<section class="lang-select" id="langSelect">
-  <div class="lang-card" data-lang="EN">
-    <h2>EN Cards</h2>
-  </div>
-  <div class="lang-card" data-lang="JP">
-    <h2>JP Cards</h2>
-  </div>
-</section>
+<main class="collection-layout">
 
-<!-- QUICK SECTIONS -->
-<section class="quick">
-  <button data-section="new">🆕 Novinky</button>
-  <button data-section="hot">🔥 Žhavé</button>
-</section>
+  <!-- FILTER SIDEBAR -->
+  <aside class="filters">
+    <h3>Filtry</h3>
 
-<!-- EDITIONS -->
-<section class="editions hidden" id="editions"></section>
+    <label>Stav</label>
+    <select id="condition">
+      <option value="">Vše</option>
+      <option value="NM">Near Mint</option>
+      <option value="EX">Excellent</option>
+    </select>
 
-<!-- CARDS -->
-<section class="cards-grid" id="cards"></section>
+    <label>Rarity</label>
+    <select id="rarity">
+      <option value="">Vše</option>
+      <option value="Common">Common</option>
+      <option value="Rare">Rare</option>
+      <option value="Ultra Rare">Ultra Rare</option>
+    </select>
 
-<!-- FILTER PANEL -->
-<div class="filters-panel hidden" id="filtersPanel">
-  <h3>Filtry</h3>
+    <label>Cena</label>
+    <div class="price-range">
+      <input type="number" id="priceMin" placeholder="Od">
+      <input type="number" id="priceMax" placeholder="Do">
+    </div>
 
-  <input id="search" placeholder="Hledat kartu">
+    <label>Řazení</label>
+    <select id="sort">
+      <option value="new">Nejnovější</option>
+      <option value="price_asc">Cena ↑</option>
+      <option value="price_desc">Cena ↓</option>
+      <option value="name">Abeceda</option>
+      <option value="sold">Nejprodávanější</option>
+    </select>
 
-  <select id="condition">
-    <option value="">Stav</option>
-    <option value="Mint">Mint</option>
-    <option value="Near Mint">Near Mint</option>
-  </select>
+    <button id="applyFilters" class="apply">Použít</button>
+  </aside>
 
-  <select id="rarity">
-    <option value="">Rarity</option>
-    <option value="Rare">Rare</option>
-    <option value="Ultra Rare">Ultra Rare</option>
-  </select>
+  <!-- CONTENT -->
+  <section class="content">
 
-  <input type="number" id="priceMin" placeholder="Cena od">
-  <input type="number" id="priceMax" placeholder="Cena do">
+    <!-- TOP NAV -->
+    <div class="top-categories">
+      <div class="cat-card" data-lang="EN">🇺🇸 EN</div>
+      <div class="cat-card" data-lang="JP">🇯🇵 JP</div>
+      <div class="cat-card" data-section="new">🆕 Novinky</div>
+      <div class="cat-card" data-section="hot">🔥 Žhavé</div>
+    </div>
 
-  <select id="sort">
-    <option value="new">Nejnovější</option>
-    <option value="price_asc">Cena ↑</option>
-    <option value="price_desc">Cena ↓</option>
-  </select>
+    <!-- EDITIONS -->
+    <div id="editions" class="editions hidden"></div>
 
-  <button id="applyFilters">Použít</button>
-</div>
+    <!-- CARDS -->
+    <div id="cards" class="cards-grid"></div>
+
+  </section>
+
+</main>
 
 <script src="js/collectionfun.js"></script>
 <script src="js/headerfun.js"></script>
-
 </body>
 </html>
-
