@@ -61,7 +61,7 @@ function setActive(btns, predicate){
 }
 
 function escapeHtml(s){
-  return String(s)
+  return String(s ?? '')
     .replaceAll('&','&amp;')
     .replaceAll('<','&lt;')
     .replaceAll('>','&gt;')
@@ -101,7 +101,6 @@ function getActiveFilters(){
   if (min !== '' && min != null) active.push({ key:'priceMin', label:'Cena od', value: `${Number(min)} Kč` });
   if (max !== '' && max != null) active.push({ key:'priceMax', label:'Cena do', value: `${Number(max)} Kč` });
 
-  // sort neukazuju jako chip defaultně (je to spíš UI preference), ale klidně můžu
   return active;
 }
 
@@ -114,7 +113,6 @@ function clearSingleFilter(key){
       state.language = null;
       els.set.value = '';
       setActive(els.langBtns, () => false);
-      // reload set options based on (now null language)
       loadEditionsIntoFilter();
       break;
     case 'section':
@@ -146,7 +144,6 @@ function clearSingleFilter(key){
 }
 
 function clearAllFilters(){
-  // UI inputs
   els.search.value = '';
   els.set.value = '';
   els.condition.value = '';
@@ -156,11 +153,9 @@ function clearAllFilters(){
   els.priceMax.value = '';
   els.sort.value = 'new';
 
-  // state
   state.language = null;
   state.section = null;
 
-  // active styling
   setActive(els.langBtns, () => false);
   setActive(els.quickBtns, () => false);
 
@@ -189,6 +184,37 @@ function renderFilterChips(){
 }
 
 /* =========================
+   BADGES LOGIC
+========================= */
+
+function statusBadge(statusRaw){
+  const s = String(statusRaw || '').toLowerCase();
+
+  // default: Skladem
+  if (s.includes('rezerv')) return { text:'Rezervováno', cls:'badge-reserved' };
+  return { text:'Skladem', cls:'badge-stock' };
+}
+
+function conditionOrPsaBadge(card){
+  // PSA má přednost
+  const psaVal = (card.psa_grade ?? card.psa ?? null);
+  if (psaVal !== null && psaVal !== undefined && String(psaVal).trim() !== ''){
+    return { text:`PSA ${psaVal}`, cls:'badge-psa' };
+  }
+
+  const cond = String(card.condition || '').toLowerCase();
+
+  if (cond === 'excellent') return { text:'EX', cls:'badge-ex' };
+  if (cond === 'near mint') return { text:'NM', cls:'badge-nm' };
+  if (cond === 'good') return { text:'GD', cls:'badge-gd' };
+  if (cond === 'played') return { text:'PL', cls:'badge-pl' };
+  if (cond === 'poor') return { text:'PO', cls:'badge-po' };
+
+  // když někdo nemá condition, ať je aspoň něco neutrálního
+  return { text:'—', cls:'badge-unknown' };
+}
+
+/* =========================
    RENDER CARDS
 ========================= */
 
@@ -201,13 +227,22 @@ function renderCards(cards){
   }
 
   for (const c of cards){
+    const st = statusBadge(c.status);
+    const second = conditionOrPsaBadge(c);
+
     const el = document.createElement('div');
     el.className = 'card';
     el.onclick = () => location.href = `card.html?id=${c.id}`;
+
     el.innerHTML = `
-      <img src="${c.image_url}" alt="${escapeHtml(c.name)}">
+      <div class="card-badges">
+        <div class="badge ${st.cls}">${escapeHtml(st.text)}</div>
+        <div class="badge ${second.cls}">${escapeHtml(second.text)}</div>
+      </div>
+
+      <img src="${escapeHtml(c.image_url)}" alt="${escapeHtml(c.name)}">
       <strong>${escapeHtml(c.name)}</strong>
-      <div class="price">${c.price} Kč</div>
+      <div class="price">${Number(c.price)} Kč</div>
     `;
     els.cards.appendChild(el);
   }
@@ -221,7 +256,7 @@ async function loadEditionsIntoFilter(){
   let q = sb
     .from('cards')
     .select('set')
-    .eq('status', 'Skladem');
+    .neq('status', 'Prodáno'); // ✅ prodáno nechceme vůbec
 
   if (state.language) q = q.eq('language', state.language);
 
@@ -252,7 +287,7 @@ async function loadCards(){
   let q = sb
     .from('cards')
     .select('id,name,price,image_url,language,condition,rarity,created_at,hot,new,status,psa_grade,set')
-    .eq('status', 'Skladem');
+    .neq('status', 'Prodáno'); // ✅ Prodáno pryč úplně
 
   // quick state
   if (state.language) q = q.eq('language', state.language);
