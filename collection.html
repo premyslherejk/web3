@@ -37,19 +37,32 @@
   <section class="top-picks">
     <div class="pick-group" id="langSwitch">
 
-      <!-- 🇬🇧 EN -->
+      <!-- ✅ EN (Union Jack – správná) -->
       <button type="button" class="pick-card" data-lang="EN">
         <div class="pick-icon">
-          <svg class="flag-svg" viewBox="0 0 60 30" aria-label="EN">
-            <rect width="60" height="30" fill="#012169"/>
-            <polygon points="0,0 25,0 60,18 60,30 35,30 0,12" fill="#FFF"/>
-            <polygon points="60,0 35,0 0,18 0,30 25,30 60,12" fill="#FFF"/>
-            <polygon points="0,0 27,0 60,16 60,22 33,22 0,6" fill="#C8102E"/>
-            <polygon points="60,0 33,0 0,16 0,22 27,22 60,6" fill="#C8102E"/>
-            <rect x="25" width="10" height="30" fill="#FFF"/>
-            <rect y="10" width="60" height="10" fill="#FFF"/>
-            <rect x="27" width="6" height="30" fill="#C8102E"/>
-            <rect y="12" width="60" height="6" fill="#C8102E"/>
+          <svg class="flag-svg" viewBox="0 0 60 30" aria-label="EN" role="img">
+            <defs>
+              <clipPath id="uk-clip">
+                <rect width="60" height="30" rx="0" ry="0"></rect>
+              </clipPath>
+            </defs>
+            <g clip-path="url(#uk-clip)">
+              <rect width="60" height="30" fill="#012169"></rect>
+
+              <!-- bílé diagonály -->
+              <path d="M0,0 L60,30 M60,0 L0,30" stroke="#FFFFFF" stroke-width="6"></path>
+              <!-- červené diagonály (posunuté) -->
+              <path d="M0,0 L60,30" stroke="#C8102E" stroke-width="4" transform="translate(1.5,0)"></path>
+              <path d="M60,0 L0,30" stroke="#C8102E" stroke-width="4" transform="translate(-1.5,0)"></path>
+
+              <!-- bílé kříže -->
+              <rect x="0" y="12" width="60" height="6" fill="#FFFFFF"></rect>
+              <rect x="27" y="0" width="6" height="30" fill="#FFFFFF"></rect>
+
+              <!-- červené kříže -->
+              <rect x="0" y="13" width="60" height="4" fill="#C8102E"></rect>
+              <rect x="28" y="0" width="4" height="30" fill="#C8102E"></rect>
+            </g>
           </svg>
         </div>
         <div class="pick-text">
@@ -58,10 +71,10 @@
         </div>
       </button>
 
-      <!-- 🇯🇵 JP -->
+      <!-- ✅ JP -->
       <button type="button" class="pick-card" data-lang="JP">
         <div class="pick-icon">
-          <svg class="flag-svg" viewBox="0 0 60 30" aria-label="JP">
+          <svg class="flag-svg" viewBox="0 0 60 30" aria-label="JP" role="img">
             <rect width="60" height="30" fill="#FFF"/>
             <circle cx="30" cy="15" r="9" fill="#BC002D"/>
           </svg>
@@ -121,8 +134,16 @@
     <aside class="filters hidden" id="filtersPanel">
       <div class="filters-head">
         <h3>Filtry</h3>
-        <button class="filters-close" id="closeFilters" type="button">✕</button>
+        <button class="filters-close" id="closeFilters" type="button" aria-label="Zavřít filtry">✕</button>
       </div>
+
+      <!-- ✅ NOVÉ: SERIE (nad edicí) -->
+      <label>
+        Série
+        <select id="serie">
+          <option value="">Vše</option>
+        </select>
+      </label>
 
       <label>
         Edice
@@ -168,6 +189,7 @@
           Cena od
           <input type="number" id="priceMin" placeholder="0" min="0">
         </label>
+
         <label>
           Cena do
           <input type="number" id="priceMax" placeholder="9999" min="0">
