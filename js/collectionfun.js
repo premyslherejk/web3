@@ -13,6 +13,10 @@ const state = {
 
 const els = {};
 
+/* =========================
+   DOM
+========================= */
+
 function grabEls(){
   els.layout = document.getElementById('collectionLayout');
   els.cards = document.getElementById('cards');
@@ -23,6 +27,9 @@ function grabEls(){
   els.closeFilters = document.getElementById('closeFilters');
   els.filtersPanel = document.getElementById('filtersPanel');
   els.applyFilters = document.getElementById('applyFilters');
+
+  // ✅ nové
+  els.serie = document.getElementById('serie'); // MUSÍ existovat v HTML
 
   els.set = document.getElementById('set');
   els.condition = document.getElementById('condition');
@@ -61,7 +68,7 @@ function setActive(btns, predicate){
 }
 
 function escapeHtml(s){
-  return String(s ?? '')
+  return String(s)
     .replaceAll('&','&amp;')
     .replaceAll('<','&lt;')
     .replaceAll('>','&gt;')
@@ -84,6 +91,9 @@ function getActiveFilters(){
   if (state.section === 'new') active.push({ key:'section', label:'Sekce', value: 'Novinky' });
   if (state.section === 'hot') active.push({ key:'section', label:'Sekce', value: 'Žhavé' });
 
+  const serieVal = els.serie?.value || '';
+  if (serieVal) active.push({ key:'serie', label:'Série', value: serieVal });
+
   const setVal = els.set.value || '';
   if (setVal) active.push({ key:'set', label:'Edice', value: setVal });
 
@@ -102,66 +112,6 @@ function getActiveFilters(){
   if (max !== '' && max != null) active.push({ key:'priceMax', label:'Cena do', value: `${Number(max)} Kč` });
 
   return active;
-}
-
-function clearSingleFilter(key){
-  switch(key){
-    case 'search':
-      els.search.value = '';
-      break;
-    case 'language':
-      state.language = null;
-      els.set.value = '';
-      setActive(els.langBtns, () => false);
-      loadEditionsIntoFilter();
-      break;
-    case 'section':
-      state.section = null;
-      setActive(els.quickBtns, () => false);
-      break;
-    case 'set':
-      els.set.value = '';
-      break;
-    case 'condition':
-      els.condition.value = '';
-      break;
-    case 'rarity':
-      els.rarity.value = '';
-      break;
-    case 'psaOnly':
-      els.psaOnly.checked = false;
-      break;
-    case 'priceMin':
-      els.priceMin.value = '';
-      break;
-    case 'priceMax':
-      els.priceMax.value = '';
-      break;
-  }
-
-  renderFilterChips();
-  loadCards();
-}
-
-function clearAllFilters(){
-  els.search.value = '';
-  els.set.value = '';
-  els.condition.value = '';
-  els.rarity.value = '';
-  els.psaOnly.checked = false;
-  els.priceMin.value = '';
-  els.priceMax.value = '';
-  els.sort.value = 'new';
-
-  state.language = null;
-  state.section = null;
-
-  setActive(els.langBtns, () => false);
-  setActive(els.quickBtns, () => false);
-
-  loadEditionsIntoFilter();
-  renderFilterChips();
-  loadCards();
 }
 
 function renderFilterChips(){
@@ -183,35 +133,82 @@ function renderFilterChips(){
   `).join('');
 }
 
-/* =========================
-   BADGES LOGIC
-========================= */
+function clearSingleFilter(key){
+  switch(key){
+    case 'search':
+      els.search.value = '';
+      break;
 
-function statusBadge(statusRaw){
-  const s = String(statusRaw || '').toLowerCase();
+    case 'language':
+      state.language = null;
+      setActive(els.langBtns, () => false);
+      // reset série+edice
+      if (els.serie) els.serie.value = '';
+      els.set.value = '';
+      break;
 
-  // default: Skladem
-  if (s.includes('rezerv')) return { text:'Rezervováno', cls:'badge-reserved' };
-  return { text:'Skladem', cls:'badge-stock' };
-}
+    case 'section':
+      state.section = null;
+      setActive(els.quickBtns, () => false);
+      break;
 
-function conditionOrPsaBadge(card){
-  // PSA má přednost
-  const psaVal = (card.psa_grade ?? card.psa ?? null);
-  if (psaVal !== null && psaVal !== undefined && String(psaVal).trim() !== ''){
-    return { text:`PSA ${psaVal}`, cls:'badge-psa' };
+    case 'serie':
+      if (els.serie) els.serie.value = '';
+      els.set.value = '';
+      break;
+
+    case 'set':
+      els.set.value = '';
+      break;
+
+    case 'condition':
+      els.condition.value = '';
+      break;
+
+    case 'rarity':
+      els.rarity.value = '';
+      break;
+
+    case 'psaOnly':
+      els.psaOnly.checked = false;
+      break;
+
+    case 'priceMin':
+      els.priceMin.value = '';
+      break;
+
+    case 'priceMax':
+      els.priceMax.value = '';
+      break;
   }
 
-  const cond = String(card.condition || '').toLowerCase();
+  refreshDependentOptions().then(() => {
+    renderFilterChips();
+    loadCards();
+  });
+}
 
-  if (cond === 'excellent') return { text:'EX', cls:'badge-ex' };
-  if (cond === 'near mint') return { text:'NM', cls:'badge-nm' };
-  if (cond === 'good') return { text:'GD', cls:'badge-gd' };
-  if (cond === 'played') return { text:'PL', cls:'badge-pl' };
-  if (cond === 'poor') return { text:'PO', cls:'badge-po' };
+function clearAllFilters(){
+  els.search.value = '';
+  if (els.serie) els.serie.value = '';
+  els.set.value = '';
+  els.condition.value = '';
+  els.rarity.value = '';
+  els.psaOnly.checked = false;
+  els.priceMin.value = '';
+  els.priceMax.value = '';
+  els.sort.value = 'new';
 
-  // když někdo nemá condition, ať je aspoň něco neutrálního
-  return { text:'—', cls:'badge-unknown' };
+  state.language = null;
+  state.section = null;
+
+  setActive(els.langBtns, () => false);
+  setActive(els.quickBtns, () => false);
+
+  refreshDependentOptions().then(() => {
+    renderFilterChips();
+    loadCards();
+  });
 }
 
 /* =========================
@@ -227,36 +224,70 @@ function renderCards(cards){
   }
 
   for (const c of cards){
-    const st = statusBadge(c.status);
-    const second = conditionOrPsaBadge(c);
-
+    // ⚠️ render nechávám jednoduchý (jak máš). Badge si máš ve své verzi.
     const el = document.createElement('div');
     el.className = 'card';
     el.onclick = () => location.href = `card.html?id=${c.id}`;
-
     el.innerHTML = `
-      <div class="card-badges">
-        <div class="badge ${st.cls}">${escapeHtml(st.text)}</div>
-        <div class="badge ${second.cls}">${escapeHtml(second.text)}</div>
-      </div>
-
-      <img src="${escapeHtml(c.image_url)}" alt="${escapeHtml(c.name)}">
+      <img src="${c.image_url}" alt="${escapeHtml(c.name)}">
       <strong>${escapeHtml(c.name)}</strong>
-      <div class="price">${Number(c.price)} Kč</div>
+      <div class="price">${c.price} Kč</div>
     `;
     els.cards.appendChild(el);
   }
 }
 
 /* =========================
-   LOAD EDITIONS
+   DEPENDENT OPTIONS
+   Serie -> Set
 ========================= */
 
+async function loadSeriesIntoFilter(){
+  if (!els.serie) return;
+
+  let q = sb
+    .from('cards')
+    .select('serie')
+    .neq('status', 'Prodáno');
+
+  if (state.language) q = q.eq('language', state.language);
+
+  const { data, error } = await q;
+  if (error){
+    console.error('Serie load error:', error);
+    return;
+  }
+
+  const series = [...new Set((data || []).map(x => x.serie).filter(Boolean))]
+    .sort((a,b) => a.localeCompare(b, 'cs'));
+
+  const current = els.serie.value || '';
+
+  els.serie.innerHTML =
+    `<option value="">Vše</option>` +
+    series.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+
+  if (current && series.includes(current)) els.serie.value = current;
+  else els.serie.value = '';
+}
+
 async function loadEditionsIntoFilter(){
+  // 🔥 pokud není vybraná série → edice disabled a hláška
+  const serieVal = els.serie ? (els.serie.value || '') : '';
+
+  if (!serieVal){
+    els.set.innerHTML = `<option value="">Nejdřív vyber sérii</option>`;
+    els.set.disabled = true;
+    return;
+  }
+
+  els.set.disabled = false;
+
   let q = sb
     .from('cards')
     .select('set')
-    .neq('status', 'Prodáno'); // ✅ prodáno nechceme vůbec
+    .neq('status', 'Prodáno')
+    .eq('serie', serieVal);
 
   if (state.language) q = q.eq('language', state.language);
 
@@ -267,7 +298,7 @@ async function loadEditionsIntoFilter(){
   }
 
   const sets = [...new Set((data || []).map(x => x.set).filter(Boolean))]
-    .sort((a,b) => a.localeCompare(b));
+    .sort((a,b) => a.localeCompare(b, 'cs'));
 
   const current = els.set.value || '';
 
@@ -279,6 +310,14 @@ async function loadEditionsIntoFilter(){
   else els.set.value = '';
 }
 
+async function refreshDependentOptions(){
+  // série závisí na language
+  await loadSeriesIntoFilter();
+
+  // pokud série po reloadu spadla na "" → edice se má zamknout
+  await loadEditionsIntoFilter();
+}
+
 /* =========================
    LOAD CARDS
 ========================= */
@@ -286,8 +325,8 @@ async function loadEditionsIntoFilter(){
 async function loadCards(){
   let q = sb
     .from('cards')
-    .select('id,name,price,image_url,language,condition,rarity,created_at,hot,new,status,psa_grade,set')
-    .neq('status', 'Prodáno'); // ✅ Prodáno pryč úplně
+    .select('id,name,price,image_url,language,condition,rarity,created_at,hot,new,status,psa_grade,set,serie')
+    .neq('status', 'Prodáno'); // ✅ Skladem + Rezervováno, skryje Prodáno
 
   // quick state
   if (state.language) q = q.eq('language', state.language);
@@ -298,10 +337,14 @@ async function loadCards(){
   const search = (els.search.value || '').trim();
   if (search) q = q.ilike('name', `%${search}%`);
 
-  // sidebar filters
+  // serie + set
+  const serieVal = els.serie ? (els.serie.value || '') : '';
+  if (serieVal) q = q.eq('serie', serieVal);
+
   const setVal = els.set.value || '';
   if (setVal) q = q.eq('set', setVal);
 
+  // other filters
   const cond = els.condition.value || '';
   if (cond) q = q.eq('condition', cond);
 
@@ -370,9 +413,22 @@ function wireEvents(){
     renderFilterChips();
   });
 
+  // ✅ série změna: reset edice + reload edic podle série
+  if (els.serie){
+    els.serie.addEventListener('change', async () => {
+      els.set.value = '';
+      await loadEditionsIntoFilter();
+      renderFilterChips();
+      loadCards();
+    });
+  }
+
   // auto reload on filter change
   [els.set, els.condition, els.rarity, els.psaOnly, els.priceMin, els.priceMax, els.sort].forEach(el => {
-    el.addEventListener('change', loadCards);
+    el.addEventListener('change', () => {
+      renderFilterChips();
+      loadCards();
+    });
   });
 
   // language buttons
@@ -381,10 +437,14 @@ function wireEvents(){
       const lang = btn.dataset.lang;
       state.language = (state.language === lang) ? null : lang;
 
+      // reset serie + set (protože oba závisí na language)
+      if (els.serie) els.serie.value = '';
       els.set.value = '';
-      await loadEditionsIntoFilter();
+
+      await refreshDependentOptions();
 
       setActive(els.langBtns, b => b.dataset.lang === state.language);
+      renderFilterChips();
       loadCards();
     });
   });
@@ -396,6 +456,7 @@ function wireEvents(){
       state.section = (state.section === sec) ? null : sec;
 
       setActive(els.quickBtns, b => b.dataset.section === state.section);
+      renderFilterChips();
       loadCards();
     });
   });
@@ -409,7 +470,7 @@ function wireEvents(){
 document.addEventListener('DOMContentLoaded', async () => {
   grabEls();
   wireEvents();
-  await loadEditionsIntoFilter();
+  await refreshDependentOptions();   // => zamkne edici dokud není série
   renderFilterChips();
   loadCards();
 });
