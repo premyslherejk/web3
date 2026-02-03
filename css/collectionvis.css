@@ -366,6 +366,15 @@ body{
   width:fit-content;
 }
 
+/* menší druhý badge (kondice / PSA) */
+.card-badges .badge:nth-child(2){
+  font-size:.62rem;      /* cca o půl menší */
+  padding:4px 8px;
+  box-shadow:0 8px 18px rgba(0,0,0,.35);
+  border-radius:999px;
+}
+
+
 /* STATUS */
 .badge-stock{ background:rgba(31,143,58,.95); color:white; }
 .badge-reserved{ background:rgba(160,160,170,.92); color:#0b0b0f; }
