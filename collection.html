@@ -2,69 +2,74 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <title>Pokékusovky – Nabídka karet</title>
+  <title>Pokékusovky</title>
+
   <link rel="stylesheet" href="css/collectionvis.css">
   <link rel="stylesheet" href="css/headervis.css">
-  <!-- Supabase -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-<header>
+<header class="topbar">
   <h1>Pokékusovky</h1>
-
-  <div class="lang-switch">
-    <button data-lang="EN" class="active">EN</button>
-    <button data-lang="JP">JP</button>
-  </div>
+  <button id="openFilters">🔍 Filtry</button>
 </header>
 
-<section class="quick-sections">
-  <button data-section="all" class="active">Vše</button>
-  <button data-section="new">Novinky</button>
+<!-- LANGUAGE SELECT -->
+<section class="lang-select" id="langSelect">
+  <div class="lang-card" data-lang="EN">
+    <h2>EN Cards</h2>
+  </div>
+  <div class="lang-card" data-lang="JP">
+    <h2>JP Cards</h2>
+  </div>
+</section>
+
+<!-- QUICK SECTIONS -->
+<section class="quick">
+  <button data-section="new">🆕 Novinky</button>
   <button data-section="hot">🔥 Žhavé</button>
-  <button data-section="psa">PSA</button>
 </section>
 
-<section class="layout">
-  <aside class="filters">
-    <input type="text" id="search" placeholder="Hledat kartu...">
+<!-- EDITIONS -->
+<section class="editions hidden" id="editions"></section>
 
-    <select id="condition">
-      <option value="">Stav</option>
-      <option value="Mint">Mint</option>
-      <option value="Near Mint">Near Mint</option>
-      <option value="Lightly Played">Lightly Played</option>
-    </select>
+<!-- CARDS -->
+<section class="cards-grid" id="cards"></section>
 
-    <select id="rarity">
-      <option value="">Rarity</option>
-      <option value="Common">Common</option>
-      <option value="Rare">Rare</option>
-      <option value="Ultra Rare">Ultra Rare</option>
-      <option value="Secret Rare">Secret Rare</option>
-    </select>
+<!-- FILTER PANEL -->
+<div class="filters-panel hidden" id="filtersPanel">
+  <h3>Filtry</h3>
 
-    <label>Cena</label>
-    <input type="number" id="priceMin" placeholder="Od">
-    <input type="number" id="priceMax" placeholder="Do">
+  <input id="search" placeholder="Hledat kartu">
 
-    <select id="sort">
-      <option value="new">Nejnovější</option>
-      <option value="price_asc">Cena ↑</option>
-      <option value="price_desc">Cena ↓</option>
-      <option value="name">Abeceda</option>
-    </select>
+  <select id="condition">
+    <option value="">Stav</option>
+    <option value="Mint">Mint</option>
+    <option value="Near Mint">Near Mint</option>
+  </select>
 
-    <button id="apply">Použít filtry</button>
-  </aside>
+  <select id="rarity">
+    <option value="">Rarity</option>
+    <option value="Rare">Rare</option>
+    <option value="Ultra Rare">Ultra Rare</option>
+  </select>
 
-  <main>
-    <div id="cards" class="cards-grid"></div>
-  </main>
-</section>
+  <input type="number" id="priceMin" placeholder="Cena od">
+  <input type="number" id="priceMax" placeholder="Cena do">
+
+  <select id="sort">
+    <option value="new">Nejnovější</option>
+    <option value="price_asc">Cena ↑</option>
+    <option value="price_desc">Cena ↓</option>
+  </select>
+
+  <button id="applyFilters">Použít</button>
+</div>
 
 <script src="js/collectionfun.js"></script>
 <script src="js/headerfun.js"></script>
+
 </body>
 </html>
+
