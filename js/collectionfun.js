@@ -5,100 +5,185 @@ const sb = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3amJmcmhiZ2VjenVrY2prbWNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0NDU5MjQsImV4cCI6MjA4NTAyMTkyNH0.BlgIov7kFq2EUW17hLs6o1YujL1i9elD7wILJP6h-lQ'
 );
 
-let state = {
-  lang: null,
-  section: null,
-  set: null
+/* =========================
+   GLOBAL STATE
+========================= */
+const state = {
+  language: null,   // EN | JP
+  section: null,    // new | hot | null
+  edition: null,    // set name
+  filtersOpen: false
 };
 
+/* =========================
+   LOAD CARDS
+========================= */
 async function loadCards() {
-  let q = sb.from('cards').select('*').eq('status', 'Skladem');
+  let q = sb
+    .from('cards')
+    .select('*')
+    .eq('status', 'Skladem');
 
-  if (state.lang) q = q.eq('language', state.lang);
-  if (state.section === 'new') q = q.eq('is_new', true);
-  if (state.section === 'hot') q = q.eq('is_hot', true);
-  if (state.set) q = q.eq('set', state.set);
+  // --- BASE STATE ---
+  if (state.language) q = q.eq('language', state.language);
+  if (state.section === 'new') q = q.eq('new', true);
+  if (state.section === 'hot') q = q.eq('hot', true);
+  if (state.edition) q = q.eq('set', state.edition);
 
-  const search = document.getElementById('searchInput').value;
+  // --- SEARCH ---
+  const search = document.getElementById('searchInput')?.value;
   if (search) q = q.ilike('name', `%${search}%`);
 
-  const cond = document.getElementById('condition').value;
-  if (cond) q = q.eq('condition', cond);
+  // --- FILTERS ---
+  const condition = document.getElementById('filter-condition')?.value;
+  if (condition) q = q.eq('condition', condition);
 
-  const rar = document.getElementById('rarity').value;
-  if (rar) q = q.eq('rarity', rar);
+  const rarity = document.getElementById('filter-rarity')?.value;
+  if (rarity) q = q.eq('rarity', rarity);
 
-  const min = document.getElementById('priceMin').value;
-  const max = document.getElementById('priceMax').value;
+  const min = document.getElementById('priceMin')?.value;
+  const max = document.getElementById('priceMax')?.value;
   if (min) q = q.gte('price', min);
   if (max) q = q.lte('price', max);
 
-  const sort = document.getElementById('sort').value;
-  if (sort === 'price_asc') q = q.order('price');
-  if (sort === 'price_desc') q = q.order('price', { ascending: false });
-  if (sort === 'name') q = q.order('name');
-  if (sort === 'sold') q = q.order('sold_count', { ascending: false });
-  if (sort === 'new') q = q.order('created_at', { ascending: false });
+  // --- SORT ---
+  const sort = document.getElementById('sort')?.value;
+  switch (sort) {
+    case 'price_asc':
+      q = q.order('price', { ascending: true });
+      break;
+    case 'price_desc':
+      q = q.order('price', { ascending: false });
+      break;
+    case 'name':
+      q = q.order('name', { ascending: true });
+      break;
+    case 'sold':
+      q = q.order('sold_count', { ascending: false });
+      break;
+    case 'new':
+      q = q.order('created_at', { ascending: false });
+      break;
+  }
 
-  const { data } = await q;
+  const { data, error } = await q;
+  if (error) {
+    console.error(error);
+    return;
+  }
+
   renderCards(data || []);
 }
 
+/* =========================
+   RENDER CARDS
+========================= */
 function renderCards(cards) {
   const grid = document.getElementById('cards');
   grid.innerHTML = '';
 
+  if (!cards.length) {
+    grid.innerHTML = `<p class="empty">Nic jsme nenašli 😕</p>`;
+    return;
+  }
+
   cards.forEach(c => {
-    const d = document.createElement('div');
-    d.className = 'card';
-    d.onclick = () => location.href = `card.html?id=${c.id}`;
-    d.innerHTML = `
-      <img src="${c.image_url}">
-      <strong>${c.name}</strong>
-      <div class="price">${c.price} Kč</div>
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.onclick = () => location.href = `card.html?id=${c.id}`;
+    el.innerHTML = `
+      <img src="${c.image_url}" alt="${c.name}">
+      <div class="card-info">
+        <strong>${c.name}</strong>
+        <div class="meta">
+          <span>${c.language}</span>
+          <span>${c.condition}</span>
+          <span>${c.rarity}</span>
+        </div>
+        <div class="price">${c.price} Kč</div>
+      </div>
     `;
-    grid.appendChild(d);
+    grid.appendChild(el);
   });
 }
 
+/* =========================
+   LOAD EDITIONS
+========================= */
 async function loadEditions() {
+  if (!state.language) return;
+
   const { data } = await sb
     .from('cards')
     .select('set')
-    .eq('language', state.lang);
+    .eq('language', state.language);
 
-  const sets = [...new Set(data.map(d => d.set))];
-  const el = document.getElementById('editions');
-  el.innerHTML = '';
-  el.classList.remove('hidden');
+  const sets = [...new Set(data.map(d => d.set))].filter(Boolean);
 
-  sets.forEach(s => {
-    const b = document.createElement('button');
-    b.textContent = s;
-    b.onclick = () => {
-      state.set = s;
+  const wrap = document.getElementById('editions');
+  wrap.innerHTML = '';
+  wrap.classList.remove('hidden');
+
+  sets.forEach(set => {
+    const btn = document.createElement('button');
+    btn.textContent = set;
+    btn.onclick = () => {
+      state.edition = set;
+      hideTopCategories();
       loadCards();
     };
-    el.appendChild(b);
+    wrap.appendChild(btn);
   });
 }
 
-/* EVENTS */
-document.querySelectorAll('.cat-card').forEach(c => {
-  c.onclick = () => {
-    state.lang = c.dataset.lang || state.lang;
-    state.section = c.dataset.section || null;
-    state.set = null;
+/* =========================
+   UI HELPERS
+========================= */
+function hideTopCategories() {
+  document.getElementById('top-categories')?.classList.add('hidden');
+}
 
-    if (state.lang) loadEditions();
+function toggleFilters(force = null) {
+  const panel = document.getElementById('filters');
+  state.filtersOpen = force !== null ? force : !state.filtersOpen;
+  panel.classList.toggle('open', state.filtersOpen);
+}
+
+/* =========================
+   EVENTS
+========================= */
+
+// EN / JP / NEW / HOT
+document.querySelectorAll('[data-lang],[data-section]').forEach(btn => {
+  btn.onclick = () => {
+    state.language = btn.dataset.lang || state.language;
+    state.section = btn.dataset.section || null;
+    state.edition = null;
+
+    hideTopCategories();
+    loadEditions();
     loadCards();
   };
 });
 
-document.getElementById('applyFilters').onclick = loadCards;
-document.getElementById('searchInput').oninput = () => {
-  clearTimeout(window._s);
-  window._s = setTimeout(loadCards, 300);
-};
+// APPLY FILTERS
+document.getElementById('applyFilters')?.addEventListener('click', () => {
+  toggleFilters(false);
+  loadCards();
+});
 
+// FILTER TOGGLE BUTTON
+document.getElementById('toggleFilters')?.addEventListener('click', () => {
+  toggleFilters();
+});
+
+// SEARCH (debounce)
+document.getElementById('searchInput')?.addEventListener('input', () => {
+  clearTimeout(window._search);
+  window._search = setTimeout(loadCards, 300);
+});
+
+/* =========================
+   INIT
+========================= */
 loadCards();
