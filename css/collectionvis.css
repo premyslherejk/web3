@@ -74,10 +74,17 @@ body{
   display:flex;
   flex-direction:column;
   gap:18px;
+
   transform:translateX(-40px);
   opacity:0;
   pointer-events:none;
   transition:.3s;
+}
+
+.filters.show{
+  transform:translateX(0);
+  opacity:1;
+  pointer-events:auto;
 }
 
 .filters h3{
@@ -111,12 +118,6 @@ body{
   cursor:pointer;
   background:linear-gradient(135deg,#ff3b3b,#c40000);
   color:white;
-}
-
-.filters.show{
-  transform:translateX(0);
-  opacity:1;
-  pointer-events:auto;
 }
 
 /* ===================== MAIN ===================== */
@@ -170,28 +171,6 @@ body{
   border-color:#6c4cff;
 }
 
-/* ===================== EDITIONS ===================== */
-
-.editions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-}
-
-.editions button{
-  padding:10px 16px;
-  border-radius:999px;
-  border:1px solid #333;
-  background:#15151d;
-  color:white;
-  cursor:pointer;
-}
-
-.editions button.active{
-  background:#ff3b3b;
-  border-color:#ff3b3b;
-}
-
 /* ===================== CARDS ===================== */
 
 .cards-grid{
@@ -238,6 +217,7 @@ body{
 
   .collection-layout{
     grid-template-columns:1fr;
+    gap:18px;
   }
 
   .filters{
@@ -245,11 +225,13 @@ body{
     inset:0;
     z-index:9999;
     border-radius:0;
+    transform:translateX(-100%);
+    opacity:1;
+    pointer-events:none;
   }
 
-  .collection-layout.filters-open .filters{
+  .filters.show{
     transform:translateX(0);
-    opacity:1;
     pointer-events:auto;
   }
 
