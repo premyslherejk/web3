@@ -1,142 +1,273 @@
-body {
-  margin: 0;
-  background: #0e0e0e;
-  color: #fff;
-  font-family: 'Inter', system-ui, sans-serif;
+/* ===================== RESET ===================== */
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
 }
 
-.collection-layout {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 24px;
-  padding: 24px;
+body{
+  background:#0f0f14;
+  color:white;
+  font-family:Inter,system-ui,sans-serif;
 }
 
-/* FILTERS */
-.filters {
-  background: #121212;
-  border-radius: 16px;
-  padding: 20px;
-  position: sticky;
-  top: 90px;
-  height: fit-content;
+/* ===================== PAGE ===================== */
+
+.collection-page{
+  max-width:1400px;
+  margin:auto;
+  padding:40px 24px;
 }
 
-.filters h3 {
-  margin-top: 0;
+/* ===================== TOP BAR ===================== */
+
+.collection-top{
+  display:flex;
+  gap:16px;
+  margin-bottom:24px;
 }
 
-.filters label {
-  display: block;
-  margin: 14px 0 6px;
-  font-size: 14px;
-  opacity: 0.8;
+.search-input{
+  flex:1;
+  padding:14px 18px;
+  border-radius:999px;
+  border:none;
+  background:#15151d;
+  color:white;
+  font-size:1rem;
+  outline:none;
 }
 
-.filters select,
-.filters input {
-  width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-  background: #1c1c1c;
-  color: #fff;
+.search-input::placeholder{
+  color:#777;
 }
 
-.price-range {
-  display: flex;
-  gap: 10px;
+.filter-toggle{
+  padding:14px 22px;
+  border-radius:999px;
+  border:none;
+  background:#ff3b3b;
+  color:white;
+  font-weight:800;
+  cursor:pointer;
 }
 
-.apply {
-  margin-top: 16px;
-  width: 100%;
-  padding: 12px;
-  border-radius: 12px;
-  background: #ffcb05;
-  color: #000;
-  font-weight: 800;
-  cursor: pointer;
+/* ===================== LAYOUT ===================== */
+
+.collection-layout{
+  display:grid;
+  grid-template-columns:0 1fr;
+  gap:40px;
+  transition:.3s;
 }
 
-/* CONTENT */
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.collection-layout.filters-open{
+  grid-template-columns:280px 1fr;
 }
 
-/* TOP CATEGORIES */
-.top-categories {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 14px;
+/* ===================== FILTERS ===================== */
+
+.filters{
+  background:#15151d;
+  border-radius:20px;
+  padding:24px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  transform:translateX(-40px);
+  opacity:0;
+  pointer-events:none;
+  transition:.3s;
 }
 
-.cat-card {
-  background: #1a1a1a;
-  padding: 22px;
-  border-radius: 18px;
-  text-align: center;
-  font-weight: 800;
-  cursor: pointer;
-  transition: 0.2s;
+.filters h3{
+  font-size:1.2rem;
+  margin-bottom:6px;
 }
 
-.cat-card:hover {
-  box-shadow: 0 0 0 2px #ffcb05;
+.filters label{
+  display:flex;
+  flex-direction:column;
+  font-size:.85rem;
+  color:#aaa;
+  gap:6px;
 }
 
-/* EDITIONS */
-.editions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+.filters input,
+.filters select{
+  padding:10px 12px;
+  border-radius:12px;
+  border:none;
+  background:#0f0f14;
+  color:white;
 }
 
-.editions button {
-  background: #1c1c1c;
-  border: none;
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 999px;
-  cursor: pointer;
+.apply-filters{
+  margin-top:10px;
+  padding:14px;
+  border-radius:999px;
+  border:none;
+  font-weight:800;
+  cursor:pointer;
+  background:linear-gradient(135deg,#ff3b3b,#c40000);
+  color:white;
 }
 
-/* CARDS */
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px,1fr));
-  gap: 16px;
+.filters.show{
+  transform:translateX(0);
+  opacity:1;
+  pointer-events:auto;
 }
 
-.card {
-  background: #151515;
-  border-radius: 16px;
-  padding: 10px;
-  cursor: pointer;
-  transition: 0.15s;
+/* ===================== MAIN ===================== */
+
+.collection-main{
+  display:flex;
+  flex-direction:column;
+  gap:26px;
 }
 
-.card:hover {
-  transform: translateY(-3px);
+/* ===================== LANGUAGE ===================== */
+
+.lang-switch{
+  display:flex;
+  gap:10px;
 }
 
-.card img {
-  width: 100%;
-  border-radius: 12px;
+.lang-switch button{
+  padding:10px 18px;
+  border-radius:999px;
+  border:1px solid #333;
+  background:#15151d;
+  color:white;
+  font-weight:700;
+  cursor:pointer;
 }
 
-.card strong {
-  display: block;
-  margin-top: 8px;
+.lang-switch button.active{
+  background:#ff3b3b;
+  border-color:#ff3b3b;
 }
 
-.card .price {
-  font-weight: 800;
-  margin-top: 4px;
+/* ===================== QUICK ===================== */
+
+.quick-filters{
+  display:flex;
+  gap:10px;
 }
 
-.hidden {
-  display: none;
+.quick-filters button{
+  padding:10px 18px;
+  border-radius:999px;
+  border:1px solid #333;
+  background:#0f0f14;
+  color:white;
+  cursor:pointer;
+}
+
+.quick-filters button.active{
+  background:#6c4cff;
+  border-color:#6c4cff;
+}
+
+/* ===================== EDITIONS ===================== */
+
+.editions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.editions button{
+  padding:10px 16px;
+  border-radius:999px;
+  border:1px solid #333;
+  background:#15151d;
+  color:white;
+  cursor:pointer;
+}
+
+.editions button.active{
+  background:#ff3b3b;
+  border-color:#ff3b3b;
+}
+
+/* ===================== CARDS ===================== */
+
+.cards-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:20px;
+}
+
+.card{
+  background:#15151d;
+  border-radius:18px;
+  padding:12px;
+  cursor:pointer;
+  transition:.25s;
+}
+
+.card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 20px 40px rgba(0,0,0,.6);
+}
+
+.card img{
+  width:100%;
+  aspect-ratio:3/4;
+  object-fit:cover;
+  border-radius:14px;
+  margin-bottom:10px;
+}
+
+.card strong{
+  display:block;
+  font-size:.95rem;
+}
+
+.card .price{
+  color:#ffff00;
+  font-weight:800;
+  margin-top:4px;
+}
+
+/* ===================== MOBILE ===================== */
+
+@media (max-width:900px){
+
+  .collection-layout{
+    grid-template-columns:1fr;
+  }
+
+  .filters{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    border-radius:0;
+  }
+
+  .collection-layout.filters-open .filters{
+    transform:translateX(0);
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  .cards-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .collection-top{
+    flex-direction:column;
+  }
+
+  .filter-toggle{
+    width:100%;
+  }
+}
+
+/* ===================== HELPERS ===================== */
+
+.hidden{
+  display:none;
 }
