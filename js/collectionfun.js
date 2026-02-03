@@ -34,6 +34,11 @@ function grabEls(){
 
   els.langBtns = Array.from(document.querySelectorAll('#langSwitch [data-lang]'));
   els.quickBtns = Array.from(document.querySelectorAll('#quickFilters [data-section]'));
+
+  // chips UI
+  els.activeFilters = document.getElementById('activeFilters');
+  els.filterChips = document.getElementById('filterChips');
+  els.clearAll = document.getElementById('clearAllFilters');
 }
 
 function setFiltersOpen(open){
@@ -55,6 +60,138 @@ function setActive(btns, predicate){
   btns.forEach(b => b.classList.toggle('active', predicate(b)));
 }
 
+function escapeHtml(s){
+  return String(s)
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+}
+
+/* =========================
+   FILTER CHIPS
+========================= */
+
+function getActiveFilters(){
+  const active = [];
+
+  const search = (els.search.value || '').trim();
+  if (search) active.push({ key:'search', label:'Hledat', value: search });
+
+  if (state.language) active.push({ key:'language', label:'Jazyk', value: state.language });
+
+  if (state.section === 'new') active.push({ key:'section', label:'Sekce', value: 'Novinky' });
+  if (state.section === 'hot') active.push({ key:'section', label:'Sekce', value: 'Žhavé' });
+
+  const setVal = els.set.value || '';
+  if (setVal) active.push({ key:'set', label:'Edice', value: setVal });
+
+  const cond = els.condition.value || '';
+  if (cond) active.push({ key:'condition', label:'Stav', value: cond });
+
+  const rar = els.rarity.value || '';
+  if (rar) active.push({ key:'rarity', label:'Rarita', value: rar });
+
+  if (els.psaOnly.checked) active.push({ key:'psaOnly', label:'PSA', value: 'Hodnocené' });
+
+  const min = els.priceMin.value;
+  const max = els.priceMax.value;
+
+  if (min !== '' && min != null) active.push({ key:'priceMin', label:'Cena od', value: `${Number(min)} Kč` });
+  if (max !== '' && max != null) active.push({ key:'priceMax', label:'Cena do', value: `${Number(max)} Kč` });
+
+  // sort neukazuju jako chip defaultně (je to spíš UI preference), ale klidně můžu
+  return active;
+}
+
+function clearSingleFilter(key){
+  switch(key){
+    case 'search':
+      els.search.value = '';
+      break;
+    case 'language':
+      state.language = null;
+      els.set.value = '';
+      setActive(els.langBtns, () => false);
+      // reload set options based on (now null language)
+      loadEditionsIntoFilter();
+      break;
+    case 'section':
+      state.section = null;
+      setActive(els.quickBtns, () => false);
+      break;
+    case 'set':
+      els.set.value = '';
+      break;
+    case 'condition':
+      els.condition.value = '';
+      break;
+    case 'rarity':
+      els.rarity.value = '';
+      break;
+    case 'psaOnly':
+      els.psaOnly.checked = false;
+      break;
+    case 'priceMin':
+      els.priceMin.value = '';
+      break;
+    case 'priceMax':
+      els.priceMax.value = '';
+      break;
+  }
+
+  renderFilterChips();
+  loadCards();
+}
+
+function clearAllFilters(){
+  // UI inputs
+  els.search.value = '';
+  els.set.value = '';
+  els.condition.value = '';
+  els.rarity.value = '';
+  els.psaOnly.checked = false;
+  els.priceMin.value = '';
+  els.priceMax.value = '';
+  els.sort.value = 'new';
+
+  // state
+  state.language = null;
+  state.section = null;
+
+  // active styling
+  setActive(els.langBtns, () => false);
+  setActive(els.quickBtns, () => false);
+
+  loadEditionsIntoFilter();
+  renderFilterChips();
+  loadCards();
+}
+
+function renderFilterChips(){
+  const active = getActiveFilters();
+
+  if (!active.length){
+    els.activeFilters.classList.add('hidden');
+    els.filterChips.innerHTML = '';
+    return;
+  }
+
+  els.activeFilters.classList.remove('hidden');
+  els.filterChips.innerHTML = active.map(f => `
+    <span class="chip" data-key="${escapeHtml(f.key)}">
+      <span class="chip-label">${escapeHtml(f.label)}:</span>
+      <span class="chip-value">${escapeHtml(f.value)}</span>
+      <button type="button" aria-label="Odstranit filtr">✕</button>
+    </span>
+  `).join('');
+}
+
+/* =========================
+   RENDER CARDS
+========================= */
+
 function renderCards(cards){
   els.cards.innerHTML = '';
 
@@ -68,16 +205,19 @@ function renderCards(cards){
     el.className = 'card';
     el.onclick = () => location.href = `card.html?id=${c.id}`;
     el.innerHTML = `
-      <img src="${c.image_url}" alt="${c.name}">
-      <strong>${c.name}</strong>
+      <img src="${c.image_url}" alt="${escapeHtml(c.name)}">
+      <strong>${escapeHtml(c.name)}</strong>
       <div class="price">${c.price} Kč</div>
     `;
     els.cards.appendChild(el);
   }
 }
 
+/* =========================
+   LOAD EDITIONS
+========================= */
+
 async function loadEditionsIntoFilter(){
-  // načti edice (set) podle jazyka (pokud je vybraný)
   let q = sb
     .from('cards')
     .select('set')
@@ -91,16 +231,22 @@ async function loadEditionsIntoFilter(){
     return;
   }
 
-  const sets = [...new Set((data || []).map(x => x.set).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+  const sets = [...new Set((data || []).map(x => x.set).filter(Boolean))]
+    .sort((a,b) => a.localeCompare(b));
 
   const current = els.set.value || '';
 
-  els.set.innerHTML = `<option value="">Vše</option>` + sets.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+  els.set.innerHTML =
+    `<option value="">Vše</option>` +
+    sets.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
 
-  // zkus zachovat vybranou edici, pokud pořád existuje
   if (current && sets.includes(current)) els.set.value = current;
   else els.set.value = '';
 }
+
+/* =========================
+   LOAD CARDS
+========================= */
 
 async function loadCards(){
   let q = sb
@@ -108,7 +254,7 @@ async function loadCards(){
     .select('id,name,price,image_url,language,condition,rarity,created_at,hot,new,status,psa_grade,set')
     .eq('status', 'Skladem');
 
-  // rychlé filtry
+  // quick state
   if (state.language) q = q.eq('language', state.language);
   if (state.section === 'new') q = q.eq('new', true);
   if (state.section === 'hot') q = q.eq('hot', true);
@@ -117,7 +263,7 @@ async function loadCards(){
   const search = (els.search.value || '').trim();
   if (search) q = q.ilike('name', `%${search}%`);
 
-  // sidebar filtry
+  // sidebar filters
   const setVal = els.set.value || '';
   if (setVal) q = q.eq('set', setVal);
 
@@ -127,8 +273,7 @@ async function loadCards(){
   const rar = els.rarity.value || '';
   if (rar) q = q.eq('rarity', rar);
 
-  const psaOnly = !!els.psaOnly.checked;
-  if (psaOnly) q = q.not('psa_grade', 'is', null);
+  if (els.psaOnly.checked) q = q.not('psa_grade', 'is', null);
 
   const min = els.priceMin.value;
   const max = els.priceMax.value;
@@ -150,17 +295,36 @@ async function loadCards(){
   }
 
   renderCards(data || []);
+  renderFilterChips();
 }
 
+/* =========================
+   EVENTS
+========================= */
+
 function wireEvents(){
-  // otevřít / zavřít filtry
+  // filters open/close
   els.toggleFilters.addEventListener('click', () => setFiltersOpen(!state.filtersOpen));
   els.closeFilters.addEventListener('click', () => setFiltersOpen(false));
 
-  // apply → reload + zavřít
   els.applyFilters.addEventListener('click', () => {
     setFiltersOpen(false);
     loadCards();
+  });
+
+  // clear all
+  els.clearAll.addEventListener('click', clearAllFilters);
+
+  // chips remove (delegation)
+  els.filterChips.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+
+    const key = chip.dataset.key;
+    clearSingleFilter(key);
   });
 
   // live search (debounce)
@@ -168,22 +332,20 @@ function wireEvents(){
   els.search.addEventListener('input', () => {
     clearTimeout(t);
     t = setTimeout(loadCards, 250);
+    renderFilterChips();
   });
 
-  // změna filtrů → reload
+  // auto reload on filter change
   [els.set, els.condition, els.rarity, els.psaOnly, els.priceMin, els.priceMax, els.sort].forEach(el => {
     el.addEventListener('change', loadCards);
   });
 
-  // EN/JP
+  // language buttons
   els.langBtns.forEach(btn => {
     btn.addEventListener('click', async () => {
       const lang = btn.dataset.lang;
-
-      // toggle: klikneš znovu → vypne
       state.language = (state.language === lang) ? null : lang;
 
-      // edice se vážou na jazyk → reset + reload options
       els.set.value = '';
       await loadEditionsIntoFilter();
 
@@ -192,7 +354,7 @@ function wireEvents(){
     });
   });
 
-  // Novinky/Žhavé
+  // section buttons
   els.quickBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const sec = btn.dataset.section;
@@ -203,24 +365,16 @@ function wireEvents(){
     });
   });
 
-  // ESC zavře filtry
+  // esc closes filters
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && state.filtersOpen) setFiltersOpen(false);
   });
-}
-
-function escapeHtml(s){
-  return String(s)
-    .replaceAll('&','&amp;')
-    .replaceAll('<','&lt;')
-    .replaceAll('>','&gt;')
-    .replaceAll('"','&quot;')
-    .replaceAll("'","&#039;");
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
   grabEls();
   wireEvents();
   await loadEditionsIntoFilter();
+  renderFilterChips();
   loadCards();
 });
