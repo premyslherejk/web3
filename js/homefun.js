@@ -43,7 +43,8 @@ async function loadHotOffers(){
   }
 
   const picked = shuffle(data || []).slice(0, 4);
-  window.OfferUI.renderCards(container, picked);
+  OfferUI.renderCardsInto(container, picked, { size: 'md' });
 }
 
 document.addEventListener('DOMContentLoaded', loadHotOffers);
+
