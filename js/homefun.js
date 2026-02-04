@@ -7,9 +7,26 @@ function shuffle(arr){
   return [...arr].sort(() => Math.random() - 0.5);
 }
 
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+async function waitForOfferUI(timeoutMs = 2000){
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs){
+    if (window.OfferUI && typeof window.OfferUI.renderCards === 'function') return true;
+    await sleep(50);
+  }
+  return false;
+}
+
 async function loadHotOffers(){
-  if (!window.OfferUI || typeof window.OfferUI.renderCards !== 'function'){
-    console.error('❌ OfferUI není načteno – zkontroluj pořadí scriptů');
+  const container = document.getElementById('hot-cards');
+  if (!container) return;
+
+  // počkej na OfferUI (kdyby se načítalo pomaleji)
+  const ok = await waitForOfferUI(2000);
+  if (!ok){
+    console.error('❌ OfferUI není načteno. Nejčastěji: špatná cesta js/offerfun.js nebo 404.');
+    container.innerHTML = `<p style="opacity:.7">Chybí renderer karet (OfferUI). Mrkni do Console/Network 😕</p>`;
     return;
   }
 
@@ -21,15 +38,11 @@ async function loadHotOffers(){
 
   if (error){
     console.error('Chyba při načítání hot karet:', error);
+    container.innerHTML = `<p style="opacity:.7">Chyba při načítání karet 😕</p>`;
     return;
   }
 
-  const container = document.getElementById('hot-cards');
-  if (!container) return;
-
   const picked = shuffle(data || []).slice(0, 4);
-
-  // ✅ JEDINÉ místo, kde se renderuje
   window.OfferUI.renderCards(container, picked);
 }
 
