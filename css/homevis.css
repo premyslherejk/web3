@@ -135,3 +135,23 @@ body{
   max-width:1200px;
   margin:0 auto;
 }
+
+/* ================================
+   HOMEPAGE: větší karty na desktopu
+   (bez zásahu do collection.html)
+================================ */
+@media (min-width: 901px){
+
+  /* zvětší “sloupec” gridu => karta je větší */
+  #hot-cards.cards-grid{
+    grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    gap:24px;
+  }
+
+  /* ať to působí víc premium (trochu víc prostoru sekce) */
+  .hot-offers{
+    padding:70px 24px;
+  }
+}
+
+/* mobil necháváme beze změny (offervis.css už dělá 2 sloupce apod.) */
