@@ -4,6 +4,9 @@
    Usage:
      const el = OfferUI.renderCard(card, { size: 'md' });
      OfferUI.renderCardsInto(container, cards, { size: 'md' });
+
+   Extra:
+     OfferUI.renderCards(container, cards, opts) // alias (for older calls)
 ========================= */
 
 (function () {
@@ -16,12 +19,10 @@
       .replaceAll("'", '&#039;');
   }
 
-  // --- BADGES (classes match your CSS in collectionvis.css) ---
+  // --- BADGES (classes match your CSS in offervis.css / collectionvis.css) ---
   function statusBadge(status) {
     const s = String(status || '').trim();
-
     if (s === 'Rezervováno') return { text: 'Rezervováno', cls: 'badge badge-reserved' };
-    // default visible
     return { text: 'Skladem', cls: 'badge badge-stock' };
   }
 
@@ -43,7 +44,7 @@
   // --- MAIN RENDER ---
   function renderCard(card, opts = {}) {
     const {
-      size = 'md', // 'sm' | 'md' | 'lg' (your CSS can style these)
+      size = 'md', // 'sm' | 'md' | 'lg'
       href = (c) => `card.html?id=${c.id}`,
       clickable = true,
     } = opts;
@@ -58,7 +59,6 @@
     const b1 = statusBadge(card.status);
     const b2 = conditionOrPsaBadge(card.psa_grade, card.condition);
 
-    // NOTE: badges are inside .card-badges (your CSS positions it top-left)
     el.innerHTML = `
       <img src="${img}" alt="${name}">
       <div class="card-badges">
@@ -94,11 +94,16 @@
     container.appendChild(frag);
   }
 
-  // expose globally
+  // ✅ alias pro kompatibilitu (homefun.js může volat renderCards)
+  function renderCards(container, cards, opts = {}) {
+    return renderCardsInto(container, cards, opts);
+  }
+
   window.OfferUI = {
     escapeHtml,
     renderCard,
     renderCardsInto,
+    renderCards, // ✅ přidáno
     statusBadge,
     conditionOrPsaBadge,
   };
