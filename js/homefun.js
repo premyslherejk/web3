@@ -69,8 +69,16 @@ async function loadHotOffers(){
     window.OfferUI.renderCards(container, picked);
   } else {
     console.warn('OfferUI.renderCards není k dispozici, jedu fallback.');
-    fallbackRender(container, picked);
+    if (!window.OfferUI || typeof window.OfferUI.renderCards !== 'function') {
+  console.error('OfferUI není načteno – špatné pořadí scriptů');
+  return;
+}
+
+window.OfferUI.renderCards(container, picked, {
+  size: 'home' // klidně později
+});
   }
 }
 
 document.addEventListener('DOMContentLoaded', loadHotOffers);
+
