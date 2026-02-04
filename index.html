@@ -8,7 +8,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/homevis.css">
   <link rel="stylesheet" href="css/headervis.css">
-  <!-- ✅ stejné karty/badges jako collection -->
   <link rel="stylesheet" href="css/offervis.css">
 </head>
 
@@ -35,7 +34,6 @@
   <a href="auctions.html">Aukce</a>
   <a href="contact.html">Kontakt</a>
 </nav>
-
 
 <section class="hero">
   <div class="cards">
@@ -66,11 +64,11 @@
   <div class="hot-cards cards-grid" id="hot-cards"></div>
 </section>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 
-<!-- ⚠️ MUSÍ BÝT PŘED homefun.js -->
-<script src="js/offerfun.js"></script>
-<script src="js/homefun.js"></script>
+<!-- důležité: OfferUI musí být dřív než homefun -->
+<script src="js/offerfun.js" defer></script>
+<script src="js/homefun.js" defer></script>
 <script src="js/headerfun.js" defer></script>
 
 </body>
