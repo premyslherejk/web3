@@ -49,17 +49,13 @@
             <g clip-path="url(#uk-clip)">
               <rect width="60" height="30" fill="#012169"></rect>
 
-              <!-- bílé diagonály -->
               <path d="M0,0 L60,30 M60,0 L0,30" stroke="#FFFFFF" stroke-width="6"></path>
-              <!-- červené diagonály (posunuté) -->
               <path d="M0,0 L60,30" stroke="#C8102E" stroke-width="4" transform="translate(1.5,0)"></path>
               <path d="M60,0 L0,30" stroke="#C8102E" stroke-width="4" transform="translate(-1.5,0)"></path>
 
-              <!-- bílé kříže -->
               <rect x="0" y="12" width="60" height="6" fill="#FFFFFF"></rect>
               <rect x="27" y="0" width="6" height="30" fill="#FFFFFF"></rect>
 
-              <!-- červené kříže -->
               <rect x="0" y="13" width="60" height="4" fill="#C8102E"></rect>
               <rect x="28" y="0" width="4" height="30" fill="#C8102E"></rect>
             </g>
@@ -88,11 +84,13 @@
     </div>
 
     <div class="pick-group" id="quickFilters">
-      <button type="button" class="pick-card pick-alt" data-section="new">
-        <div class="pick-icon">🆕</div>
+
+      <!-- ✅ Novinky -> Hodnocené -->
+      <button type="button" class="pick-card pick-alt" data-section="graded">
+        <div class="pick-icon">🟣</div>
         <div class="pick-text">
-          <div class="pick-title">Novinky</div>
-          <div class="pick-sub">čerstvě přidané</div>
+          <div class="pick-title">Hodnocené</div>
+          <div class="pick-sub">PSA karty</div>
         </div>
       </button>
 
@@ -137,7 +135,6 @@
         <button class="filters-close" id="closeFilters" type="button" aria-label="Zavřít filtry">✕</button>
       </div>
 
-      <!-- ✅ NOVÉ: SERIE (nad edicí) -->
       <label>
         Série
         <select id="serie">
@@ -177,11 +174,6 @@
           <option value="Special illustration rare">Special illustration rare</option>
           <option value="Hyper rare">Hyper rare</option>
         </select>
-      </label>
-
-      <label class="checkline">
-        <input type="checkbox" id="psaOnly">
-        <span>Hodnocené (PSA)</span>
       </label>
 
       <div class="price-row">
