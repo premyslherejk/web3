@@ -1,110 +1,53 @@
-/* ===================== OFFER UI (cards + badges) ===================== */
-/* Tenhle soubor je sdílený pro index / collection / related / atd.
-   Velikost karet ovládáš přes třídu na gridu: .offer-grid.size-sm|md|lg
+/* ===================== OFFER VIS (drop-in, kompatibilní s current třídami) ===================== */
+/* Cíl: collection.html musí vypadat pořád stejně.
+   Až pak můžeme přidat size presety pro jiné stránky.
 */
 
-/* Grid */
-.offer-grid{
+/* GRID */
+.cards-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(var(--offer-card-min), 1fr));
-  gap:var(--offer-gap);
-}
-
-/* Size presets (měň jen tyhle proměnné) */
-.offer-grid.size-lg{
-  --offer-card-min: 220px;
-  --offer-gap: 22px;
-  --offer-pad: 14px;
-  --offer-radius: 20px;
-  --offer-img-radius: 16px;
-  --offer-name: 1.02rem;
-  --offer-price: 1.05rem;
-  --offer-badge: .82rem;
-  --offer-badge2: .66rem;
-}
-
-.offer-grid.size-md{
-  --offer-card-min: 180px;
-  --offer-gap: 20px;
-  --offer-pad: 12px;
-  --offer-radius: 18px;
-  --offer-img-radius: 14px;
-  --offer-name: .95rem;
-  --offer-price: 1.02rem;
-  --offer-badge: .78rem;
-  --offer-badge2: .62rem;
-}
-
-.offer-grid.size-sm{
-  --offer-card-min: 150px;
-  --offer-gap: 16px;
-  --offer-pad: 10px;
-  --offer-radius: 16px;
-  --offer-img-radius: 12px;
-  --offer-name: .9rem;
-  --offer-price: 1rem;
-  --offer-badge: .74rem;
-  --offer-badge2: .6rem;
-}
-
-/* Default fallback kdyby size třída chyběla */
-.offer-grid{
-  --offer-card-min: 180px;
-  --offer-gap: 20px;
-  --offer-pad: 12px;
-  --offer-radius: 18px;
-  --offer-img-radius: 14px;
-  --offer-name: .95rem;
-  --offer-price: 1.02rem;
-  --offer-badge: .78rem;
-  --offer-badge2: .62rem;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:20px;
 }
 
 /* Card */
-.offer-card{
-  position:relative;
+.card{
+  position:relative; /* pro badge stack */
   background:#15151d;
-  border-radius:var(--offer-radius);
-  padding:var(--offer-pad);
+  border-radius:18px;
+  padding:12px;
   cursor:pointer;
   transition:.2s;
 }
 
-.offer-card:hover{
+.card:hover{
   transform:translateY(-4px);
   box-shadow:0 20px 40px rgba(0,0,0,.6);
 }
 
-/* Media */
-.offer-media{
-  position:relative;
-}
-
-.offer-media img{
+.card img{
   width:100%;
   aspect-ratio:3/4;
   object-fit:cover;
-  border-radius:var(--offer-img-radius);
+  border-radius:14px;
   margin-bottom:10px;
   display:block;
 }
 
-/* Name + price */
-.offer-name{
+.card strong{
   display:block;
-  font-size:var(--offer-name);
+  font-size:.95rem;
   font-weight:800;
 }
 
-.offer-price{
+.card .price{
   color:#ffff00;
   font-weight:900;
   margin-top:4px;
-  font-size:var(--offer-price);
 }
 
-/* Badges stack (top-left) */
-.offer-badges{
+/* BADGES stack (top-left) */
+.card-badges{
   position:absolute;
   top:10px;
   left:10px;
@@ -115,14 +58,13 @@
   pointer-events:none;
 }
 
-/* Badge base */
-.offer-badge{
+.badge{
   display:inline-flex;
   align-items:center;
   justify-content:center;
   padding:6px 10px;
   border-radius:999px;
-  font-size:var(--offer-badge);
+  font-size:.78rem;
   font-weight:900;
   box-shadow:0 10px 24px rgba(0,0,0,.45);
   border:1px solid rgba(255,255,255,.08);
@@ -130,33 +72,33 @@
   width:fit-content;
 }
 
-/* Menší druhý badge (kondice / PSA) */
-.offer-badges .offer-badge:nth-child(2){
-  font-size:var(--offer-badge2);
+/* menší druhý badge (kondice / PSA) */
+.card-badges .badge:nth-child(2){
+  font-size:.62rem;
   padding:4px 8px;
   box-shadow:0 8px 18px rgba(0,0,0,.35);
 }
 
-/* Status */
-.offer-badge-stock{ background:rgba(31,143,58,.95); color:white; }
-.offer-badge-reserved{ background:rgba(160,160,170,.92); color:#0b0b0f; }
+/* STATUS */
+.badge-stock{ background:rgba(31,143,58,.95); color:white; }
+.badge-reserved{ background:rgba(160,160,170,.92); color:#0b0b0f; }
 
-/* Condition colors */
-.offer-badge-ex{ background:rgba(20,120,55,.95); color:white; }
-.offer-badge-nm{ background:rgba(80,220,140,.95); color:#0b0b0f; }
-.offer-badge-gd{ background:rgba(255,215,0,.95); color:#0b0b0f; }
-.offer-badge-pl{ background:rgba(255,140,0,.95); color:#0b0b0f; }
-.offer-badge-po{ background:rgba(255,59,59,.95); color:white; }
+/* CONDITION COLORS */
+.badge-ex{ background:rgba(20,120,55,.95); color:white; }
+.badge-nm{ background:rgba(80,220,140,.95); color:#0b0b0f; }
+.badge-gd{ background:rgba(255,215,0,.95); color:#0b0b0f; }
+.badge-pl{ background:rgba(255,140,0,.95); color:#0b0b0f; }
+.badge-po{ background:rgba(255,59,59,.95); color:white; }
 
 /* PSA */
-.offer-badge-psa{ background:rgba(108,76,255,.95); color:white; }
+.badge-psa{ background:rgba(108,76,255,.95); color:white; }
 
 /* fallback */
-.offer-badge-unknown{ background:rgba(80,80,95,.92); color:white; }
+.badge-unknown{ background:rgba(80,80,95,.92); color:white; }
 
-/* Mobile sizing for grids */
+/* MOBILE */
 @media (max-width:900px){
-  .offer-grid{
-    grid-template-columns:repeat(2, 1fr);
+  .cards-grid{
+    grid-template-columns:repeat(2,1fr);
   }
 }
