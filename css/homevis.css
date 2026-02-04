@@ -129,55 +129,9 @@ body{
   margin-bottom:40px;
 }
 
+/* ✅ Hot grid je teď cards-grid z offervis.css.
+   Tady jen zarovnání a max-width, aby to vypadalo čistě. */
 .hot-cards{
-  display:flex;
-  justify-content:center;
-  gap:24px;
-  flex-wrap:wrap;
+  max-width:1200px;
+  margin:0 auto;
 }
-
-.hot-card{
-  position:relative;
-  width:250px;
-  background:#111;
-  border-radius:12px;
-  overflow:hidden;
-  box-shadow:0 10px 30px rgba(0,0,0,0.7);
-  transition:.3s;
-  cursor:pointer;
-}
-
-.hot-card:hover{
-  transform:translateY(-10px);
-  box-shadow:0 20px 50px rgba(0,0,0,0.8);
-}
-
-.hot-card img{width:100%;display:block;}
-
-.hot-card .tag{
-  position:absolute;
-  top:8px;
-  left:8px;
-  background:green;
-  color:white;
-  font-size:.75rem;
-  font-weight:700;
-  padding:4px 8px;
-  border-radius:4px;
-}
-
-.hot-card .info{
-  padding:12px;
-  text-align:left;
-}
-
-.hot-card .info h3{
-  font-size:1.2rem;
-  margin:4px 0;
-}
-
-.hot-card .info p{
-  color:#ccc;
-
-}
-
