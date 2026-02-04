@@ -2,7 +2,6 @@ const { createClient } = supabase;
 
 const sb = createClient(
   'https://hwjbfrhbgeczukcjkmca.supabase.co',
-  // ✅ SPRÁVNÝ KEY (tvoje původní verze)
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3amJmcmhiZ2VjenVrY2prbWNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0NDU5MjQsImV4cCI6MjA4NTAyMTkyNH0.BlgIov7kFq2EUW17hLs6o1YujL1i9elD7wILJP6h-lQ'
 );
 
@@ -61,7 +60,9 @@ function setActive(btns, predicate){
 }
 
 function escapeHtml(s){
-  return String(s)
+  // fallback if OfferUI not loaded for some reason
+  if (window.OfferUI?.escapeHtml) return window.OfferUI.escapeHtml(s);
+  return String(s ?? '')
     .replaceAll('&','&amp;')
     .replaceAll('<','&lt;')
     .replaceAll('>','&gt;')
@@ -196,62 +197,6 @@ function clearAllFilters(){
 }
 
 /* =========================
-   BADGES (classes sedí na tvoje CSS)
-========================= */
-
-function statusBadge(status){
-  const s = (status || '').trim();
-  if (s === 'Rezervováno') return { text: 'Rezervováno', cls: 'badge badge-reserved' };
-  return { text: 'Skladem', cls: 'badge badge-stock' };
-}
-
-function conditionOrPsaBadge(psaGrade, condition){
-  if (psaGrade != null && String(psaGrade).trim() !== '') {
-    return { text: `PSA ${psaGrade}`, cls: 'badge badge-psa' };
-  }
-
-  const c = (condition || '').trim();
-  const map = {
-    'Excellent': { text: 'EX', cls: 'badge badge-ex' },
-    'Near Mint': { text: 'NM', cls: 'badge badge-nm' },
-    'Good':      { text: 'GD', cls: 'badge badge-gd' },
-    'Played':    { text: 'PL', cls: 'badge badge-pl' },
-    'Poor':      { text: 'PO', cls: 'badge badge-po' },
-  };
-  return map[c] || { text: 'RAW', cls: 'badge badge-unknown' };
-}
-
-function renderCards(cards){
-  els.cards.innerHTML = '';
-
-  if (!cards.length){
-    els.cards.innerHTML = `<p style="opacity:.7">Nic jsme nenašli 😕</p>`;
-    return;
-  }
-
-  for (const c of cards){
-    const el = document.createElement('div');
-    el.className = 'card';
-    el.onclick = () => location.href = `card.html?id=${c.id}`;
-
-    const b1 = statusBadge(c.status);
-    const b2 = conditionOrPsaBadge(c.psa_grade, c.condition);
-
-    el.innerHTML = `
-      <img src="${c.image_url}" alt="${escapeHtml(c.name)}">
-      <div class="card-badges">
-        <span class="${b1.cls}">${escapeHtml(b1.text)}</span>
-        <span class="${b2.cls}">${escapeHtml(b2.text)}</span>
-      </div>
-      <strong>${escapeHtml(c.name)}</strong>
-      <div class="price">${c.price} Kč</div>
-    `;
-
-    els.cards.appendChild(el);
-  }
-}
-
-/* =========================
    DEPENDENT OPTIONS (Serie -> Set)
 ========================= */
 
@@ -335,7 +280,7 @@ async function loadCards(){
 
   if (state.language) q = q.eq('language', state.language);
 
-  // ✅ quick section
+  // quick section
   if (state.section === 'hot') q = q.eq('hot', true);
   if (state.section === 'graded') q = q.not('psa_grade', 'is', null);
 
@@ -372,11 +317,20 @@ async function loadCards(){
   const { data, error } = await q;
   if (error){
     console.error('Supabase error:', error);
-    renderCards([]);
+    // use OfferUI empty state too
+    if (window.OfferUI?.renderCardsInto) window.OfferUI.renderCardsInto(els.cards, []);
+    else els.cards.innerHTML = `<p style="opacity:.7">Nic jsme nenašli 😕</p>`;
     return;
   }
 
-  renderCards(data || []);
+  // ✅ render via shared renderer
+  if (!window.OfferUI?.renderCardsInto) {
+    console.error('OfferUI not loaded. Add <script src="js/offerfun.js"></script> before collectionfun.js');
+    els.cards.innerHTML = `<p style="opacity:.7">Chybí offerfun.js 😕</p>`;
+    return;
+  }
+
+  window.OfferUI.renderCardsInto(els.cards, data || [], { size: 'md' });
   renderFilterChips();
 }
 
