@@ -8,7 +8,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/homevis.css">
   <link rel="stylesheet" href="css/headervis.css">
-
+  <!-- ✅ stejné karty/badges jako collection -->
+  <link rel="stylesheet" href="css/offervis.css">
 </head>
 
 <body>
@@ -62,14 +63,17 @@
 
 <section class="hot-offers">
   <h2>🔥 Žhavé nabídky</h2>
-  <div class="hot-cards" id="hot-cards"></div>
+
+  <!-- ✅ render přes OfferUI + offervis.css -->
+  <div class="hot-cards cards-grid" id="hot-cards"></div>
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- ✅ sdílený renderer karet (musí být před homefun.js) -->
+<script src="js/offerfun.js"></script>
 <script src="js/homefun.js"></script>
 <script src="js/headerfun.js" defer></script>
 
-
 </body>
-
 </html>
