@@ -2,20 +2,17 @@ const { createClient } = supabase;
 
 const sb = createClient(
   'https://hwjbfrhbgeczukcjkmca.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmJzZSIsInJlZiI6Imh3amJmcmhiZ2VjenVrY2prbWNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0NDU5MjQsImV4cCI6MjA4NTAyMTkyNH0.BlgIov7kFq2EUW17hLs6o1YujL1i9elD7wILJP6h-lQ'
+  // ✅ SPRÁVNÝ KEY (tvoje původní verze)
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3amJmcmhiZ2VjenVrY2prbWNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0NDU5MjQsImV4cCI6MjA4NTAyMTkyNH0.BlgIov7kFq2EUW17hLs6o1YujL1i9elD7wILJP6h-lQ'
 );
 
 const state = {
   language: null,   // "EN" | "JP" | null
-  section: null,    // "new" | "hot" | null
+  section: null,    // "graded" | "hot" | null
   filtersOpen: false
 };
 
 const els = {};
-
-/* =========================
-   DOM
-========================= */
 
 function grabEls(){
   els.layout = document.getElementById('collectionLayout');
@@ -28,13 +25,10 @@ function grabEls(){
   els.filtersPanel = document.getElementById('filtersPanel');
   els.applyFilters = document.getElementById('applyFilters');
 
-  // serie
   els.serie = document.getElementById('serie');
-
   els.set = document.getElementById('set');
   els.condition = document.getElementById('condition');
   els.rarity = document.getElementById('rarity');
-  els.psaOnly = document.getElementById('psaOnly');
   els.priceMin = document.getElementById('priceMin');
   els.priceMax = document.getElementById('priceMax');
   els.sort = document.getElementById('sort');
@@ -42,7 +36,6 @@ function grabEls(){
   els.langBtns = Array.from(document.querySelectorAll('#langSwitch [data-lang]'));
   els.quickBtns = Array.from(document.querySelectorAll('#quickFilters [data-section]'));
 
-  // chips UI
   els.activeFilters = document.getElementById('activeFilters');
   els.filterChips = document.getElementById('filterChips');
   els.clearAll = document.getElementById('clearAllFilters');
@@ -88,7 +81,7 @@ function getActiveFilters(){
 
   if (state.language) active.push({ key:'language', label:'Jazyk', value: state.language });
 
-  if (state.section === 'new') active.push({ key:'section', label:'Sekce', value: 'Novinky' });
+  if (state.section === 'graded') active.push({ key:'section', label:'Sekce', value: 'Hodnocené' });
   if (state.section === 'hot') active.push({ key:'section', label:'Sekce', value: 'Žhavé' });
 
   const serieVal = els.serie?.value || '';
@@ -103,11 +96,8 @@ function getActiveFilters(){
   const rar = els.rarity.value || '';
   if (rar) active.push({ key:'rarity', label:'Rarita', value: rar });
 
-  if (els.psaOnly.checked) active.push({ key:'psaOnly', label:'PSA', value: 'Hodnocené' });
-
   const min = els.priceMin.value;
   const max = els.priceMax.value;
-
   if (min !== '' && min != null) active.push({ key:'priceMin', label:'Cena od', value: `${Number(min)} Kč` });
   if (max !== '' && max != null) active.push({ key:'priceMax', label:'Cena do', value: `${Number(max)} Kč` });
 
@@ -142,7 +132,7 @@ function clearSingleFilter(key){
     case 'language':
       state.language = null;
       setActive(els.langBtns, () => false);
-      if (els.serie) els.serie.value = '';
+      els.serie.value = '';
       els.set.value = '';
       break;
 
@@ -152,7 +142,7 @@ function clearSingleFilter(key){
       break;
 
     case 'serie':
-      if (els.serie) els.serie.value = '';
+      els.serie.value = '';
       els.set.value = '';
       break;
 
@@ -166,10 +156,6 @@ function clearSingleFilter(key){
 
     case 'rarity':
       els.rarity.value = '';
-      break;
-
-    case 'psaOnly':
-      els.psaOnly.checked = false;
       break;
 
     case 'priceMin':
@@ -189,11 +175,10 @@ function clearSingleFilter(key){
 
 function clearAllFilters(){
   els.search.value = '';
-  if (els.serie) els.serie.value = '';
+  els.serie.value = '';
   els.set.value = '';
   els.condition.value = '';
   els.rarity.value = '';
-  els.psaOnly.checked = false;
   els.priceMin.value = '';
   els.priceMax.value = '';
   els.sort.value = 'new';
@@ -211,41 +196,30 @@ function clearAllFilters(){
 }
 
 /* =========================
-   BADGE HELPERS
+   BADGES (classes sedí na tvoje CSS)
 ========================= */
 
 function statusBadge(status){
   const s = (status || '').trim();
-
-  if (s === 'Rezervováno') {
-    return { text: 'Rezervováno', cls: 'badge badge--reserved' };
-  }
-
-  // default
-  return { text: 'Skladem', cls: 'badge badge--in' };
+  if (s === 'Rezervováno') return { text: 'Rezervováno', cls: 'badge badge-reserved' };
+  return { text: 'Skladem', cls: 'badge badge-stock' };
 }
 
 function conditionOrPsaBadge(psaGrade, condition){
   if (psaGrade != null && String(psaGrade).trim() !== '') {
-    return { text: `PSA ${psaGrade}`, cls: 'badge badge--psa badge--small' };
+    return { text: `PSA ${psaGrade}`, cls: 'badge badge-psa' };
   }
 
   const c = (condition || '').trim();
-
   const map = {
-    'Excellent': { text: 'EX', cls: 'badge badge--ex badge--small' },
-    'Near Mint': { text: 'NM', cls: 'badge badge--nm badge--small' },
-    'Good':      { text: 'GD', cls: 'badge badge--gd badge--small' },
-    'Played':    { text: 'PL', cls: 'badge badge--pl badge--small' },
-    'Poor':      { text: 'PO', cls: 'badge badge--po badge--small' },
+    'Excellent': { text: 'EX', cls: 'badge badge-ex' },
+    'Near Mint': { text: 'NM', cls: 'badge badge-nm' },
+    'Good':      { text: 'GD', cls: 'badge badge-gd' },
+    'Played':    { text: 'PL', cls: 'badge badge-pl' },
+    'Poor':      { text: 'PO', cls: 'badge badge-po' },
   };
-
-  return map[c] || { text: 'RAW', cls: 'badge badge--raw badge--small' };
+  return map[c] || { text: 'RAW', cls: 'badge badge-unknown' };
 }
-
-/* =========================
-   RENDER CARDS (✅ BADGES ZPÁTKY)
-========================= */
 
 function renderCards(cards){
   els.cards.innerHTML = '';
@@ -264,14 +238,11 @@ function renderCards(cards){
     const b2 = conditionOrPsaBadge(c.psa_grade, c.condition);
 
     el.innerHTML = `
-      <div class="card-media">
-        <img src="${c.image_url}" alt="${escapeHtml(c.name)}">
-        <div class="card-badges">
-          <span class="${b1.cls}">${escapeHtml(b1.text)}</span>
-          <span class="${b2.cls}">${escapeHtml(b2.text)}</span>
-        </div>
+      <img src="${c.image_url}" alt="${escapeHtml(c.name)}">
+      <div class="card-badges">
+        <span class="${b1.cls}">${escapeHtml(b1.text)}</span>
+        <span class="${b2.cls}">${escapeHtml(b2.text)}</span>
       </div>
-
       <strong>${escapeHtml(c.name)}</strong>
       <div class="price">${c.price} Kč</div>
     `;
@@ -281,13 +252,10 @@ function renderCards(cards){
 }
 
 /* =========================
-   DEPENDENT OPTIONS
-   Serie -> Set
+   DEPENDENT OPTIONS (Serie -> Set)
 ========================= */
 
 async function loadSeriesIntoFilter(){
-  if (!els.serie) return;
-
   let q = sb
     .from('cards')
     .select('serie')
@@ -310,12 +278,11 @@ async function loadSeriesIntoFilter(){
     `<option value="">Vše</option>` +
     series.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
 
-  if (current && series.includes(current)) els.serie.value = current;
-  else els.serie.value = '';
+  els.serie.value = (current && series.includes(current)) ? current : '';
 }
 
 async function loadEditionsIntoFilter(){
-  const serieVal = els.serie ? (els.serie.value || '') : '';
+  const serieVal = els.serie.value || '';
 
   if (!serieVal){
     els.set.innerHTML = `<option value="">Nejdřív vyber sérii</option>`;
@@ -348,8 +315,7 @@ async function loadEditionsIntoFilter(){
     `<option value="">Vše</option>` +
     sets.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
 
-  if (current && sets.includes(current)) els.set.value = current;
-  else els.set.value = '';
+  els.set.value = (current && sets.includes(current)) ? current : '';
 }
 
 async function refreshDependentOptions(){
@@ -365,32 +331,31 @@ async function loadCards(){
   let q = sb
     .from('cards')
     .select('id,name,price,image_url,language,condition,rarity,created_at,hot,new,status,psa_grade,set,serie')
-    .neq('status', 'Prodáno'); // ✅ Skladem + Rezervováno, skryje Prodáno
+    .neq('status', 'Prodáno');
 
-  // quick state
   if (state.language) q = q.eq('language', state.language);
-  if (state.section === 'new') q = q.eq('new', true);
+
+  // ✅ quick section
   if (state.section === 'hot') q = q.eq('hot', true);
+  if (state.section === 'graded') q = q.not('psa_grade', 'is', null);
 
   // search
   const search = (els.search.value || '').trim();
   if (search) q = q.ilike('name', `%${search}%`);
 
   // serie + set
-  const serieVal = els.serie ? (els.serie.value || '') : '';
+  const serieVal = els.serie.value || '';
   if (serieVal) q = q.eq('serie', serieVal);
 
   const setVal = els.set.value || '';
   if (setVal) q = q.eq('set', setVal);
 
-  // other filters
+  // filters
   const cond = els.condition.value || '';
   if (cond) q = q.eq('condition', cond);
 
   const rar = els.rarity.value || '';
   if (rar) q = q.eq('rarity', rar);
-
-  if (els.psaOnly.checked) q = q.not('psa_grade', 'is', null);
 
   const min = els.priceMin.value;
   const max = els.priceMax.value;
@@ -420,7 +385,6 @@ async function loadCards(){
 ========================= */
 
 function wireEvents(){
-  // filters open/close
   els.toggleFilters.addEventListener('click', () => setFiltersOpen(!state.filtersOpen));
   els.closeFilters.addEventListener('click', () => setFiltersOpen(false));
 
@@ -429,22 +393,17 @@ function wireEvents(){
     loadCards();
   });
 
-  // clear all
   els.clearAll.addEventListener('click', clearAllFilters);
 
-  // chips remove (delegation)
   els.filterChips.addEventListener('click', (e) => {
     const btn = e.target.closest('button');
     if (!btn) return;
-
     const chip = e.target.closest('.chip');
     if (!chip) return;
-
-    const key = chip.dataset.key;
-    clearSingleFilter(key);
+    clearSingleFilter(chip.dataset.key);
   });
 
-  // live search (debounce)
+  // live search
   let t = null;
   els.search.addEventListener('input', () => {
     clearTimeout(t);
@@ -452,18 +411,16 @@ function wireEvents(){
     renderFilterChips();
   });
 
-  // serie change -> reload sets
-  if (els.serie){
-    els.serie.addEventListener('change', async () => {
-      els.set.value = '';
-      await loadEditionsIntoFilter();
-      renderFilterChips();
-      loadCards();
-    });
-  }
+  // serie -> set depends
+  els.serie.addEventListener('change', async () => {
+    els.set.value = '';
+    await loadEditionsIntoFilter();
+    renderFilterChips();
+    loadCards();
+  });
 
-  // auto reload on filter change
-  [els.set, els.condition, els.rarity, els.psaOnly, els.priceMin, els.priceMax, els.sort].forEach(el => {
+  // filter changes
+  [els.set, els.condition, els.rarity, els.priceMin, els.priceMax, els.sort].forEach(el => {
     el.addEventListener('change', () => {
       renderFilterChips();
       loadCards();
@@ -476,7 +433,7 @@ function wireEvents(){
       const lang = btn.dataset.lang;
       state.language = (state.language === lang) ? null : lang;
 
-      if (els.serie) els.serie.value = '';
+      els.serie.value = '';
       els.set.value = '';
 
       await refreshDependentOptions();
@@ -487,7 +444,7 @@ function wireEvents(){
     });
   });
 
-  // section buttons
+  // quick buttons
   els.quickBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const sec = btn.dataset.section;
@@ -499,7 +456,6 @@ function wireEvents(){
     });
   });
 
-  // esc closes filters
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && state.filtersOpen) setFiltersOpen(false);
   });
