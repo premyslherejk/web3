@@ -18,7 +18,7 @@ body{
   padding:40px 24px;
 }
 
-/* ===================== TOP PICKS (EN/JP + NEW/HOT) ===================== */
+/* ===================== TOP PICKS (EN/JP + QUICK) ===================== */
 .top-picks{
   display:flex;
   flex-direction:column;
@@ -83,6 +83,15 @@ body{
   opacity:.75;
   font-size:.85rem;
   margin-top:2px;
+}
+
+/* ===================== FLAGS ===================== */
+.flag-svg{
+  width:30px;
+  height:18px;
+  border-radius:4px;
+  box-shadow:0 6px 16px rgba(0,0,0,.35);
+  display:block;
 }
 
 /* ===================== TOP BAR (SEARCH + FILTER BTN) ===================== */
@@ -265,34 +274,19 @@ body{
   color:white;
 }
 
-.checkline{
-  flex-direction:row !important;
-  align-items:center;
-  gap:10px;
-  color:#ddd !important;
-}
-
-.checkline input{
-  width:18px;
-  height:18px;
-}
-
 .price-row{
   display:grid;
   grid-template-columns:minmax(0,1fr) minmax(0,1fr);
   gap:10px;
 }
 
-.price-row label{
-  min-width:0;
-}
+.price-row label{ min-width:0; }
 
 .price-row input{
   width:100%;
-  padding:9px 10px;      /* o chlup menší */
-  font-size:.95rem;      /* o chlup menší */
+  padding:9px 10px;
+  font-size:.95rem;
 }
-
 
 .apply-filters{
   margin-top:8px;
@@ -309,111 +303,6 @@ body{
 .collection-main{
   width:100%;
 }
-
-/* ===================== CARDS ===================== */
-.cards-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
-  gap:20px;
-}
-
-.card{
-  position:relative; /* ✅ pro badge overlay */
-  background:#15151d;
-  border-radius:18px;
-  padding:12px;
-  cursor:pointer;
-  transition:.2s;
-}
-
-.card:hover{
-  transform:translateY(-4px);
-  box-shadow:0 20px 40px rgba(0,0,0,.6);
-}
-
-.card img{
-  width:100%;
-  aspect-ratio:3/4;
-  object-fit:cover;
-  border-radius:14px;
-  margin-bottom:10px;
-}
-
-.card strong{
-  display:block;
-  font-size:.95rem;
-  font-weight:800;
-}
-
-.card .price{
-  color:#ffff00;
-  font-weight:900;
-  margin-top:4px;
-}
-
-/* ===================== BADGES (TOP-LEFT STACK) ===================== */
-.card-badges{
-  position:absolute;
-  top:10px;
-  left:10px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  z-index:5;
-  pointer-events:none;
-}
-
-.badge{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:6px 10px;
-  border-radius:999px;
-  font-size:.78rem;
-  font-weight:900;
-  box-shadow:0 10px 24px rgba(0,0,0,.45);
-  border:1px solid rgba(255,255,255,.08);
-  backdrop-filter:blur(8px);
-  width:fit-content;
-}
-
-/* menší druhý badge (kondice / PSA) */
-.card-badges .badge:nth-child(2){
-  font-size:.62rem;      /* cca o půl menší */
-  padding:4px 8px;
-  box-shadow:0 8px 18px rgba(0,0,0,.35);
-  border-radius:999px;
-}
-
-
-/* STATUS */
-.badge-stock{ background:rgba(31,143,58,.95); color:white; }
-.badge-reserved{ background:rgba(160,160,170,.92); color:#0b0b0f; }
-
-/* CONDITION COLORS */
-.badge-ex{ background:rgba(20,120,55,.95); color:white; }     /* Excellent - tmavě zelená */
-.badge-nm{ background:rgba(80,220,140,.95); color:#0b0b0f; }  /* Near Mint - světle zelená */
-.badge-gd{ background:rgba(255,215,0,.95); color:#0b0b0f; }   /* Good - žlutá */
-.badge-pl{ background:rgba(255,140,0,.95); color:#0b0b0f; }   /* Played - oranžová */
-.badge-po{ background:rgba(255,59,59,.95); color:white; }     /* Poor - červená */
-
-/* PSA */
-.badge-psa{ background:rgba(108,76,255,.95); color:white; }
-
-/* fallback */
-.badge-unknown{ background:rgba(80,80,95,.92); color:white; }
-
-/* ===================== VLAJKY ===================== */
-
-.flag-svg{
-  width:30px;
-  height:18px;
-  border-radius:4px;
-  box-shadow:0 6px 16px rgba(0,0,0,.35);
-  display:block;
-}
-
-
 
 /* ===================== MOBILE ===================== */
 @media (max-width:900px){
@@ -452,10 +341,6 @@ body{
   .filters.show{
     transform:translateX(0);
     pointer-events:auto;
-  }
-
-  .cards-grid{
-    grid-template-columns:repeat(2,1fr);
   }
 }
 
