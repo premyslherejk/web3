@@ -210,7 +210,7 @@ async function loadSeriesIntoFilter(){
 
   const { data, error } = await q;
   if (error){
-    console.error('Serie load error:', error);
+    console.error('Serie load error:', error?.message || error);
     return;
   }
 
@@ -247,7 +247,7 @@ async function loadEditionsIntoFilter(){
 
   const { data, error } = await q;
   if (error){
-    console.error('Editions load error:', error);
+    console.error('Editions load error:', error?.message || error);
     return;
   }
 
@@ -273,9 +273,10 @@ async function refreshDependentOptions(){
 ========================= */
 
 async function loadCards(){
+  // ✅ FIX: odebráno `new` ze selectu (sloupec už neexistuje)
   let q = sb
     .from('cards')
-    .select('id,name,price,image_url,language,condition,rarity,created_at,hot,new,status,psa_grade,set,serie')
+    .select('id,name,price,image_url,language,condition,rarity,created_at,hot,status,psa_grade,set,serie')
     .neq('status', 'Prodáno');
 
   if (state.language) q = q.eq('language', state.language);
@@ -316,14 +317,14 @@ async function loadCards(){
 
   const { data, error } = await q;
   if (error){
-    console.error('Supabase error:', error);
-    // use OfferUI empty state too
+    // ✅ uvidíš message místo “Object”
+    console.error('Supabase error:', error?.message || error, error);
+
     if (window.OfferUI?.renderCardsInto) window.OfferUI.renderCardsInto(els.cards, []);
     else els.cards.innerHTML = `<p style="opacity:.7">Nic jsme nenašli 😕</p>`;
     return;
   }
 
-  // ✅ render via shared renderer
   if (!window.OfferUI?.renderCardsInto) {
     console.error('OfferUI not loaded. Add <script src="js/offerfun.js"></script> before collectionfun.js');
     els.cards.innerHTML = `<p style="opacity:.7">Chybí offerfun.js 😕</p>`;
