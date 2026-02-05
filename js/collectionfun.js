@@ -27,7 +27,7 @@ function grabEls(){
   els.serie = document.getElementById('serie');
   els.set = document.getElementById('set');
   els.condition = document.getElementById('condition');
-  els.rarity = document.getElementById('rarity');
+  // ❌ els.rarity pryč
   els.priceMin = document.getElementById('priceMin');
   els.priceMax = document.getElementById('priceMax');
   els.sort = document.getElementById('sort');
@@ -60,7 +60,6 @@ function setActive(btns, predicate){
 }
 
 function escapeHtml(s){
-  // fallback if OfferUI not loaded for some reason
   if (window.OfferUI?.escapeHtml) return window.OfferUI.escapeHtml(s);
   return String(s ?? '')
     .replaceAll('&','&amp;')
@@ -93,9 +92,6 @@ function getActiveFilters(){
 
   const cond = els.condition.value || '';
   if (cond) active.push({ key:'condition', label:'Stav', value: cond });
-
-  const rar = els.rarity.value || '';
-  if (rar) active.push({ key:'rarity', label:'Rarita', value: rar });
 
   const min = els.priceMin.value;
   const max = els.priceMax.value;
@@ -155,10 +151,6 @@ function clearSingleFilter(key){
       els.condition.value = '';
       break;
 
-    case 'rarity':
-      els.rarity.value = '';
-      break;
-
     case 'priceMin':
       els.priceMin.value = '';
       break;
@@ -179,7 +171,6 @@ function clearAllFilters(){
   els.serie.value = '';
   els.set.value = '';
   els.condition.value = '';
-  els.rarity.value = '';
   els.priceMin.value = '';
   els.priceMax.value = '';
   els.sort.value = 'new';
@@ -273,42 +264,34 @@ async function refreshDependentOptions(){
 ========================= */
 
 async function loadCards(){
-  // ✅ FIX: odebráno `new` ze selectu (sloupec už neexistuje)
   let q = sb
     .from('cards')
-    .select('id,name,price,image_url,language,condition,rarity,created_at,hot,status,psa_grade,set,serie')
+    // ❌ rarity pryč
+    .select('id,name,price,image_url,language,condition,created_at,hot,status,psa_grade,set,serie')
     .neq('status', 'Prodáno');
 
   if (state.language) q = q.eq('language', state.language);
 
-  // quick section
   if (state.section === 'hot') q = q.eq('hot', true);
   if (state.section === 'graded') q = q.not('psa_grade', 'is', null);
 
-  // search
   const search = (els.search.value || '').trim();
   if (search) q = q.ilike('name', `%${search}%`);
 
-  // serie + set
   const serieVal = els.serie.value || '';
   if (serieVal) q = q.eq('serie', serieVal);
 
   const setVal = els.set.value || '';
   if (setVal) q = q.eq('set', setVal);
 
-  // filters
   const cond = els.condition.value || '';
   if (cond) q = q.eq('condition', cond);
-
-  const rar = els.rarity.value || '';
-  if (rar) q = q.eq('rarity', rar);
 
   const min = els.priceMin.value;
   const max = els.priceMax.value;
   if (min !== '' && min != null) q = q.gte('price', Number(min));
   if (max !== '' && max != null) q = q.lte('price', Number(max));
 
-  // sort
   const sort = els.sort.value || 'new';
   if (sort === 'price_asc') q = q.order('price', { ascending: true });
   if (sort === 'price_desc') q = q.order('price', { ascending: false });
@@ -317,9 +300,7 @@ async function loadCards(){
 
   const { data, error } = await q;
   if (error){
-    // ✅ uvidíš message místo “Object”
     console.error('Supabase error:', error?.message || error, error);
-
     if (window.OfferUI?.renderCardsInto) window.OfferUI.renderCardsInto(els.cards, []);
     else els.cards.innerHTML = `<p style="opacity:.7">Nic jsme nenašli 😕</p>`;
     return;
@@ -358,7 +339,6 @@ function wireEvents(){
     clearSingleFilter(chip.dataset.key);
   });
 
-  // live search
   let t = null;
   els.search.addEventListener('input', () => {
     clearTimeout(t);
@@ -366,7 +346,6 @@ function wireEvents(){
     renderFilterChips();
   });
 
-  // serie -> set depends
   els.serie.addEventListener('change', async () => {
     els.set.value = '';
     await loadEditionsIntoFilter();
@@ -374,15 +353,14 @@ function wireEvents(){
     loadCards();
   });
 
-  // filter changes
-  [els.set, els.condition, els.rarity, els.priceMin, els.priceMax, els.sort].forEach(el => {
+  // ❌ rarity pryč i z listenerů
+  [els.set, els.condition, els.priceMin, els.priceMax, els.sort].forEach(el => {
     el.addEventListener('change', () => {
       renderFilterChips();
       loadCards();
     });
   });
 
-  // language buttons
   els.langBtns.forEach(btn => {
     btn.addEventListener('click', async () => {
       const lang = btn.dataset.lang;
@@ -399,7 +377,6 @@ function wireEvents(){
     });
   });
 
-  // quick buttons
   els.quickBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const sec = btn.dataset.section;
