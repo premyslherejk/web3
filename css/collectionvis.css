@@ -305,60 +305,6 @@ body{
 }
 
 
-/* ===================== PAGINATION ===================== */
-.pagination{
-  margin-top:28px;
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-}
-
-.pagination .page-info{
-  font-size:.9rem;
-  color:#cfcfd6;
-  margin:0 6px;
-}
-
-.pagination button{
-  min-width:40px;
-  height:40px;
-  padding:0 12px;
-  border-radius:999px;
-  border:1px solid #2a2a33;
-  background:#15151d;
-  color:#fff;
-  font-weight:800;
-  cursor:pointer;
-  transition:.15s;
-}
-
-.pagination button:hover:not(:disabled){
-  transform:translateY(-1px);
-  border-color:#ff3b3b;
-  box-shadow:0 0 0 2px rgba(255,59,59,.15);
-}
-
-.pagination button.active{
-  background:#ff3b3b;
-  border-color:#ff3b3b;
-  color:#fff;
-}
-
-.pagination button:disabled{
-  opacity:.45;
-  cursor:default;
-  transform:none;
-  box-shadow:none;
-}
-
-.pagination .page-ellipsis{
-  color:#8a8a98;
-  padding:0 4px;
-  font-weight:700;
-}
-
 
 /* ===================== MOBILE ===================== */
 @media (max-width:900px){
