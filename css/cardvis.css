@@ -492,9 +492,20 @@ h1{
   right:30px;
 }
 
+/* ===================== Klikatelný set ===================== */
+.meta-link{
+  color:#fff;
+  font-weight:800;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+.meta-link:hover{ opacity:.85; }
+
+
 /* ===================== Buy potvrzení ===================== */
 
 .add.added{
   background:linear-gradient(135deg,#2ecc71,#1f8f3a);
 }
+
 
