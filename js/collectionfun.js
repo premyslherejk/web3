@@ -70,6 +70,65 @@ function escapeHtml(s){
 }
 
 /* =========================
+   URL FILTERS (NEW)
+========================= */
+
+function getUrlParams(){
+  const p = new URLSearchParams(location.search);
+  const language = p.get('language');
+  const section = p.get('section');
+  const serie = p.get('serie');
+  const set = p.get('set');
+
+  return {
+    language: (language === 'EN' || language === 'JP') ? language : null,
+    section: (section === 'hot' || section === 'graded') ? section : null,
+    serie: serie ? String(serie) : '',
+    set: set ? String(set) : ''
+  };
+}
+
+function optionExists(selectEl, value){
+  if (!selectEl || value == null) return false;
+  return Array.from(selectEl.options).some(o => o.value === value);
+}
+
+async function applyUrlFilters(){
+  const u = getUrlParams();
+
+  // language / section (optional)
+  if (u.language){
+    state.language = u.language;
+    setActive(els.langBtns, b => b.dataset.lang === state.language);
+  }
+  if (u.section){
+    state.section = u.section;
+    setActive(els.quickBtns, b => b.dataset.section === state.section);
+  }
+
+  // 1) load series options (already respects state.language)
+  await loadSeriesIntoFilter();
+
+  // 2) set serie from URL if it exists
+  if (u.serie && optionExists(els.serie, u.serie)){
+    els.serie.value = u.serie;
+  } else {
+    els.serie.value = '';
+  }
+
+  // 3) load sets for selected serie
+  await loadEditionsIntoFilter();
+
+  // 4) set set from URL if it exists
+  if (u.set && optionExists(els.set, u.set)){
+    els.set.value = u.set;
+  } else {
+    // pokud set nepasuje na serii, necháme ho prázdný
+    els.set.value = '';
+  }
+}
+
+/* =========================
    FILTER CHIPS
 ========================= */
 
@@ -266,7 +325,6 @@ async function refreshDependentOptions(){
 async function loadCards(){
   let q = sb
     .from('cards')
-    // ❌ rarity pryč
     .select('id,name,price,image_url,language,condition,created_at,hot,status,psa_grade,set,serie')
     .neq('status', 'Prodáno');
 
@@ -353,7 +411,6 @@ function wireEvents(){
     loadCards();
   });
 
-  // ❌ rarity pryč i z listenerů
   [els.set, els.condition, els.priceMin, els.priceMax, els.sort].forEach(el => {
     el.addEventListener('change', () => {
       renderFilterChips();
