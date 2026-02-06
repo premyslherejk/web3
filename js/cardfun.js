@@ -38,18 +38,20 @@ let currentCard = null;
    CONDITION HELPERS
 ========================= */
 
-function getConditionBadgeData(condition) {
+function getConditionData(condition) {
   const c = String(condition || '').trim();
 
   const map = {
-    'Excellent': { short: 'EX', cls: 'ex' },
-    'Near Mint': { short: 'NM', cls: 'nm' },
-    'Good':      { short: 'GD', cls: 'gd' },
-    'Played':    { short: 'PL', cls: 'pl' },
-    'Poor':      { short: 'PO', cls: 'po' },
+    'Excellent': { short: 'EX', full: 'Excellent', cls: 'ex' },
+    'Near Mint': { short: 'NM', full: 'Near Mint', cls: 'nm' },
+    'Good':      { short: 'GD', full: 'Good', cls: 'gd' },
+    'Played':    { short: 'PL', full: 'Played', cls: 'pl' },
+    'Poor':      { short: 'PO', full: 'Poor', cls: 'po' },
   };
 
-  return map[c] || { short: c ? c : 'RAW', cls: 'unknown' };
+  // fallback: pokud máš v DB něco mimo map, ukážeme to
+  if (map[c]) return map[c];
+  return { short: c ? c : 'RAW', full: c ? c : 'RAW', cls: 'unknown' };
 }
 
 // ========= LOAD =========
@@ -69,7 +71,7 @@ async function loadCard() {
   priceEl.textContent = `${card.price} Kč`;
   metaEl.textContent = `Edice: ${card.set || '—'} · Stav: ${card.condition || '—'}`;
 
-  // STATUS (barvy si už řeší CSS, ale dáme správnou barvu podle textu)
+  // STATUS
   const st = String(card.status || 'Skladem').trim();
   statusEl.textContent = st;
   statusEl.style.background = (st === 'Rezervováno') ? '#a0a0aa' : '#1f8f3a';
@@ -77,13 +79,25 @@ async function loadCard() {
 
   handleMinOrderInfo();
 
-  // ===== PSA =====
+  // ===== PSA + CONDITION RULES =====
+  const isPsa = !!String(card.psa_grade ?? '').trim();
+
+  // reset PSA UI
   psaEl.style.display = 'none';
   psaInfoEl.style.display = 'none';
   psaEl.textContent = '';
   psaEl.onclick = null;
 
-  if (card.psa_grade) {
+  // reset CONDITION UI
+  conditionEl.style.display = 'none';
+  conditionEl.textContent = '';
+  conditionEl.className = 'condition';
+  conditionEl.onclick = null;
+
+  if (conditionInfoEl) conditionInfoEl.style.display = 'none'; // default hidden
+
+  if (isPsa) {
+    // ✅ PSA karta: jen PSA badge + PSA info, žádný stav vysvětlení
     psaEl.textContent = `PSA ${card.psa_grade}`;
     psaEl.style.display = 'inline-flex';
     psaInfoEl.style.display = 'block';
@@ -91,20 +105,15 @@ async function loadCard() {
     psaEl.onclick = () => {
       psaInfoEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
-  }
+  } else {
+    // ✅ RAW karta: condition badge (CELÝ TEXT) + condition vysvětlení
+    const d = getConditionData(card.condition);
 
-  // ===== CONDITION BADGE =====
-  // zobrazujeme hlavně pro RAW karty (bez PSA)
-  conditionEl.style.display = 'none';
-  conditionEl.textContent = '';
-  conditionEl.className = 'condition';
-  conditionEl.onclick = null;
-
-  if (!card.psa_grade) {
-    const d = getConditionBadgeData(card.condition);
-    conditionEl.textContent = d.short;
-    conditionEl.className = `condition ${d.cls}`;
+    conditionEl.textContent = d.full;             // 👈 celým slovem
+    conditionEl.className = `condition ${d.cls}`; // barvy zůstávají
     conditionEl.style.display = 'inline-flex';
+
+    if (conditionInfoEl) conditionInfoEl.style.display = 'block';
 
     conditionEl.onclick = () => {
       conditionInfoEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
