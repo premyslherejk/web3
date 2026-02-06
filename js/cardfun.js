@@ -85,6 +85,37 @@ function uniqueById(arr){
 }
 
 /* =========================
+   META (edice link)
+========================= */
+
+function escapeHtml(s){
+  return String(s ?? '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+}
+
+function renderEditionLink(card){
+  const serie = String(card?.serie || '').trim();
+  const setName = String(card?.set || '').trim();
+
+  if (!metaEl) return;
+
+  if (!setName){
+    metaEl.textContent = 'Edice: —';
+    return;
+  }
+
+  // ✅ posíláme i serie kvůli dependent dropdownům v collection
+  const href = `collection.html?serie=${encodeURIComponent(serie)}&set=${encodeURIComponent(setName)}`;
+
+  // CSS si dodáš sám (.meta-link)
+  metaEl.innerHTML = `Edice: <a class="meta-link" href="${href}">${escapeHtml(setName)}</a>`;
+}
+
+/* =========================
    RELATED (slider)
 ========================= */
 
@@ -155,7 +186,6 @@ async function loadRelatedCards(){
     return;
   }
 
-  // --- ranking ---
   const normalized = pool.map(c => {
     const p = Number(c.price || 0);
     return {
@@ -171,8 +201,7 @@ async function loadRelatedCards(){
     .filter(x => x.higher && x.price <= targetPrice * 3)
     .sort((a,b) => b.price - a.price);
 
-  const close = normalized
-    .sort((a,b) => a.diff - b.diff);
+  const close = normalized.sort((a,b) => a.diff - b.diff);
 
   const picked = [];
   for (const x of higher){
@@ -213,7 +242,9 @@ async function loadCard() {
   nameEl.textContent = card.name || '';
   descEl.textContent = card.description || '';
   priceEl.textContent = `${card.price} Kč`;
-  metaEl.textContent = `Edice: ${card.set || '—'} · Stav: ${card.condition || '—'}`;
+
+  // ✅ meta jen edice + klik
+  renderEditionLink(card);
 
   // STATUS
   const st = String(card.status || 'Skladem').trim();
@@ -394,5 +425,3 @@ document.addEventListener('keydown', e => {
 
 // ========= START =========
 loadCard();
-
-
