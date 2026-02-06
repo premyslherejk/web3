@@ -105,6 +105,35 @@ body{
   box-shadow:0 10px 30px rgba(108,76,255,.6);
 }
 
+/* ✅ CONDITION BADGE (klikací, barevný, stejně vibe jako PSA) */
+.condition{
+  display:none;
+  align-items:center;
+  padding:8px 14px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:1rem;
+  width:fit-content;
+  cursor:pointer;
+  box-shadow:0 6px 20px rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.08);
+  backdrop-filter:blur(8px);
+  transition:.25s;
+}
+
+.condition:hover{
+  transform:translateY(-1px);
+  box-shadow:0 10px 30px rgba(0,0,0,.5);
+}
+
+/* barvy stavu (stejné jako collection) */
+.condition.ex{ background:rgba(20,120,55,.95); color:white; }
+.condition.nm{ background:rgba(80,220,140,.95); color:#0b0b0f; }
+.condition.gd{ background:rgba(255,215,0,.95); color:#0b0b0f; }
+.condition.pl{ background:rgba(255,140,0,.95); color:#0b0b0f; }
+.condition.po{ background:rgba(255,59,59,.95); color:white; }
+.condition.unknown{ background:rgba(80,80,95,.92); color:white; }
+
 /* TITLE */
 
 h1{
@@ -137,8 +166,6 @@ h1{
   font-weight:900;
   color:#ffff00;
 }
-
-/* 🔴 MINIMÁLNÍ OBJEDNÁVKA */
 
 .min-order-info{
   font-size:.85rem;
@@ -191,15 +218,20 @@ h1{
     order:2;
   }
 
-  .gallery{ order:3; }
+  .condition{
+    display:flex;
+    order:3;
+  }
 
-  .badge{ order:4; }
+  .gallery{ order:4; }
 
-  .buy-box{ order:5; }
+  .badge{ order:5; }
 
-  .meta{ order:6; }
+  .buy-box{ order:6; }
 
-  .description{ order:7; }
+  .meta{ order:7; }
+
+  .description{ order:8; }
 
   .price{
     font-size:2rem;
@@ -232,6 +264,63 @@ h1{
   line-height:1.7;
   font-size:.95rem;
 }
+
+/* ===================== CONDITION INFO ===================== */
+
+.condition-info{
+  margin-top:26px;
+  padding:32px;
+  background:#15151d;
+  border-radius:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+
+.condition-info h3{
+  font-size:1.3rem;
+  margin-bottom:12px;
+  color:#ff3b3b;
+}
+
+.condition-info p{
+  color:#ccc;
+  line-height:1.7;
+  font-size:.95rem;
+  margin-bottom:14px;
+}
+
+.condition-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.condition-row{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  color:#ddd;
+  line-height:1.6;
+}
+
+.cond-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:.78rem;
+  font-weight:900;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 10px 24px rgba(0,0,0,.35);
+  width:44px;
+  flex:0 0 auto;
+}
+
+.cond-ex{ background:rgba(20,120,55,.95); color:white; }
+.cond-nm{ background:rgba(80,220,140,.95); color:#0b0b0f; }
+.cond-gd{ background:rgba(255,215,0,.95); color:#0b0b0f; }
+.cond-pl{ background:rgba(255,140,0,.95); color:#0b0b0f; }
+.cond-po{ background:rgba(255,59,59,.95); color:white; }
 
 /* ===================== LIGHTBOX ===================== */
 
