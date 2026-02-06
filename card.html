@@ -5,6 +5,9 @@
   <title>Detail karty</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- ✅ sdílený vzhled karet pro slider -->
+  <link rel="stylesheet" href="css/offervis.css">
+
   <link rel="stylesheet" href="css/cardvis.css">
   <link rel="stylesheet" href="css/headervis.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
@@ -49,7 +52,7 @@
     <!-- ✅ PSA BADGE (už máš) -->
     <div class="psa" id="psa"></div>
 
-    <!-- ✅ NOVÉ: CONDITION BADGE (EX/NM/GD/PL/PO) -->
+    <!-- ✅ CONDITION BADGE (jen pro RAW) -->
     <div class="condition" id="conditionBadge"></div>
 
     <div class="meta" id="meta"></div>
@@ -81,7 +84,7 @@
   </p>
 </div>
 
-<!-- ✅ NOVÉ: CONDITION INFO -->
+<!-- ✅ CONDITION INFO (jen pro RAW) -->
 <div id="condition-info" class="condition-info" style="display:none;">
   <h3>Co znamená stav karty?</h3>
   <p>Totálně jednoduše: jde o to, jak moc je karta „jetá“.</p>
@@ -124,6 +127,20 @@
   </div>
 </div>
 
+<!-- ✅ MOHLO BY SE VÁM LÍBIT (slider) -->
+<section class="related" id="relatedSection" style="display:none;">
+  <div class="related-head">
+    <h2>Mohlo by se Vám líbit:</h2>
+
+    <div class="related-controls">
+      <button type="button" class="rel-btn" id="relPrev" aria-label="Předchozí">‹</button>
+      <button type="button" class="rel-btn" id="relNext" aria-label="Další">›</button>
+    </div>
+  </div>
+
+  <div class="related-track" id="relatedTrack"></div>
+</section>
+
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox">
   <div class="arrow left" id="prev">‹</div>
@@ -133,6 +150,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- ✅ OfferUI musí být před cardfun.js -->
+<script src="js/offerfun.js"></script>
+
 <script src="js/cardfun.js"></script>
 <script src="js/headerfun.js"></script>
 
