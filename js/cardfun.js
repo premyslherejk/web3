@@ -68,6 +68,12 @@ function shuffle(arr){
   return a;
 }
 
+function scrollToEl(el, offset = 16){
+  if (!el) return;
+  const y = el.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({ top: y, behavior: 'smooth' });
+}
+
 function uniqueById(arr){
   const seen = new Set();
   return (arr || []).filter(x => {
@@ -99,7 +105,6 @@ async function loadRelatedCards(){
   if (!relatedSection || !relatedTrack) return;
   if (!currentCard) return;
 
-  // musí být OfferUI, jinak to nebude 1:1 vzhled
   if (!window.OfferUI || typeof window.OfferUI.renderCardsInto !== 'function'){
     relatedSection.style.display = 'none';
     return;
@@ -107,6 +112,8 @@ async function loadRelatedCards(){
 
   const want = 10;
   const selectCols = 'id,name,price,image_url,status,condition,psa_grade,set,serie,language,hot';
+
+  const targetPrice = Number(currentCard.price || 0);
 
   let pool = [];
 
@@ -117,50 +124,80 @@ async function loadRelatedCards(){
       .select(selectCols)
       .eq('set', currentCard.set)
       .neq('status', 'Prodáno')
-      .limit(want + 8);
-
+      .limit(60);
     pool = pool.concat(data || []);
   }
 
   // 2) stejné serie
-  if (pool.length < want && currentCard.serie){
+  if (pool.length < 30 && currentCard.serie){
     const { data } = await sb
       .from('cards')
       .select(selectCols)
       .eq('serie', currentCard.serie)
       .neq('status', 'Prodáno')
-      .limit(want + 12);
-
+      .limit(80);
     pool = pool.concat(data || []);
   }
 
-  // 3) fallback random
-  if (pool.length < want){
+  // 3) fallback
+  if (pool.length < 30){
     const { data } = await sb
       .from('cards')
       .select(selectCols)
       .neq('status', 'Prodáno')
-      .limit(want + 25);
-
+      .limit(120);
     pool = pool.concat(data || []);
   }
 
-  pool = pool
-    .filter(c => c?.id && c.id !== currentCard.id);
-
-  pool = uniqueById(pool);
-  pool = shuffle(pool).slice(0, want);
+  pool = uniqueById(pool).filter(c => c?.id && c.id !== currentCard.id);
 
   if (!pool.length){
     relatedSection.style.display = 'none';
     return;
   }
 
+  // --- ranking ---
+  const normalized = pool.map(c => {
+    const p = Number(c.price || 0);
+    return {
+      card: c,
+      price: p,
+      diff: Math.abs(p - targetPrice),
+      higher: p > targetPrice
+    };
+  });
+
+  // 1-2 “dražší” (ale ne úplně mimo: max +200% ceny)
+  const higher = normalized
+    .filter(x => x.higher && x.price <= targetPrice * 3)
+    .sort((a,b) => b.price - a.price);
+
+  // zbytek co nejblíž ceně
+  const close = normalized
+    .sort((a,b) => a.diff - b.diff);
+
+  const picked = [];
+  for (const x of higher){
+    if (picked.length >= 2) break;
+    picked.push(x.card);
+  }
+  for (const x of close){
+    if (picked.length >= want) break;
+    if (picked.some(p => p.id === x.card.id)) continue;
+    picked.push(x.card);
+  }
+
+  if (!picked.length){
+    relatedSection.style.display = 'none';
+    return;
+  }
+
   relatedSection.style.display = 'block';
-  window.OfferUI.renderCardsInto(relatedTrack, pool, { size: 'sm' });
+  window.OfferUI.renderCardsInto(relatedTrack, picked, { size: 'sm' });
 
   setupRelatedControls();
 }
+
 
 /* =========================
    LOAD
@@ -213,8 +250,7 @@ async function loadCard() {
     psaEl.style.display = 'inline-flex';
     psaInfoEl.style.display = 'block';
 
-    psaEl.onclick = () => {
-      psaInfoEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    psaEl.onclick = () => scrollToEl(psaInfoEl, 20);
     };
   } else {
     // ✅ RAW karta: condition badge (FULL) + condition info
@@ -226,8 +262,7 @@ async function loadCard() {
 
     if (conditionInfoEl) conditionInfoEl.style.display = 'block';
 
-    conditionEl.onclick = () => {
-      conditionInfoEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    conditionEl.onclick = () => scrollToEl(conditionInfoEl, 20);
     };
   }
 
@@ -367,3 +402,4 @@ document.addEventListener('keydown', e => {
 
 // ========= START =========
 loadCard();
+
