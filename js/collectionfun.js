@@ -11,6 +11,14 @@ const state = {
   filtersOpen: false
 };
 
+const paging = {
+  page: 1,
+  pageSize: 24,
+  total: 0,
+  totalPages: 1,
+  loading: false
+};
+
 const els = {};
 
 function grabEls(){
@@ -27,7 +35,6 @@ function grabEls(){
   els.serie = document.getElementById('serie');
   els.set = document.getElementById('set');
   els.condition = document.getElementById('condition');
-  // ❌ els.rarity pryč
   els.priceMin = document.getElementById('priceMin');
   els.priceMax = document.getElementById('priceMax');
   els.sort = document.getElementById('sort');
@@ -38,6 +45,13 @@ function grabEls(){
   els.activeFilters = document.getElementById('activeFilters');
   els.filterChips = document.getElementById('filterChips');
   els.clearAll = document.getElementById('clearAllFilters');
+
+  // pagination UI (optional – když to tam nebude, nic se nerozbije)
+  els.pager = document.getElementById('pager');
+  els.pagePrev = document.getElementById('pagePrev');
+  els.pageNext = document.getElementById('pageNext');
+  els.pageMore = document.getElementById('pageMore');
+  els.pageInfo = document.getElementById('pageInfo');
 }
 
 function setFiltersOpen(open){
@@ -70,7 +84,23 @@ function escapeHtml(s){
 }
 
 /* =========================
-   URL FILTERS (NEW)
+   PAGE SIZE (18 mobile / 24 desktop)
+========================= */
+
+function computePageSize(){
+  return window.matchMedia('(max-width: 900px)').matches ? 18 : 24;
+}
+
+function resetPaging(){
+  paging.page = 1;
+  paging.pageSize = computePageSize();
+  paging.total = 0;
+  paging.totalPages = 1;
+  updatePagerUI();
+}
+
+/* =========================
+   URL FILTERS
 ========================= */
 
 function getUrlParams(){
@@ -96,7 +126,7 @@ function optionExists(selectEl, value){
 async function applyUrlFilters(){
   const u = getUrlParams();
 
-  // language / section (optional)
+  // language / section
   if (u.language){
     state.language = u.language;
     setActive(els.langBtns, b => b.dataset.lang === state.language);
@@ -106,24 +136,23 @@ async function applyUrlFilters(){
     setActive(els.quickBtns, b => b.dataset.section === state.section);
   }
 
-  // 1) load series options (already respects state.language)
+  // load series first (respects language)
   await loadSeriesIntoFilter();
 
-  // 2) set serie from URL if it exists
+  // set serie
   if (u.serie && optionExists(els.serie, u.serie)){
     els.serie.value = u.serie;
   } else {
     els.serie.value = '';
   }
 
-  // 3) load sets for selected serie
+  // load sets for serie
   await loadEditionsIntoFilter();
 
-  // 4) set set from URL if it exists
+  // set set
   if (u.set && optionExists(els.set, u.set)){
     els.set.value = u.set;
   } else {
-    // pokud set nepasuje na serii, necháme ho prázdný
     els.set.value = '';
   }
 }
@@ -221,7 +250,8 @@ function clearSingleFilter(key){
 
   refreshDependentOptions().then(() => {
     renderFilterChips();
-    loadCards();
+    resetPaging();
+    loadCards({ reset: true });
   });
 }
 
@@ -242,7 +272,8 @@ function clearAllFilters(){
 
   refreshDependentOptions().then(() => {
     renderFilterChips();
-    loadCards();
+    resetPaging();
+    loadCards({ reset: true });
   });
 }
 
@@ -319,17 +350,16 @@ async function refreshDependentOptions(){
 }
 
 /* =========================
-   LOAD CARDS
+   BUILD QUERY (shared)
 ========================= */
 
-async function loadCards(){
+function buildBaseQuery(selectCols){
   let q = sb
     .from('cards')
-    .select('id,name,price,image_url,language,condition,created_at,hot,status,psa_grade,set,serie')
+    .select(selectCols)
     .neq('status', 'Prodáno');
 
   if (state.language) q = q.eq('language', state.language);
-
   if (state.section === 'hot') q = q.eq('hot', true);
   if (state.section === 'graded') q = q.not('psa_grade', 'is', null);
 
@@ -356,27 +386,124 @@ async function loadCards(){
   if (sort === 'name') q = q.order('name', { ascending: true });
   if (sort === 'new') q = q.order('created_at', { ascending: false });
 
-  const { data, error } = await q;
-  if (error){
-    console.error('Supabase error:', error?.message || error, error);
-    if (window.OfferUI?.renderCardsInto) window.OfferUI.renderCardsInto(els.cards, []);
-    else els.cards.innerHTML = `<p style="opacity:.7">Nic jsme nenašli 😕</p>`;
-    return;
+  return q;
+}
+
+/* =========================
+   PAGER UI
+========================= */
+
+function updatePagerUI(){
+  if (!els.pager) return;
+
+  const p = paging.page;
+  const tp = paging.totalPages;
+
+  if (els.pageInfo){
+    els.pageInfo.textContent = `Stránka ${p} / ${tp} • Celkem ${paging.total} karet`;
   }
 
-  if (!window.OfferUI?.renderCardsInto) {
+  if (els.pagePrev) els.pagePrev.disabled = (p <= 1) || paging.loading;
+  if (els.pageNext) els.pageNext.disabled = (p >= tp) || paging.loading;
+
+  // "Zobrazit více" = přidá další stránku pod to
+  if (els.pageMore){
+    const canMore = (p < tp) && !paging.loading;
+    els.pageMore.disabled = !canMore;
+    els.pageMore.style.display = (tp > 1) ? 'inline-flex' : 'none';
+  }
+}
+
+/* =========================
+   LOAD CARDS (pagination)
+========================= */
+
+async function loadCards({ reset = false, append = false } = {}){
+  if (paging.loading) return;
+  paging.loading = true;
+  updatePagerUI();
+
+  if (!window.OfferUI?.renderCardsInto || !window.OfferUI?.renderCard){
     console.error('OfferUI not loaded. Add <script src="js/offerfun.js"></script> before collectionfun.js');
     els.cards.innerHTML = `<p style="opacity:.7">Chybí offerfun.js 😕</p>`;
+    paging.loading = false;
+    updatePagerUI();
     return;
   }
 
-  window.OfferUI.renderCardsInto(els.cards, data || [], { size: 'md' });
+  // reset list
+  if (reset){
+    paging.page = 1;
+    append = false;
+  }
+
+  paging.pageSize = computePageSize();
+
+  const selectCols = 'id,name,price,image_url,language,condition,created_at,hot,status,psa_grade,set,serie';
+
+  // 1) count query
+  const countQuery = buildBaseQuery('id', true);
+  // supabase-js: count přes select with count exact + head true
+  const { count, error: countErr } = await buildBaseQuery('id')
+    .select('id', { count: 'exact', head: true });
+
+  if (countErr){
+    console.error('Supabase count error:', countErr?.message || countErr, countErr);
+    if (!append) window.OfferUI.renderCardsInto(els.cards, []);
+    paging.loading = false;
+    paging.total = 0;
+    paging.totalPages = 1;
+    updatePagerUI();
+    return;
+  }
+
+  paging.total = count || 0;
+  paging.totalPages = Math.max(1, Math.ceil(paging.total / paging.pageSize));
+
+  // clamp page
+  if (paging.page > paging.totalPages) paging.page = paging.totalPages;
+
+  // 2) data query with range
+  const from = (paging.page - 1) * paging.pageSize;
+  const to = from + paging.pageSize - 1;
+
+  const dataQuery = buildBaseQuery(selectCols).range(from, to);
+
+  const { data, error } = await dataQuery;
+  if (error){
+    console.error('Supabase data error:', error?.message || error, error);
+    if (!append) window.OfferUI.renderCardsInto(els.cards, []);
+    paging.loading = false;
+    updatePagerUI();
+    return;
+  }
+
+  const cards = data || [];
+
+  if (!append){
+    window.OfferUI.renderCardsInto(els.cards, cards, { size: 'md' });
+  } else {
+    // append = přidá další kartu za existující (load more)
+    const frag = document.createDocumentFragment();
+    for (const c of cards){
+      frag.appendChild(window.OfferUI.renderCard(c, { size: 'md' }));
+    }
+    els.cards.appendChild(frag);
+  }
+
   renderFilterChips();
+  paging.loading = false;
+  updatePagerUI();
 }
 
 /* =========================
    EVENTS
 ========================= */
+
+function resetAndReload(){
+  resetPaging();
+  loadCards({ reset: true });
+}
 
 function wireEvents(){
   els.toggleFilters.addEventListener('click', () => setFiltersOpen(!state.filtersOpen));
@@ -384,7 +511,7 @@ function wireEvents(){
 
   els.applyFilters.addEventListener('click', () => {
     setFiltersOpen(false);
-    loadCards();
+    resetAndReload();
   });
 
   els.clearAll.addEventListener('click', clearAllFilters);
@@ -397,27 +524,32 @@ function wireEvents(){
     clearSingleFilter(chip.dataset.key);
   });
 
+  // live search (reset paging)
   let t = null;
   els.search.addEventListener('input', () => {
     clearTimeout(t);
-    t = setTimeout(loadCards, 250);
+    t = setTimeout(() => {
+      resetAndReload();
+    }, 250);
     renderFilterChips();
   });
 
+  // serie -> set depends
   els.serie.addEventListener('change', async () => {
     els.set.value = '';
     await loadEditionsIntoFilter();
     renderFilterChips();
-    loadCards();
+    resetAndReload();
   });
 
   [els.set, els.condition, els.priceMin, els.priceMax, els.sort].forEach(el => {
     el.addEventListener('change', () => {
       renderFilterChips();
-      loadCards();
+      resetAndReload();
     });
   });
 
+  // language buttons
   els.langBtns.forEach(btn => {
     btn.addEventListener('click', async () => {
       const lang = btn.dataset.lang;
@@ -430,10 +562,11 @@ function wireEvents(){
 
       setActive(els.langBtns, b => b.dataset.lang === state.language);
       renderFilterChips();
-      loadCards();
+      resetAndReload();
     });
   });
 
+  // quick buttons
   els.quickBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const sec = btn.dataset.section;
@@ -441,12 +574,52 @@ function wireEvents(){
 
       setActive(els.quickBtns, b => b.dataset.section === state.section);
       renderFilterChips();
-      loadCards();
+      resetAndReload();
     });
   });
 
+  // pager buttons
+  if (els.pagePrev){
+    els.pagePrev.addEventListener('click', () => {
+      if (paging.page <= 1) return;
+      paging.page -= 1;
+      loadCards({ reset: false, append: false });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  if (els.pageNext){
+    els.pageNext.addEventListener('click', () => {
+      if (paging.page >= paging.totalPages) return;
+      paging.page += 1;
+      loadCards({ reset: false, append: false });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  if (els.pageMore){
+    els.pageMore.addEventListener('click', () => {
+      if (paging.page >= paging.totalPages) return;
+      paging.page += 1;
+      loadCards({ reset: false, append: true });
+    });
+  }
+
+  // close filters on ESC
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && state.filtersOpen) setFiltersOpen(false);
+  });
+
+  // on resize: když se přepne mobil/desktop, přepočítat pageSize a reloadnout
+  let rt = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => {
+      const newSize = computePageSize();
+      if (newSize !== paging.pageSize){
+        resetAndReload();
+      }
+    }, 200);
   });
 }
 
@@ -454,16 +627,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   grabEls();
   wireEvents();
 
-  // ✅ nejdřív načteme filtry normálně
-  await refreshDependentOptions();
+  resetPaging();
 
-  // ✅ pak aplikujeme URL parametry (?serie=...&set=...)
+  // URL -> dropdowny
   await applyUrlFilters();
 
-  // ✅ vykreslíme chipy
   renderFilterChips();
-
-  // ✅ až TEĎ loadujeme karty
-  loadCards();
+  loadCards({ reset: true });
 });
-
