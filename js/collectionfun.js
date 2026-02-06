@@ -46,7 +46,7 @@ function grabEls(){
   els.filterChips = document.getElementById('filterChips');
   els.clearAll = document.getElementById('clearAllFilters');
 
-  // pagination UI (optional – když to tam nebude, nic se nerozbije)
+  // pagination UI (optional)
   els.pager = document.getElementById('pager');
   els.pagePrev = document.getElementById('pagePrev');
   els.pageNext = document.getElementById('pageNext');
@@ -84,7 +84,7 @@ function escapeHtml(s){
 }
 
 /* =========================
-   PAGE SIZE (18 mobile / 24 desktop)
+   PAGE SIZE
 ========================= */
 
 function computePageSize(){
@@ -126,7 +126,6 @@ function optionExists(selectEl, value){
 async function applyUrlFilters(){
   const u = getUrlParams();
 
-  // language / section
   if (u.language){
     state.language = u.language;
     setActive(els.langBtns, b => b.dataset.lang === state.language);
@@ -136,20 +135,16 @@ async function applyUrlFilters(){
     setActive(els.quickBtns, b => b.dataset.section === state.section);
   }
 
-  // load series first (respects language)
   await loadSeriesIntoFilter();
 
-  // set serie
   if (u.serie && optionExists(els.serie, u.serie)){
     els.serie.value = u.serie;
   } else {
     els.serie.value = '';
   }
 
-  // load sets for serie
   await loadEditionsIntoFilter();
 
-  // set set
   if (u.set && optionExists(els.set, u.set)){
     els.set.value = u.set;
   } else {
@@ -210,42 +205,25 @@ function renderFilterChips(){
 
 function clearSingleFilter(key){
   switch(key){
-    case 'search':
-      els.search.value = '';
-      break;
-
+    case 'search': els.search.value = ''; break;
     case 'language':
       state.language = null;
       setActive(els.langBtns, () => false);
       els.serie.value = '';
       els.set.value = '';
       break;
-
     case 'section':
       state.section = null;
       setActive(els.quickBtns, () => false);
       break;
-
     case 'serie':
       els.serie.value = '';
       els.set.value = '';
       break;
-
-    case 'set':
-      els.set.value = '';
-      break;
-
-    case 'condition':
-      els.condition.value = '';
-      break;
-
-    case 'priceMin':
-      els.priceMin.value = '';
-      break;
-
-    case 'priceMax':
-      els.priceMax.value = '';
-      break;
+    case 'set': els.set.value = ''; break;
+    case 'condition': els.condition.value = ''; break;
+    case 'priceMin': els.priceMin.value = ''; break;
+    case 'priceMax': els.priceMax.value = ''; break;
   }
 
   refreshDependentOptions().then(() => {
@@ -278,15 +256,11 @@ function clearAllFilters(){
 }
 
 /* =========================
-   DEPENDENT OPTIONS (Serie -> Set)
+   DEPENDENT OPTIONS
 ========================= */
 
 async function loadSeriesIntoFilter(){
-  let q = sb
-    .from('cards')
-    .select('serie')
-    .neq('status', 'Prodáno');
-
+  let q = sb.from('cards').select('serie').neq('status', 'Prodáno');
   if (state.language) q = q.eq('language', state.language);
 
   const { data, error } = await q;
@@ -318,8 +292,7 @@ async function loadEditionsIntoFilter(){
 
   els.set.disabled = false;
 
-  let q = sb
-    .from('cards')
+  let q = sb.from('cards')
     .select('set')
     .neq('status', 'Prodáno')
     .eq('serie', serieVal);
@@ -350,16 +323,15 @@ async function refreshDependentOptions(){
 }
 
 /* =========================
-   BUILD QUERY (shared)
+   QUERY HELPERS (FIX)
 ========================= */
 
-function buildBaseQuery(selectCols){
-  let q = sb
-    .from('cards')
-    .select(selectCols)
-    .neq('status', 'Prodáno');
+function applyFilters(q){
+  // status always
+  q = q.neq('status', 'Prodáno');
 
   if (state.language) q = q.eq('language', state.language);
+
   if (state.section === 'hot') q = q.eq('hot', true);
   if (state.section === 'graded') q = q.not('psa_grade', 'is', null);
 
@@ -380,12 +352,15 @@ function buildBaseQuery(selectCols){
   if (min !== '' && min != null) q = q.gte('price', Number(min));
   if (max !== '' && max != null) q = q.lte('price', Number(max));
 
+  return q;
+}
+
+function applySort(q){
   const sort = els.sort.value || 'new';
   if (sort === 'price_asc') q = q.order('price', { ascending: true });
   if (sort === 'price_desc') q = q.order('price', { ascending: false });
   if (sort === 'name') q = q.order('name', { ascending: true });
   if (sort === 'new') q = q.order('created_at', { ascending: false });
-
   return q;
 }
 
@@ -406,7 +381,6 @@ function updatePagerUI(){
   if (els.pagePrev) els.pagePrev.disabled = (p <= 1) || paging.loading;
   if (els.pageNext) els.pageNext.disabled = (p >= tp) || paging.loading;
 
-  // "Zobrazit více" = přidá další stránku pod to
   if (els.pageMore){
     const canMore = (p < tp) && !paging.loading;
     els.pageMore.disabled = !canMore;
@@ -415,7 +389,7 @@ function updatePagerUI(){
 }
 
 /* =========================
-   LOAD CARDS (pagination)
+   LOAD CARDS (PAGINATION)
 ========================= */
 
 async function loadCards({ reset = false, append = false } = {}){
@@ -431,7 +405,6 @@ async function loadCards({ reset = false, append = false } = {}){
     return;
   }
 
-  // reset list
   if (reset){
     paging.page = 1;
     append = false;
@@ -439,13 +412,11 @@ async function loadCards({ reset = false, append = false } = {}){
 
   paging.pageSize = computePageSize();
 
-  const selectCols = 'id,name,price,image_url,language,condition,created_at,hot,status,psa_grade,set,serie';
+  // ✅ COUNT query (fixed)
+  let countQ = sb.from('cards');
+  countQ = applyFilters(countQ).select('id', { count: 'exact', head: true });
 
-  // 1) count query
-  const countQuery = buildBaseQuery('id', true);
-  // supabase-js: count přes select with count exact + head true
-  const { count, error: countErr } = await buildBaseQuery('id')
-    .select('id', { count: 'exact', head: true });
+  const { count, error: countErr } = await countQ;
 
   if (countErr){
     console.error('Supabase count error:', countErr?.message || countErr, countErr);
@@ -459,17 +430,21 @@ async function loadCards({ reset = false, append = false } = {}){
 
   paging.total = count || 0;
   paging.totalPages = Math.max(1, Math.ceil(paging.total / paging.pageSize));
-
-  // clamp page
   if (paging.page > paging.totalPages) paging.page = paging.totalPages;
 
-  // 2) data query with range
   const from = (paging.page - 1) * paging.pageSize;
   const to = from + paging.pageSize - 1;
 
-  const dataQuery = buildBaseQuery(selectCols).range(from, to);
+  const selectCols = 'id,name,price,image_url,language,condition,created_at,hot,status,psa_grade,set,serie';
 
-  const { data, error } = await dataQuery;
+  // ✅ DATA query
+  let dataQ = sb.from('cards');
+  dataQ = applyFilters(dataQ);
+  dataQ = applySort(dataQ);
+  dataQ = dataQ.select(selectCols).range(from, to);
+
+  const { data, error } = await dataQ;
+
   if (error){
     console.error('Supabase data error:', error?.message || error, error);
     if (!append) window.OfferUI.renderCardsInto(els.cards, []);
@@ -483,7 +458,6 @@ async function loadCards({ reset = false, append = false } = {}){
   if (!append){
     window.OfferUI.renderCardsInto(els.cards, cards, { size: 'md' });
   } else {
-    // append = přidá další kartu za existující (load more)
     const frag = document.createDocumentFragment();
     for (const c of cards){
       frag.appendChild(window.OfferUI.renderCard(c, { size: 'md' }));
@@ -524,17 +498,14 @@ function wireEvents(){
     clearSingleFilter(chip.dataset.key);
   });
 
-  // live search (reset paging)
+  // live search
   let t = null;
   els.search.addEventListener('input', () => {
     clearTimeout(t);
-    t = setTimeout(() => {
-      resetAndReload();
-    }, 250);
+    t = setTimeout(() => resetAndReload(), 250);
     renderFilterChips();
   });
 
-  // serie -> set depends
   els.serie.addEventListener('change', async () => {
     els.set.value = '';
     await loadEditionsIntoFilter();
@@ -549,7 +520,6 @@ function wireEvents(){
     });
   });
 
-  // language buttons
   els.langBtns.forEach(btn => {
     btn.addEventListener('click', async () => {
       const lang = btn.dataset.lang;
@@ -566,7 +536,6 @@ function wireEvents(){
     });
   });
 
-  // quick buttons
   els.quickBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const sec = btn.dataset.section;
@@ -578,7 +547,7 @@ function wireEvents(){
     });
   });
 
-  // pager buttons
+  // pager
   if (els.pagePrev){
     els.pagePrev.addEventListener('click', () => {
       if (paging.page <= 1) return;
@@ -605,20 +574,17 @@ function wireEvents(){
     });
   }
 
-  // close filters on ESC
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && state.filtersOpen) setFiltersOpen(false);
   });
 
-  // on resize: když se přepne mobil/desktop, přepočítat pageSize a reloadnout
+  // resize switch mobile/desktop
   let rt = null;
   window.addEventListener('resize', () => {
     clearTimeout(rt);
     rt = setTimeout(() => {
       const newSize = computePageSize();
-      if (newSize !== paging.pageSize){
-        resetAndReload();
-      }
+      if (newSize !== paging.pageSize) resetAndReload();
     }, 200);
   });
 }
@@ -629,7 +595,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   resetPaging();
 
-  // URL -> dropdowny
   await applyUrlFilters();
 
   renderFilterChips();
