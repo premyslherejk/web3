@@ -19,8 +19,13 @@ const descEl = document.getElementById('description');
 const priceEl = document.getElementById('price');
 const metaEl = document.getElementById('meta');
 const statusEl = document.getElementById('status');
+
 const psaEl = document.getElementById('psa');
 const psaInfoEl = document.getElementById('psa-info');
+
+const conditionEl = document.getElementById('conditionBadge');
+const conditionInfoEl = document.getElementById('condition-info');
+
 const addBtn = document.querySelector('.add');
 const minOrderEl = document.getElementById('min-order-info');
 
@@ -28,6 +33,24 @@ const minOrderEl = document.getElementById('min-order-info');
 let images = [];
 let index = 0;
 let currentCard = null;
+
+/* =========================
+   CONDITION HELPERS
+========================= */
+
+function getConditionBadgeData(condition) {
+  const c = String(condition || '').trim();
+
+  const map = {
+    'Excellent': { short: 'EX', cls: 'ex' },
+    'Near Mint': { short: 'NM', cls: 'nm' },
+    'Good':      { short: 'GD', cls: 'gd' },
+    'Played':    { short: 'PL', cls: 'pl' },
+    'Poor':      { short: 'PO', cls: 'po' },
+  };
+
+  return map[c] || { short: c ? c : 'RAW', cls: 'unknown' };
+}
 
 // ========= LOAD =========
 async function loadCard() {
@@ -45,7 +68,12 @@ async function loadCard() {
   descEl.textContent = card.description || '';
   priceEl.textContent = `${card.price} Kč`;
   metaEl.textContent = `Edice: ${card.set || '—'} · Stav: ${card.condition || '—'}`;
-  statusEl.textContent = card.status || 'Skladem';
+
+  // STATUS (barvy si už řeší CSS, ale dáme správnou barvu podle textu)
+  const st = String(card.status || 'Skladem').trim();
+  statusEl.textContent = st;
+  statusEl.style.background = (st === 'Rezervováno') ? '#a0a0aa' : '#1f8f3a';
+  statusEl.style.color = (st === 'Rezervováno') ? '#0b0b0f' : '#fff';
 
   handleMinOrderInfo();
 
@@ -53,6 +81,7 @@ async function loadCard() {
   psaEl.style.display = 'none';
   psaInfoEl.style.display = 'none';
   psaEl.textContent = '';
+  psaEl.onclick = null;
 
   if (card.psa_grade) {
     psaEl.textContent = `PSA ${card.psa_grade}`;
@@ -60,7 +89,25 @@ async function loadCard() {
     psaInfoEl.style.display = 'block';
 
     psaEl.onclick = () => {
-      psaInfoEl.scrollIntoView({ behavior: 'smooth' });
+      psaInfoEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+  }
+
+  // ===== CONDITION BADGE =====
+  // zobrazujeme hlavně pro RAW karty (bez PSA)
+  conditionEl.style.display = 'none';
+  conditionEl.textContent = '';
+  conditionEl.className = 'condition';
+  conditionEl.onclick = null;
+
+  if (!card.psa_grade) {
+    const d = getConditionBadgeData(card.condition);
+    conditionEl.textContent = d.short;
+    conditionEl.className = `condition ${d.cls}`;
+    conditionEl.style.display = 'inline-flex';
+
+    conditionEl.onclick = () => {
+      conditionInfoEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
   }
 
