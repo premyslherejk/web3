@@ -226,9 +226,9 @@ h1{
 
   .gallery{ order:4; }
 
-  .status-pill{ order:5; }
+  .buy-box{ order:5; }
 
-  .buy-box{ order:6; }
+  .status-pill{ order:6; }
 
   .meta{ order:7; }
 
@@ -507,5 +507,6 @@ h1{
 .add.added{
   background:linear-gradient(135deg,#2ecc71,#1f8f3a);
 }
+
 
 
