@@ -11,15 +11,6 @@ const state = {
   filtersOpen: false
 };
 
-const paging = {
-  page: 1,
-  pageSize: 24,
-  total: 0,
-  totalPages: 1,
-  loading: false,
-  items: [] // ✅ držíme aktuálně zobrazené karty pro "Zobrazit více"
-};
-
 const els = {};
 
 function grabEls(){
@@ -36,6 +27,7 @@ function grabEls(){
   els.serie = document.getElementById('serie');
   els.set = document.getElementById('set');
   els.condition = document.getElementById('condition');
+  // ❌ els.rarity pryč
   els.priceMin = document.getElementById('priceMin');
   els.priceMax = document.getElementById('priceMax');
   els.sort = document.getElementById('sort');
@@ -46,12 +38,6 @@ function grabEls(){
   els.activeFilters = document.getElementById('activeFilters');
   els.filterChips = document.getElementById('filterChips');
   els.clearAll = document.getElementById('clearAllFilters');
-
-  els.pager = document.getElementById('pager');
-  els.pagePrev = document.getElementById('pagePrev');
-  els.pageNext = document.getElementById('pageNext');
-  els.pageMore = document.getElementById('pageMore');
-  els.pageInfo = document.getElementById('pageInfo');
 }
 
 function setFiltersOpen(open){
@@ -84,24 +70,7 @@ function escapeHtml(s){
 }
 
 /* =========================
-   PAGE SIZE
-========================= */
-
-function computePageSize(){
-  return window.matchMedia('(max-width: 900px)').matches ? 18 : 24;
-}
-
-function resetPaging(){
-  paging.page = 1;
-  paging.pageSize = computePageSize();
-  paging.total = 0;
-  paging.totalPages = 1;
-  paging.items = [];
-  updatePagerUI(true);
-}
-
-/* =========================
-   URL FILTERS
+   URL FILTERS (NEW)
 ========================= */
 
 function getUrlParams(){
@@ -127,6 +96,7 @@ function optionExists(selectEl, value){
 async function applyUrlFilters(){
   const u = getUrlParams();
 
+  // language / section (optional)
   if (u.language){
     state.language = u.language;
     setActive(els.langBtns, b => b.dataset.lang === state.language);
@@ -136,19 +106,24 @@ async function applyUrlFilters(){
     setActive(els.quickBtns, b => b.dataset.section === state.section);
   }
 
+  // 1) load series options (already respects state.language)
   await loadSeriesIntoFilter();
 
+  // 2) set serie from URL if it exists
   if (u.serie && optionExists(els.serie, u.serie)){
     els.serie.value = u.serie;
   } else {
     els.serie.value = '';
   }
 
+  // 3) load sets for selected serie
   await loadEditionsIntoFilter();
 
+  // 4) set set from URL if it exists
   if (u.set && optionExists(els.set, u.set)){
     els.set.value = u.set;
   } else {
+    // pokud set nepasuje na serii, necháme ho prázdný
     els.set.value = '';
   }
 }
@@ -206,7 +181,9 @@ function renderFilterChips(){
 
 function clearSingleFilter(key){
   switch(key){
-    case 'search': els.search.value = ''; break;
+    case 'search':
+      els.search.value = '';
+      break;
 
     case 'language':
       state.language = null;
@@ -225,16 +202,26 @@ function clearSingleFilter(key){
       els.set.value = '';
       break;
 
-    case 'set': els.set.value = ''; break;
-    case 'condition': els.condition.value = ''; break;
-    case 'priceMin': els.priceMin.value = ''; break;
-    case 'priceMax': els.priceMax.value = ''; break;
+    case 'set':
+      els.set.value = '';
+      break;
+
+    case 'condition':
+      els.condition.value = '';
+      break;
+
+    case 'priceMin':
+      els.priceMin.value = '';
+      break;
+
+    case 'priceMax':
+      els.priceMax.value = '';
+      break;
   }
 
   refreshDependentOptions().then(() => {
     renderFilterChips();
-    resetPaging();
-    loadCards({ reset: true });
+    loadCards();
   });
 }
 
@@ -255,17 +242,20 @@ function clearAllFilters(){
 
   refreshDependentOptions().then(() => {
     renderFilterChips();
-    resetPaging();
-    loadCards({ reset: true });
+    loadCards();
   });
 }
 
 /* =========================
-   DEPENDENT OPTIONS
+   DEPENDENT OPTIONS (Serie -> Set)
 ========================= */
 
 async function loadSeriesIntoFilter(){
-  let q = sb.from('cards').select('serie').neq('status', 'Prodáno');
+  let q = sb
+    .from('cards')
+    .select('serie')
+    .neq('status', 'Prodáno');
+
   if (state.language) q = q.eq('language', state.language);
 
   const { data, error } = await q;
@@ -297,7 +287,8 @@ async function loadEditionsIntoFilter(){
 
   els.set.disabled = false;
 
-  let q = sb.from('cards')
+  let q = sb
+    .from('cards')
     .select('set')
     .neq('status', 'Prodáno')
     .eq('serie', serieVal);
@@ -328,11 +319,14 @@ async function refreshDependentOptions(){
 }
 
 /* =========================
-   QUERY HELPERS
+   LOAD CARDS
 ========================= */
 
-function applyFilters(q){
-  q = q.neq('status', 'Prodáno');
+async function loadCards(){
+  let q = sb
+    .from('cards')
+    .select('id,name,price,image_url,language,condition,created_at,hot,status,psa_grade,set,serie')
+    .neq('status', 'Prodáno');
 
   if (state.language) q = q.eq('language', state.language);
 
@@ -356,133 +350,33 @@ function applyFilters(q){
   if (min !== '' && min != null) q = q.gte('price', Number(min));
   if (max !== '' && max != null) q = q.lte('price', Number(max));
 
-  return q;
-}
-
-function applySort(q){
   const sort = els.sort.value || 'new';
   if (sort === 'price_asc') q = q.order('price', { ascending: true });
   if (sort === 'price_desc') q = q.order('price', { ascending: false });
   if (sort === 'name') q = q.order('name', { ascending: true });
   if (sort === 'new') q = q.order('created_at', { ascending: false });
-  return q;
-}
 
-/* =========================
-   PAGER UI
-========================= */
-
-function updatePagerUI(isLoading = false){
-  if (!els.pager) return;
-
-  const p = paging.page;
-  const tp = paging.totalPages;
-
-  if (els.pageInfo){
-    els.pageInfo.textContent = isLoading
-      ? 'Načítám…'
-      : `Stránka ${p} / ${tp} • Celkem ${paging.total} karet`;
-  }
-
-  if (els.pagePrev) els.pagePrev.disabled = (p <= 1) || paging.loading;
-  if (els.pageNext) els.pageNext.disabled = (p >= tp) || paging.loading;
-
-  if (els.pageMore){
-    const canMore = (p < tp) && !paging.loading;
-    els.pageMore.disabled = !canMore;
-    els.pageMore.style.display = (tp > 1) ? 'inline-flex' : 'none';
-  }
-}
-
-/* =========================
-   LOAD CARDS
-========================= */
-
-async function loadCards({ reset = false, append = false } = {}){
-  if (paging.loading) return;
-
-  // ✅ OfferUI musí mít aspoň renderCardsInto
-  if (!window.OfferUI?.renderCardsInto){
-    console.error('OfferUI not loaded. Add <script src="js/offerfun.js"></script> before collectionfun.js');
-    if (els.cards) els.cards.innerHTML = `<p style="opacity:.7">Chybí offerfun.js 😕</p>`;
-    return;
-  }
-
-  paging.loading = true;
-  updatePagerUI(true);
-
-  if (reset){
-    paging.page = 1;
-    paging.items = [];
-    append = false;
-  }
-
-  paging.pageSize = computePageSize();
-
-  // COUNT
-  let countQ = sb.from('cards');
-  countQ = applyFilters(countQ).select('id', { count: 'exact', head: true });
-
-  const { count, error: countErr } = await countQ;
-
-  if (countErr){
-    console.error('Supabase count error:', countErr?.message || countErr, countErr);
-    window.OfferUI.renderCardsInto(els.cards, []);
-    paging.total = 0;
-    paging.totalPages = 1;
-    paging.loading = false;
-    updatePagerUI(false);
-    return;
-  }
-
-  paging.total = count || 0;
-  paging.totalPages = Math.max(1, Math.ceil(paging.total / paging.pageSize));
-  if (paging.page > paging.totalPages) paging.page = paging.totalPages;
-
-  const from = (paging.page - 1) * paging.pageSize;
-  const to = from + paging.pageSize - 1;
-
-  const selectCols = 'id,name,price,image_url,language,condition,created_at,hot,status,psa_grade,set,serie';
-
-  // DATA
-  let dataQ = sb.from('cards');
-  dataQ = applyFilters(dataQ);
-  dataQ = applySort(dataQ);
-  dataQ = dataQ.select(selectCols).range(from, to);
-
-  const { data, error } = await dataQ;
-
+  const { data, error } = await q;
   if (error){
-    console.error('Supabase data error:', error?.message || error, error);
-    if (!append) window.OfferUI.renderCardsInto(els.cards, []);
-    paging.loading = false;
-    updatePagerUI(false);
+    console.error('Supabase error:', error?.message || error, error);
+    if (window.OfferUI?.renderCardsInto) window.OfferUI.renderCardsInto(els.cards, []);
+    else els.cards.innerHTML = `<p style="opacity:.7">Nic jsme nenašli 😕</p>`;
     return;
   }
 
-  const cards = data || [];
-
-  if (!append){
-    paging.items = cards;
-  } else {
-    paging.items = paging.items.concat(cards);
+  if (!window.OfferUI?.renderCardsInto) {
+    console.error('OfferUI not loaded. Add <script src="js/offerfun.js"></script> before collectionfun.js');
+    els.cards.innerHTML = `<p style="opacity:.7">Chybí offerfun.js 😕</p>`;
+    return;
   }
 
-  window.OfferUI.renderCardsInto(els.cards, paging.items, { size: 'md' });
-
+  window.OfferUI.renderCardsInto(els.cards, data || [], { size: 'md' });
   renderFilterChips();
-  paging.loading = false;
-  updatePagerUI(false);
 }
 
 /* =========================
    EVENTS
 ========================= */
-
-function resetAndReload(){
-  resetPaging();
-  loadCards({ reset: true });
-}
 
 function wireEvents(){
   els.toggleFilters.addEventListener('click', () => setFiltersOpen(!state.filtersOpen));
@@ -490,7 +384,7 @@ function wireEvents(){
 
   els.applyFilters.addEventListener('click', () => {
     setFiltersOpen(false);
-    resetAndReload();
+    loadCards();
   });
 
   els.clearAll.addEventListener('click', clearAllFilters);
@@ -506,7 +400,7 @@ function wireEvents(){
   let t = null;
   els.search.addEventListener('input', () => {
     clearTimeout(t);
-    t = setTimeout(() => resetAndReload(), 250);
+    t = setTimeout(loadCards, 250);
     renderFilterChips();
   });
 
@@ -514,13 +408,13 @@ function wireEvents(){
     els.set.value = '';
     await loadEditionsIntoFilter();
     renderFilterChips();
-    resetAndReload();
+    loadCards();
   });
 
   [els.set, els.condition, els.priceMin, els.priceMax, els.sort].forEach(el => {
     el.addEventListener('change', () => {
       renderFilterChips();
-      resetAndReload();
+      loadCards();
     });
   });
 
@@ -536,7 +430,7 @@ function wireEvents(){
 
       setActive(els.langBtns, b => b.dataset.lang === state.language);
       renderFilterChips();
-      resetAndReload();
+      loadCards();
     });
   });
 
@@ -547,49 +441,12 @@ function wireEvents(){
 
       setActive(els.quickBtns, b => b.dataset.section === state.section);
       renderFilterChips();
-      resetAndReload();
+      loadCards();
     });
   });
-
-  if (els.pagePrev){
-    els.pagePrev.addEventListener('click', () => {
-      if (paging.page <= 1) return;
-      paging.page -= 1;
-      paging.items = [];
-      loadCards({ reset: false, append: false });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-  }
-
-  if (els.pageNext){
-    els.pageNext.addEventListener('click', () => {
-      if (paging.page >= paging.totalPages) return;
-      paging.page += 1;
-      paging.items = [];
-      loadCards({ reset: false, append: false });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-  }
-
-  if (els.pageMore){
-    els.pageMore.addEventListener('click', () => {
-      if (paging.page >= paging.totalPages) return;
-      paging.page += 1;
-      loadCards({ reset: false, append: true });
-    });
-  }
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && state.filtersOpen) setFiltersOpen(false);
-  });
-
-  let rt = null;
-  window.addEventListener('resize', () => {
-    clearTimeout(rt);
-    rt = setTimeout(() => {
-      const newSize = computePageSize();
-      if (newSize !== paging.pageSize) resetAndReload();
-    }, 200);
   });
 }
 
@@ -597,9 +454,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   grabEls();
   wireEvents();
 
-  resetPaging();
+  // ✅ nejdřív načteme filtry normálně
+  await refreshDependentOptions();
+
+  // ✅ pak aplikujeme URL parametry (?serie=...&set=...)
   await applyUrlFilters();
 
+  // ✅ vykreslíme chipy
   renderFilterChips();
-  loadCards({ reset: true });
+
+  // ✅ až TEĎ loadujeme karty
+  loadCards();
 });
