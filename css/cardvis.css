@@ -73,7 +73,8 @@ body{
 
 /* STATUS */
 
-.badge{
+/* STATUS (jen pro detail stránky, ať se to nehádá s offervis.css) */
+.status-pill{
   padding:6px 14px;
   border-radius:999px;
   font-size:.85rem;
@@ -225,7 +226,7 @@ h1{
 
   .gallery{ order:4; }
 
-  .badge{ order:5; }
+  .status-pill{ order:5; }
 
   .buy-box{ order:6; }
 
@@ -321,6 +322,47 @@ h1{
 .cond-gd{ background:rgba(255,215,0,.95); color:#0b0b0f; }
 .cond-pl{ background:rgba(255,140,0,.95); color:#0b0b0f; }
 .cond-po{ background:rgba(255,59,59,.95); color:white; }
+
+
+/* ===================== RELATED tweaks (menší cena + menší badges) ===================== */
+
+/* zmenšení badge + ceny jen ve slideru */
+.related-track .card-badges{
+  top:8px;
+  left:8px;
+  gap:6px;
+}
+
+.related-track .badge{
+  font-size:.62rem;
+  padding:4px 8px;
+  box-shadow:0 8px 18px rgba(0,0,0,.30);
+}
+
+.related-track .card-badges .badge:nth-child(2){
+  font-size:.54rem;
+  padding:3px 7px;
+}
+
+.related-track strong{
+  font-size:.85rem;
+}
+
+.related-track .price{
+  font-size:.95rem;
+  font-weight:900;
+}
+
+/* aby karty ve slideru nebyly “masivní” */
+.related-track .card{
+  padding:10px;
+  border-radius:16px;
+}
+
+.related-track .card img{
+  border-radius:12px;
+}
+
 
 /* ===================== RELATED (slider) ===================== */
 
@@ -455,3 +497,4 @@ h1{
 .add.added{
   background:linear-gradient(135deg,#2ecc71,#1f8f3a);
 }
+
