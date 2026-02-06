@@ -46,7 +46,12 @@
 
     <h1 id="name"></h1>
 
+    <!-- ✅ PSA BADGE (už máš) -->
     <div class="psa" id="psa"></div>
+
+    <!-- ✅ NOVÉ: CONDITION BADGE (EX/NM/GD/PL/PO) -->
+    <div class="condition" id="conditionBadge"></div>
+
     <div class="meta" id="meta"></div>
 
     <p class="description" id="description"></p>
@@ -54,7 +59,6 @@
     <div class="buy-box">
       <div class="price" id="price"></div>
 
-      <!-- 🔴 MINIMÁLNÍ OBJEDNÁVKA – zatím prázdné, řeší JS -->
       <div id="min-order-info" class="min-order-info" style="display:none;">
         * Minimální objednávka je 99 Kč
       </div>
@@ -64,6 +68,7 @@
   </div>
 </div>
 
+<!-- ✅ PSA INFO -->
 <div id="psa-info" class="psa-info">
   <h3>Co znamená PSA hodnocení?</h3>
   <p>
@@ -74,6 +79,49 @@
   <p>
     <strong>PSA 9</strong> znamená téměř perfektní stav – ideální pro sběratele i investory.
   </p>
+</div>
+
+<!-- ✅ NOVÉ: CONDITION INFO -->
+<div id="condition-info" class="condition-info">
+  <h3>Co znamená stav karty?</h3>
+  <p>Totálně jednoduše: jde o to, jak moc je karta „jetá“.</p>
+
+  <div class="condition-list">
+    <div class="condition-row">
+      <span class="cond-pill cond-ex">EX</span>
+      <div>
+        <strong>Excellent</strong> – vypadá skoro jako nová, jen maličký náznak používání.
+      </div>
+    </div>
+
+    <div class="condition-row">
+      <span class="cond-pill cond-nm">NM</span>
+      <div>
+        <strong>Near Mint</strong> – top stav, minimální vady (většinou skoro neviditelné).
+      </div>
+    </div>
+
+    <div class="condition-row">
+      <span class="cond-pill cond-gd">GD</span>
+      <div>
+        <strong>Good</strong> – už je vidět hraní / nošení, ale pořád ok do sbírky.
+      </div>
+    </div>
+
+    <div class="condition-row">
+      <span class="cond-pill cond-pl">PL</span>
+      <div>
+        <strong>Played</strong> – výrazně hraná karta, viditelné oděrky, rohy, hrany.
+      </div>
+    </div>
+
+    <div class="condition-row">
+      <span class="cond-pill cond-po">PO</span>
+      <div>
+        <strong>Poor</strong> – hodně špatný stav (silné poškození), spíš „budget“.
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- LIGHTBOX -->
