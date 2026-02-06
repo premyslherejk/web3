@@ -29,6 +29,12 @@ const conditionInfoEl = document.getElementById('condition-info');
 const addBtn = document.querySelector('.add');
 const minOrderEl = document.getElementById('min-order-info');
 
+// ✅ related slider elementy (js je zvládne i když tam nejsou – ale ty je v HTML máš)
+const relatedSection = document.getElementById('relatedSection');
+const relatedTrack = document.getElementById('relatedTrack');
+const relPrev = document.getElementById('relPrev');
+const relNext = document.getElementById('relNext');
+
 // ========= STATE =========
 let images = [];
 let index = 0;
@@ -49,12 +55,117 @@ function getConditionData(condition) {
     'Poor':      { short: 'PO', full: 'Poor', cls: 'po' },
   };
 
-  // fallback: pokud máš v DB něco mimo map, ukážeme to
   if (map[c]) return map[c];
   return { short: c ? c : 'RAW', full: c ? c : 'RAW', cls: 'unknown' };
 }
 
-// ========= LOAD =========
+function shuffle(arr){
+  const a = (arr || []).slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function uniqueById(arr){
+  const seen = new Set();
+  return (arr || []).filter(x => {
+    if (!x?.id) return false;
+    if (seen.has(x.id)) return false;
+    seen.add(x.id);
+    return true;
+  });
+}
+
+/* =========================
+   RELATED (slider)
+========================= */
+
+function setupRelatedControls(){
+  if (!relatedTrack || !relPrev || !relNext) return;
+
+  const step = () => {
+    const first = relatedTrack.querySelector('.card');
+    const w = first ? first.getBoundingClientRect().width : 220;
+    return Math.round(w * 2 + 28); // cca 2 karty
+  };
+
+  relPrev.onclick = () => relatedTrack.scrollBy({ left: -step(), behavior:'smooth' });
+  relNext.onclick = () => relatedTrack.scrollBy({ left: step(), behavior:'smooth' });
+}
+
+async function loadRelatedCards(){
+  if (!relatedSection || !relatedTrack) return;
+  if (!currentCard) return;
+
+  // musí být OfferUI, jinak to nebude 1:1 vzhled
+  if (!window.OfferUI || typeof window.OfferUI.renderCardsInto !== 'function'){
+    relatedSection.style.display = 'none';
+    return;
+  }
+
+  const want = 10;
+  const selectCols = 'id,name,price,image_url,status,condition,psa_grade,set,serie,language,hot';
+
+  let pool = [];
+
+  // 1) stejné set
+  if (currentCard.set){
+    const { data } = await sb
+      .from('cards')
+      .select(selectCols)
+      .eq('set', currentCard.set)
+      .neq('status', 'Prodáno')
+      .limit(want + 8);
+
+    pool = pool.concat(data || []);
+  }
+
+  // 2) stejné serie
+  if (pool.length < want && currentCard.serie){
+    const { data } = await sb
+      .from('cards')
+      .select(selectCols)
+      .eq('serie', currentCard.serie)
+      .neq('status', 'Prodáno')
+      .limit(want + 12);
+
+    pool = pool.concat(data || []);
+  }
+
+  // 3) fallback random
+  if (pool.length < want){
+    const { data } = await sb
+      .from('cards')
+      .select(selectCols)
+      .neq('status', 'Prodáno')
+      .limit(want + 25);
+
+    pool = pool.concat(data || []);
+  }
+
+  pool = pool
+    .filter(c => c?.id && c.id !== currentCard.id);
+
+  pool = uniqueById(pool);
+  pool = shuffle(pool).slice(0, want);
+
+  if (!pool.length){
+    relatedSection.style.display = 'none';
+    return;
+  }
+
+  relatedSection.style.display = 'block';
+  window.OfferUI.renderCardsInto(relatedTrack, pool, { size: 'sm' });
+
+  setupRelatedControls();
+}
+
+/* =========================
+   LOAD
+========================= */
+
 async function loadCard() {
   const { data: card, error } = await sb
     .from('cards')
@@ -82,22 +193,22 @@ async function loadCard() {
   // ===== PSA + CONDITION RULES =====
   const isPsa = !!String(card.psa_grade ?? '').trim();
 
-  // reset PSA UI
+  // reset PSA
   psaEl.style.display = 'none';
   psaInfoEl.style.display = 'none';
   psaEl.textContent = '';
   psaEl.onclick = null;
 
-  // reset CONDITION UI
+  // reset CONDITION
   conditionEl.style.display = 'none';
   conditionEl.textContent = '';
   conditionEl.className = 'condition';
   conditionEl.onclick = null;
 
-  if (conditionInfoEl) conditionInfoEl.style.display = 'none'; // default hidden
+  if (conditionInfoEl) conditionInfoEl.style.display = 'none';
 
   if (isPsa) {
-    // ✅ PSA karta: jen PSA badge + PSA info, žádný stav vysvětlení
+    // ✅ PSA karta: jen PSA vysvětlení, condition pryč
     psaEl.textContent = `PSA ${card.psa_grade}`;
     psaEl.style.display = 'inline-flex';
     psaInfoEl.style.display = 'block';
@@ -106,11 +217,11 @@ async function loadCard() {
       psaInfoEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
   } else {
-    // ✅ RAW karta: condition badge (CELÝ TEXT) + condition vysvětlení
+    // ✅ RAW karta: condition badge (FULL) + condition info
     const d = getConditionData(card.condition);
 
-    conditionEl.textContent = d.full;             // 👈 celým slovem
-    conditionEl.className = `condition ${d.cls}`; // barvy zůstávají
+    conditionEl.textContent = d.full;
+    conditionEl.className = `condition ${d.cls}`;
     conditionEl.style.display = 'inline-flex';
 
     if (conditionInfoEl) conditionInfoEl.style.display = 'block';
@@ -132,9 +243,15 @@ async function loadCard() {
 
   renderImages();
   syncAddButton();
+
+  // ✅ related slider
+  loadRelatedCards();
 }
 
-// ========= KOŠÍK =========
+/* =========================
+   CART
+========================= */
+
 function getCart() {
   return JSON.parse(localStorage.getItem('cart')) || [];
 }
@@ -169,7 +286,6 @@ function addToCart() {
   handleMinOrderInfo();
 }
 
-// ========= MIN ORDER LOGIKA =========
 function handleMinOrderInfo() {
   if (!minOrderEl || !currentCard) return;
 
@@ -182,7 +298,6 @@ function handleMinOrderInfo() {
   }
 }
 
-// ========= SYNC TLAČÍTKA =========
 function syncAddButton() {
   const cart = getCart();
   const exists = cart.find(item => item.id === currentCard.id);
@@ -200,7 +315,10 @@ function syncAddButton() {
 
 addBtn.addEventListener('click', addToCart);
 
-// ========= GALERIE =========
+/* =========================
+   GALLERY
+========================= */
+
 function renderImages() {
   thumbsWrap.innerHTML = '';
   index = 0;
@@ -222,7 +340,10 @@ function setImage(i) {
   thumbsWrap.children[i].classList.add('active');
 }
 
-// ========= LIGHTBOX =========
+/* =========================
+   LIGHTBOX
+========================= */
+
 document.getElementById('mainImage').onclick = () => {
   lightImg.src = images[index];
   light.classList.add('active');
