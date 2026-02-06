@@ -29,7 +29,7 @@ const conditionInfoEl = document.getElementById('condition-info');
 const addBtn = document.querySelector('.add');
 const minOrderEl = document.getElementById('min-order-info');
 
-// ✅ related slider elementy (js je zvládne i když tam nejsou – ale ty je v HTML máš)
+// related slider elementy
 const relatedSection = document.getElementById('relatedSection');
 const relatedTrack = document.getElementById('relatedTrack');
 const relPrev = document.getElementById('relPrev');
@@ -112,7 +112,6 @@ async function loadRelatedCards(){
 
   const want = 10;
   const selectCols = 'id,name,price,image_url,status,condition,psa_grade,set,serie,language,hot';
-
   const targetPrice = Number(currentCard.price || 0);
 
   let pool = [];
@@ -167,12 +166,11 @@ async function loadRelatedCards(){
     };
   });
 
-  // 1-2 “dražší” (ale ne úplně mimo: max +200% ceny)
+  // 1-2 “dražší” (ale ne úplně mimo: max 3x ceny)
   const higher = normalized
     .filter(x => x.higher && x.price <= targetPrice * 3)
     .sort((a,b) => b.price - a.price);
 
-  // zbytek co nejblíž ceně
   const close = normalized
     .sort((a,b) => a.diff - b.diff);
 
@@ -194,10 +192,8 @@ async function loadRelatedCards(){
 
   relatedSection.style.display = 'block';
   window.OfferUI.renderCardsInto(relatedTrack, picked, { size: 'sm' });
-
   setupRelatedControls();
 }
-
 
 /* =========================
    LOAD
@@ -249,9 +245,7 @@ async function loadCard() {
     psaEl.textContent = `PSA ${card.psa_grade}`;
     psaEl.style.display = 'inline-flex';
     psaInfoEl.style.display = 'block';
-
     psaEl.onclick = () => scrollToEl(psaInfoEl, 20);
-    };
   } else {
     // ✅ RAW karta: condition badge (FULL) + condition info
     const d = getConditionData(card.condition);
@@ -261,9 +255,7 @@ async function loadCard() {
     conditionEl.style.display = 'inline-flex';
 
     if (conditionInfoEl) conditionInfoEl.style.display = 'block';
-
     conditionEl.onclick = () => scrollToEl(conditionInfoEl, 20);
-    };
   }
 
   // ===== IMAGES =====
@@ -326,7 +318,7 @@ function handleMinOrderInfo() {
 
   const cartTotal = getCartTotal();
 
-  if (currentCard.price < 100 && cartTotal < 100) {
+  if (Number(currentCard.price) < 100 && cartTotal < 100) {
     minOrderEl.style.display = 'block';
   } else {
     minOrderEl.style.display = 'none';
@@ -402,4 +394,3 @@ document.addEventListener('keydown', e => {
 
 // ========= START =========
 loadCard();
-
