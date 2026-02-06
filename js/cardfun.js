@@ -68,7 +68,7 @@ function shuffle(arr){
   return a;
 }
 
-function scrollToEl(el, offset = 50){
+function scrollToEl(el, offset = 16){
   if (!el) return;
   const y = el.getBoundingClientRect().top + window.scrollY - offset;
   window.scrollTo({ top: y, behavior: 'smooth' });
@@ -245,7 +245,7 @@ async function loadCard() {
     psaEl.textContent = `PSA ${card.psa_grade}`;
     psaEl.style.display = 'inline-flex';
     psaInfoEl.style.display = 'block';
-    psaEl.onclick = () => scrollToEl(psaInfoEl, 20);
+    psaEl.onclick = () => scrollToEl(psaInfoEl, 80);
   } else {
     // ✅ RAW karta: condition badge (FULL) + condition info
     const d = getConditionData(card.condition);
@@ -255,7 +255,7 @@ async function loadCard() {
     conditionEl.style.display = 'inline-flex';
 
     if (conditionInfoEl) conditionInfoEl.style.display = 'block';
-    conditionEl.onclick = () => scrollToEl(conditionInfoEl, 20);
+    conditionEl.onclick = () => scrollToEl(conditionInfoEl, 80);
   }
 
   // ===== IMAGES =====
@@ -394,4 +394,5 @@ document.addEventListener('keydown', e => {
 
 // ========= START =========
 loadCard();
+
 
