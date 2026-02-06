@@ -68,7 +68,7 @@ function shuffle(arr){
   return a;
 }
 
-function scrollToEl(el, offset = 16){
+function scrollToEl(el, offset = 50){
   if (!el) return;
   const y = el.getBoundingClientRect().top + window.scrollY - offset;
   window.scrollTo({ top: y, behavior: 'smooth' });
@@ -394,3 +394,4 @@ document.addEventListener('keydown', e => {
 
 // ========= START =========
 loadCard();
+
