@@ -453,7 +453,17 @@ function wireEvents(){
 document.addEventListener('DOMContentLoaded', async () => {
   grabEls();
   wireEvents();
+
+  // ✅ nejdřív načteme filtry normálně
   await refreshDependentOptions();
+
+  // ✅ pak aplikujeme URL parametry (?serie=...&set=...)
+  await applyUrlFilters();
+
+  // ✅ vykreslíme chipy
   renderFilterChips();
+
+  // ✅ až TEĎ loadujeme karty
   loadCards();
 });
+
