@@ -7,14 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       <div class="footer-brand">
         <h3>PokeKusovky</h3>
-        <p>Kusové Pokémon karty. Čistě, rychle, bezpečně.</p>
-      </div>
-
-      <div class="footer-links">
-        <h4>Menu</h4>
-        <a href="collection.html">Karty</a>
-        <a href="auctions.html">Aukce</a>
-        <a href="contact.html">Kontakt</a>
+        <p>Kusové Pokémon karty.</p>
       </div>
 
       <div class="footer-links">
@@ -28,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
     <div class="footer-bottom">
-      © ${new Date().getFullYear()} PokeKusovky — všechna práva vyhrazena
+      © ${new Date().getFullYear()} PokeKusovky
     </div>
   `;
 
