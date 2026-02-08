@@ -38,7 +38,7 @@
   <section class="top-picks">
     <div class="pick-group" id="langSwitch">
 
-      <!-- ✅ EN (Union Jack – správná) -->
+      <!-- ✅ EN (Union Jack) -->
       <button type="button" class="pick-card" data-lang="EN">
         <div class="pick-icon">
           <svg class="flag-svg" viewBox="0 0 60 30" aria-label="EN" role="img">
@@ -85,8 +85,6 @@
     </div>
 
     <div class="pick-group" id="quickFilters">
-
-      <!-- ✅ Novinky -> Hodnocené -->
       <button type="button" class="pick-card pick-alt" data-section="graded">
         <div class="pick-icon">🟣</div>
         <div class="pick-text">
@@ -161,7 +159,6 @@
           <option value="Poor">Poor</option>
         </select>
       </label>
-      
 
       <div class="price-row">
         <label>
@@ -193,7 +190,13 @@
     <!-- MAIN -->
     <main class="collection-main">
       <section class="cards-grid" id="cards"></section>
-      
+
+      <!-- ✅ LOAD MORE -->
+      <div class="load-more-wrap" id="loadMoreWrap">
+        <button type="button" class="load-more-btn" id="loadMoreBtn">Zobrazit více</button>
+        <div class="load-more-info" id="loadMoreInfo">0/0</div>
+      </div>
+
     </main>
   </div>
 </div>
