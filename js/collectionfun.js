@@ -11,6 +11,14 @@ const state = {
   filtersOpen: false
 };
 
+// "load more" paging
+const paging = {
+  page: 1,
+  pageSize: 24,
+  total: 0,
+  loading: false
+};
+
 const els = {};
 
 function grabEls(){
@@ -27,7 +35,6 @@ function grabEls(){
   els.serie = document.getElementById('serie');
   els.set = document.getElementById('set');
   els.condition = document.getElementById('condition');
-  // ❌ els.rarity pryč
   els.priceMin = document.getElementById('priceMin');
   els.priceMax = document.getElementById('priceMax');
   els.sort = document.getElementById('sort');
@@ -38,6 +45,11 @@ function grabEls(){
   els.activeFilters = document.getElementById('activeFilters');
   els.filterChips = document.getElementById('filterChips');
   els.clearAll = document.getElementById('clearAllFilters');
+
+  // load more UI
+  els.loadMoreWrap = document.getElementById('loadMoreWrap');
+  els.loadMoreBtn = document.getElementById('loadMoreBtn');
+  els.loadMoreInfo = document.getElementById('loadMoreInfo');
 }
 
 function setFiltersOpen(open){
@@ -70,7 +82,49 @@ function escapeHtml(s){
 }
 
 /* =========================
-   URL FILTERS (NEW)
+   PAGE SIZE + RESET
+========================= */
+
+function computePageSize(){
+  return window.matchMedia('(max-width: 900px)').matches ? 18 : 24;
+}
+
+function resetPaging(){
+  paging.page = 1;
+  paging.pageSize = computePageSize();
+  paging.total = 0;
+  paging.loading = false;
+  updateLoadMoreUI();
+}
+
+function getShownCount(){
+  const shown = (paging.page * paging.pageSize);
+  return Math.min(shown, paging.total || 0);
+}
+
+function updateLoadMoreUI(){
+  if (!els.loadMoreWrap) return;
+
+  const total = paging.total || 0;
+  const shown = getShownCount();
+
+  if (els.loadMoreInfo){
+    els.loadMoreInfo.textContent = `${shown}/${total}`;
+  }
+
+  const canMore = shown < total;
+
+  if (els.loadMoreBtn){
+    els.loadMoreBtn.disabled = paging.loading || !canMore;
+    els.loadMoreBtn.style.opacity = (paging.loading || !canMore) ? '0.55' : '1';
+  }
+
+  // když je total 0 -> klidně schovej celé
+  els.loadMoreWrap.style.display = (total > 0) ? 'flex' : 'none';
+}
+
+/* =========================
+   URL FILTERS
 ========================= */
 
 function getUrlParams(){
@@ -96,7 +150,6 @@ function optionExists(selectEl, value){
 async function applyUrlFilters(){
   const u = getUrlParams();
 
-  // language / section (optional)
   if (u.language){
     state.language = u.language;
     setActive(els.langBtns, b => b.dataset.lang === state.language);
@@ -106,24 +159,19 @@ async function applyUrlFilters(){
     setActive(els.quickBtns, b => b.dataset.section === state.section);
   }
 
-  // 1) load series options (already respects state.language)
   await loadSeriesIntoFilter();
 
-  // 2) set serie from URL if it exists
   if (u.serie && optionExists(els.serie, u.serie)){
     els.serie.value = u.serie;
   } else {
     els.serie.value = '';
   }
 
-  // 3) load sets for selected serie
   await loadEditionsIntoFilter();
 
-  // 4) set set from URL if it exists
   if (u.set && optionExists(els.set, u.set)){
     els.set.value = u.set;
   } else {
-    // pokud set nepasuje na serii, necháme ho prázdný
     els.set.value = '';
   }
 }
@@ -181,9 +229,7 @@ function renderFilterChips(){
 
 function clearSingleFilter(key){
   switch(key){
-    case 'search':
-      els.search.value = '';
-      break;
+    case 'search': els.search.value = ''; break;
 
     case 'language':
       state.language = null;
@@ -202,26 +248,15 @@ function clearSingleFilter(key){
       els.set.value = '';
       break;
 
-    case 'set':
-      els.set.value = '';
-      break;
-
-    case 'condition':
-      els.condition.value = '';
-      break;
-
-    case 'priceMin':
-      els.priceMin.value = '';
-      break;
-
-    case 'priceMax':
-      els.priceMax.value = '';
-      break;
+    case 'set': els.set.value = ''; break;
+    case 'condition': els.condition.value = ''; break;
+    case 'priceMin': els.priceMin.value = ''; break;
+    case 'priceMax': els.priceMax.value = ''; break;
   }
 
   refreshDependentOptions().then(() => {
     renderFilterChips();
-    loadCards();
+    resetAndReload();
   });
 }
 
@@ -242,7 +277,7 @@ function clearAllFilters(){
 
   refreshDependentOptions().then(() => {
     renderFilterChips();
-    loadCards();
+    resetAndReload();
   });
 }
 
@@ -319,14 +354,11 @@ async function refreshDependentOptions(){
 }
 
 /* =========================
-   LOAD CARDS
+   QUERY HELPERS
 ========================= */
 
-async function loadCards(){
-  let q = sb
-    .from('cards')
-    .select('id,name,price,image_url,language,condition,created_at,hot,status,psa_grade,set,serie')
-    .neq('status', 'Prodáno');
+function applyFiltersToQuery(q){
+  q = q.neq('status', 'Prodáno');
 
   if (state.language) q = q.eq('language', state.language);
 
@@ -350,28 +382,123 @@ async function loadCards(){
   if (min !== '' && min != null) q = q.gte('price', Number(min));
   if (max !== '' && max != null) q = q.lte('price', Number(max));
 
-  const sort = els.sort.value || 'new';
-  if (sort === 'price_asc') q = q.order('price', { ascending: true });
-  if (sort === 'price_desc') q = q.order('price', { ascending: false });
-  if (sort === 'name') q = q.order('name', { ascending: true });
-  if (sort === 'new') q = q.order('created_at', { ascending: false });
+  return q;
+}
 
-  const { data, error } = await q;
-  if (error){
-    console.error('Supabase error:', error?.message || error, error);
-    if (window.OfferUI?.renderCardsInto) window.OfferUI.renderCardsInto(els.cards, []);
-    else els.cards.innerHTML = `<p style="opacity:.7">Nic jsme nenašli 😕</p>`;
-    return;
+function applySortToQuery(q){
+  const sort = els.sort.value || 'new';
+
+  // ✅ Stabilní order: vždy přidáme tiebreaker "id"
+  if (sort === 'price_asc') {
+    q = q.order('price', { ascending: true, nullsFirst: false });
+    q = q.order('id', { ascending: true });
+  } else if (sort === 'price_desc') {
+    q = q.order('price', { ascending: false, nullsFirst: false });
+    q = q.order('id', { ascending: false });
+  } else if (sort === 'name') {
+    q = q.order('name', { ascending: true, nullsFirst: false });
+    q = q.order('id', { ascending: true });
+  } else {
+    // new
+    q = q.order('created_at', { ascending: false, nullsFirst: false });
+    q = q.order('id', { ascending: false });
   }
 
-  if (!window.OfferUI?.renderCardsInto) {
+  return q;
+}
+
+/* =========================
+   LOAD (COUNT + PAGE DATA)
+========================= */
+
+async function fetchTotalCount(){
+  // head+count query
+  let q = sb.from('cards');
+  q = applyFiltersToQuery(q).select('id', { count: 'exact', head: true });
+
+  const { count, error } = await q;
+  if (error) throw error;
+
+  return count || 0;
+}
+
+async function fetchPageData(page){
+  const selectCols = 'id,name,price,image_url,language,condition,created_at,hot,status,psa_grade,set,serie';
+
+  const from = (page - 1) * paging.pageSize;
+  const to = from + paging.pageSize - 1;
+
+  let q = sb.from('cards');
+  q = applyFiltersToQuery(q);
+  q = applySortToQuery(q);
+  q = q.select(selectCols).range(from, to);
+
+  const { data, error } = await q;
+  if (error) throw error;
+
+  return data || [];
+}
+
+async function loadCards({ reset = false, append = false } = {}){
+  if (paging.loading) return;
+
+  if (!window.OfferUI?.renderCardsInto || !window.OfferUI?.renderCard){
     console.error('OfferUI not loaded. Add <script src="js/offerfun.js"></script> before collectionfun.js');
     els.cards.innerHTML = `<p style="opacity:.7">Chybí offerfun.js 😕</p>`;
     return;
   }
 
-  window.OfferUI.renderCardsInto(els.cards, data || [], { size: 'md' });
-  renderFilterChips();
+  paging.loading = true;
+  updateLoadMoreUI();
+
+  try {
+    paging.pageSize = computePageSize();
+
+    if (reset){
+      paging.page = 1;
+      append = false;
+    }
+
+    // 1) count (jen když reset nebo total neznáme)
+    if (reset || paging.total === 0){
+      paging.total = await fetchTotalCount();
+    }
+
+    // když nic nenajdeme
+    if (paging.total === 0){
+      window.OfferUI.renderCardsInto(els.cards, []);
+      paging.loading = false;
+      updateLoadMoreUI();
+      return;
+    }
+
+    // 2) fetch page data
+    const data = await fetchPageData(paging.page);
+
+    if (!append){
+      window.OfferUI.renderCardsInto(els.cards, data, { size: 'md' });
+    } else {
+      const frag = document.createDocumentFragment();
+      for (const c of data){
+        frag.appendChild(window.OfferUI.renderCard(c, { size: 'md' }));
+      }
+      els.cards.appendChild(frag);
+    }
+
+    renderFilterChips();
+  } catch (err){
+    console.error('Load error:', err?.message || err, err);
+    if (!append) window.OfferUI.renderCardsInto(els.cards, []);
+    paging.total = 0;
+  } finally {
+    paging.loading = false;
+    updateLoadMoreUI();
+  }
+}
+
+function resetAndReload(){
+  resetPaging();
+  loadCards({ reset: true, append: false });
 }
 
 /* =========================
@@ -384,7 +511,7 @@ function wireEvents(){
 
   els.applyFilters.addEventListener('click', () => {
     setFiltersOpen(false);
-    loadCards();
+    resetAndReload();
   });
 
   els.clearAll.addEventListener('click', clearAllFilters);
@@ -397,10 +524,11 @@ function wireEvents(){
     clearSingleFilter(chip.dataset.key);
   });
 
+  // live search
   let t = null;
   els.search.addEventListener('input', () => {
     clearTimeout(t);
-    t = setTimeout(loadCards, 250);
+    t = setTimeout(() => resetAndReload(), 250);
     renderFilterChips();
   });
 
@@ -408,13 +536,13 @@ function wireEvents(){
     els.set.value = '';
     await loadEditionsIntoFilter();
     renderFilterChips();
-    loadCards();
+    resetAndReload();
   });
 
   [els.set, els.condition, els.priceMin, els.priceMax, els.sort].forEach(el => {
     el.addEventListener('change', () => {
       renderFilterChips();
-      loadCards();
+      resetAndReload();
     });
   });
 
@@ -430,7 +558,7 @@ function wireEvents(){
 
       setActive(els.langBtns, b => b.dataset.lang === state.language);
       renderFilterChips();
-      loadCards();
+      resetAndReload();
     });
   });
 
@@ -441,12 +569,36 @@ function wireEvents(){
 
       setActive(els.quickBtns, b => b.dataset.section === state.section);
       renderFilterChips();
-      loadCards();
+      resetAndReload();
     });
   });
 
+  // load more
+  if (els.loadMoreBtn){
+    els.loadMoreBtn.addEventListener('click', () => {
+      const shown = getShownCount();
+      if (paging.loading) return;
+      if (shown >= (paging.total || 0)) return;
+
+      paging.page += 1;
+      loadCards({ reset: false, append: true });
+    });
+  }
+
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && state.filtersOpen) setFiltersOpen(false);
+  });
+
+  // resize: změna pageSize (18/24)
+  let rt = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => {
+      const newSize = computePageSize();
+      if (newSize !== paging.pageSize){
+        resetAndReload();
+      }
+    }, 200);
   });
 }
 
@@ -454,15 +606,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   grabEls();
   wireEvents();
 
-  // ✅ nejdřív načteme filtry normálně
+  resetPaging();
+
+  // 1) načti dependent options
   await refreshDependentOptions();
 
-  // ✅ pak aplikujeme URL parametry (?serie=...&set=...)
+  // 2) aplikuj URL (?serie&set...)
   await applyUrlFilters();
 
-  // ✅ vykreslíme chipy
+  // 3) chipy
   renderFilterChips();
 
-  // ✅ až TEĎ loadujeme karty
-  loadCards();
+  // 4) první load (reset + count + page 1)
+  loadCards({ reset: true, append: false });
 });
