@@ -304,7 +304,86 @@ body{
   width:100%;
 }
 
+/* ===================== LOAD MORE / "STRÁNKOVÁNÍ" ===================== */
+/* Wrapper – vypadá jako elegantní bar pod gridem */
+#loadMoreWrap{
+  margin-top:26px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:14px;
 
+  padding:14px 16px;
+  border-radius:18px;
+  border:1px solid #2a2a33;
+  background:#15151d;
+
+  box-shadow:0 18px 40px rgba(0,0,0,.35);
+}
+
+/* Button – pill jako ostatní CTA */
+#loadMoreBtn{
+  padding:14px 22px;
+  border-radius:999px;
+  border:none;
+  cursor:pointer;
+  font-weight:900;
+  letter-spacing:.2px;
+
+  background:#ff3b3b;
+  color:white;
+  transition:.15s;
+}
+
+#loadMoreBtn:hover{
+  transform:scale(1.03);
+}
+
+#loadMoreBtn:disabled{
+  cursor:not-allowed;
+  transform:none;
+  background:#2a2a33;
+  color:#9a9aa4;
+}
+
+/* Info – "18/75" */
+#loadMoreInfo{
+  font-weight:900;
+  font-size:.95rem;
+  color:#bbb;
+  padding:10px 14px;
+  border-radius:999px;
+  background:#0f0f14;
+  border:1px solid #2a2a33;
+  min-width:86px;
+  text-align:center;
+}
+
+/* Desktop: info vpravo vedle tlačítka (už je) */
+@media (min-width:901px){
+  #loadMoreWrap{
+    justify-content:flex-end;
+  }
+}
+
+/* Mobile: button full width + info pod tím */
+@media (max-width:900px){
+  #loadMoreWrap{
+    flex-direction:column;
+    align-items:stretch;
+    justify-content:flex-start;
+    gap:10px;
+    padding:14px;
+  }
+
+  #loadMoreBtn{
+    width:100%;
+  }
+
+  #loadMoreInfo{
+    width:100%;
+  }
+}
 
 /* ===================== MOBILE ===================== */
 @media (max-width:900px){
