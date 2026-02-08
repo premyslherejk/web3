@@ -98,7 +98,7 @@ function resetPaging(){
 }
 
 function getShownCount(){
-  const shown = (paging.page * paging.pageSize);
+  const shown = paging.page * paging.pageSize;
   return Math.min(shown, paging.total || 0);
 }
 
@@ -119,7 +119,6 @@ function updateLoadMoreUI(){
     els.loadMoreBtn.style.opacity = (paging.loading || !canMore) ? '0.55' : '1';
   }
 
-  // když je total 0 -> klidně schovej celé
   els.loadMoreWrap.style.display = (total > 0) ? 'flex' : 'none';
 }
 
@@ -354,10 +353,12 @@ async function refreshDependentOptions(){
 }
 
 /* =========================
-   QUERY HELPERS
+   QUERY HELPERS (FIXED FOR supabase-js v2)
+   -> filters must be applied AFTER select()
 ========================= */
 
 function applyFiltersToQuery(q){
+  // status always
   q = q.neq('status', 'Prodáno');
 
   if (state.language) q = q.eq('language', state.language);
@@ -388,18 +389,17 @@ function applyFiltersToQuery(q){
 function applySortToQuery(q){
   const sort = els.sort.value || 'new';
 
-  // ✅ Stabilní order: vždy přidáme tiebreaker "id"
-  if (sort === 'price_asc') {
+  // ✅ Stabilní order: tiebreaker id
+  if (sort === 'price_asc'){
     q = q.order('price', { ascending: true, nullsFirst: false });
     q = q.order('id', { ascending: true });
-  } else if (sort === 'price_desc') {
+  } else if (sort === 'price_desc'){
     q = q.order('price', { ascending: false, nullsFirst: false });
     q = q.order('id', { ascending: false });
-  } else if (sort === 'name') {
+  } else if (sort === 'name'){
     q = q.order('name', { ascending: true, nullsFirst: false });
     q = q.order('id', { ascending: true });
   } else {
-    // new
     q = q.order('created_at', { ascending: false, nullsFirst: false });
     q = q.order('id', { ascending: false });
   }
@@ -412,13 +412,15 @@ function applySortToQuery(q){
 ========================= */
 
 async function fetchTotalCount(){
-  // head+count query
-  let q = sb.from('cards');
-  q = applyFiltersToQuery(q).select('id', { count: 'exact', head: true });
+  // ✅ IMPORTANT: .select() first, THEN filters
+  let q = sb
+    .from('cards')
+    .select('id', { count: 'exact', head: true });
+
+  q = applyFiltersToQuery(q);
 
   const { count, error } = await q;
   if (error) throw error;
-
   return count || 0;
 }
 
@@ -428,10 +430,14 @@ async function fetchPageData(page){
   const from = (page - 1) * paging.pageSize;
   const to = from + paging.pageSize - 1;
 
-  let q = sb.from('cards');
+  // ✅ IMPORTANT: .select() first, THEN filters/sort/range
+  let q = sb
+    .from('cards')
+    .select(selectCols);
+
   q = applyFiltersToQuery(q);
   q = applySortToQuery(q);
-  q = q.select(selectCols).range(from, to);
+  q = q.range(from, to);
 
   const { data, error } = await q;
   if (error) throw error;
@@ -457,22 +463,18 @@ async function loadCards({ reset = false, append = false } = {}){
     if (reset){
       paging.page = 1;
       append = false;
+      paging.total = 0; // force recount
     }
 
-    // 1) count (jen když reset nebo total neznáme)
-    if (reset || paging.total === 0){
+    if (paging.total === 0){
       paging.total = await fetchTotalCount();
     }
 
-    // když nic nenajdeme
     if (paging.total === 0){
       window.OfferUI.renderCardsInto(els.cards, []);
-      paging.loading = false;
-      updateLoadMoreUI();
       return;
     }
 
-    // 2) fetch page data
     const data = await fetchPageData(paging.page);
 
     if (!append){
@@ -524,7 +526,6 @@ function wireEvents(){
     clearSingleFilter(chip.dataset.key);
   });
 
-  // live search
   let t = null;
   els.search.addEventListener('input', () => {
     clearTimeout(t);
@@ -576,9 +577,10 @@ function wireEvents(){
   // load more
   if (els.loadMoreBtn){
     els.loadMoreBtn.addEventListener('click', () => {
+      const total = paging.total || 0;
       const shown = getShownCount();
       if (paging.loading) return;
-      if (shown >= (paging.total || 0)) return;
+      if (shown >= total) return;
 
       paging.page += 1;
       loadCards({ reset: false, append: true });
@@ -589,7 +591,6 @@ function wireEvents(){
     if (e.key === 'Escape' && state.filtersOpen) setFiltersOpen(false);
   });
 
-  // resize: změna pageSize (18/24)
   let rt = null;
   window.addEventListener('resize', () => {
     clearTimeout(rt);
@@ -608,15 +609,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   resetPaging();
 
-  // 1) načti dependent options
   await refreshDependentOptions();
-
-  // 2) aplikuj URL (?serie&set...)
   await applyUrlFilters();
 
-  // 3) chipy
   renderFilterChips();
-
-  // 4) první load (reset + count + page 1)
   loadCards({ reset: true, append: false });
 });
