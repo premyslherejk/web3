@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!target) return;
 
       e.preventDefault();
-      const y = target.getBoundingClientRect().top + window.scrollY - 14;
+      const y = target.getBoundingClientRect().top + window.scrollY - 80;
       window.scrollTo({ top: y, behavior: 'smooth' });
 
       history.replaceState(null, '', href);
