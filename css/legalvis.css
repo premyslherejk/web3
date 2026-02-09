@@ -52,6 +52,7 @@
   font-size: 1.25rem;
   font-weight: 900;
   color: #ff3b3b;
+  scroll-margin-top: 14px; /* aby anchor nesedl pod header */
 }
 
 /* Lists */
@@ -128,6 +129,14 @@
   transform: translateY(-1px);
 }
 
+/* active section (scroll spy) */
+.legal-toc a.is-active{
+  opacity: 1;
+  border-color: rgba(255,59,59,.75);
+  box-shadow: 0 0 0 2px rgba(255,59,59,.14);
+  transform: translateY(-1px);
+}
+
 /* End */
 .legal-end{
   margin-top: 26px;
@@ -141,6 +150,40 @@
   height: 1px;
   background: #2a2a33;
   margin: 18px 0 12px;
+}
+
+/* Back to top button */
+.back-to-top{
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  border: 1px solid #2a2a33;
+  background: #15151d;
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: .18s;
+  z-index: 9999;
+}
+
+.back-to-top:hover{
+  border-color: rgba(255,59,59,.6);
+  box-shadow: 0 0 0 2px rgba(255,59,59,.12);
+}
+
+.back-to-top.show{
+  opacity: .95;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 /* Mobile */
@@ -164,5 +207,13 @@
 
   .legal-toc a{
     font-size: .95rem;
+  }
+
+  .back-to-top{
+    right: 12px;
+    bottom: 12px;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
   }
 }
