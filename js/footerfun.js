@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="footer-links">
         <h4>Info</h4>
         <a href="terms.html">Obchodní podmínky</a>
+        <a href="odstoupeni.html">Odstoupení od kupní smlouvy</a>
         <a href="reklamace.html">Reklamace</a>
         <a href="gdpr.html">GDPR</a>
         <a href="cookies.html">Cookies</a>
