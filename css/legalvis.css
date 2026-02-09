@@ -217,3 +217,39 @@
     border-radius: 14px;
   }
 }
+
+
+/* ===================== BACK TO TOP ===================== */
+#backTop {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  padding: 12px 16px;
+  border-radius: 999px;
+  border: 1px solid #2a2a33;
+  background: #15151d;
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: .2s;
+}
+
+#backTop.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#backTop:hover {
+  border-color: #ff3b3b;
+  box-shadow: 0 0 0 2px rgba(255,59,59,.2);
+}
+
+
+/* ===================== ACTIVE TOC LINK ===================== */
+.legal-toc a.active {
+  opacity: 1;
+  border-color: #ff3b3b;
+  box-shadow: 0 0 0 2px rgba(255,59,59,.18);
+}
