@@ -1,181 +1,221 @@
-<link rel="stylesheet" href="css/offervis.css">
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Obchodní podmínky | PokeKusovky</title>
 
-<div class="legal-page">
+  <!-- Global styles (tvoje existující) -->
+  <link rel="stylesheet" href="css/headervis.css">
+  <link rel="stylesheet" href="css/footervis.css">
 
-  <header class="legal-header">
-    <h1>Všeobecné obchodní podmínky</h1>
-    <p class="legal-sub">
-      Poslední aktualizace: <span>[datum]</span>
-    </p>
+  <!-- Legal page styles -->
+  <link rel="stylesheet" href="css/legalvis.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- HEADER (stejný pattern jako jinde) -->
+  <header class="site-header">
+    <div class="logo" onclick="location.href='index.html'">PokeKusovky</div>
+
+    <div class="header-right">
+      <div class="cart-icon" onclick="location.href='cart.html'">
+        🛒 <span class="cart-count" id="cart-count">0</span>
+      </div>
+      <button id="menu-button" class="menu-button">☰</button>
+    </div>
   </header>
 
-  <section class="legal-card">
-    <p>
-      Tyto všeobecné obchodní podmínky (dále jen „obchodní podmínky“) jsou vydané dle § 1751 a násl. zákona č. 89/2012 Sb., občanský zákoník (dále jen „občanský zákoník“).
-    </p>
-
-    <div class="legal-box">
-      <p><b>Prodávající:</b> [Tvoje jméno / název firmy]</p>
-      <p><b>IČO:</b> [IČO] &nbsp;&nbsp; <b>DIČ:</b> [DIČ – pokud máš]</p>
-      <p><b>Sídlo / místo podnikání:</b> [Adresa]</p>
-      <p><b>Zapsán:</b> [např. v živnostenském rejstříku / OR: oddíl, vložka – pokud s.r.o.]</p>
-      <p><b>E-mail:</b> [email]</p>
-      <p><b>Telefon:</b> [telefon]</p>
-      <p><b>Web:</b> [doména]</p>
-      <p><b>Provozovna (pokud máš):</b> [adresa / nebo „Nemáme provozovnu pro veřejnost“]</p>
-    </div>
-
-    <p class="legal-note">(dále jen „prodávající“)</p>
-  </section>
-
-  <nav class="legal-toc">
-    <h3>Obsah</h3>
-    <div class="toc-grid">
-      <a href="#i">I. Základní ustanovení</a>
-      <a href="#ii">II. Informace o zboží a cenách</a>
-      <a href="#iii">III. Objednávka a uzavření kupní smlouvy</a>
-      <a href="#iv">IV. Zákaznický účet</a>
-      <a href="#v">V. Platební podmínky a dodání zboží</a>
-      <a href="#vi">VI. Odstoupení od smlouvy</a>
-      <a href="#vii">VII. Práva z vadného plnění</a>
-      <a href="#viii">VIII. Doručování</a>
-      <a href="#ix">IX. Ochrana osobních údajů</a>
-      <a href="#x">X. Mimosoudní řešení sporů</a>
-      <a href="#xi">XI. Závěrečná ustanovení</a>
-    </div>
+  <nav class="menu-overlay" id="menu">
+    <a href="index.html">Domů</a>
+    <a href="collection.html">Karty</a>
+    <a href="auctions.html">Aukce</a>
+    <a href="contact.html">Kontakt</a>
   </nav>
 
-  <section class="legal-card" id="i">
-    <h2>I. Základní ustanovení</h2>
-    <ol>
-      <li>
-        Tyto obchodní podmínky upravují vzájemná práva a povinnosti prodávajícího a osoby, která uzavírá kupní smlouvu mimo svou podnikatelskou činnost jako spotřebitel, nebo v rámci své podnikatelské činnosti (dále jen „kupující“) prostřednictvím webového rozhraní umístěného na webové stránce prodávajícího (dále jen „internetový obchod“).
-      </li>
-      <li>
-        Ustanovení obchodních podmínek jsou nedílnou součástí kupní smlouvy. Odchylná ujednání v kupní smlouvě mají přednost před ustanoveními těchto obchodních podmínek.
-      </li>
-      <li>Kupní smlouva i obchodní podmínky se uzavírají v českém jazyce.</li>
-      <li>
-        Prodávající je oprávněn obchodní podmínky měnit; pro konkrétní objednávku platí znění účinné v okamžiku odeslání objednávky kupujícím.
-      </li>
-    </ol>
-  </section>
+  <!-- PAGE -->
+  <main class="legal-page">
 
-  <section class="legal-card" id="ii">
-    <h2>II. Informace o zboží a cenách</h2>
-    <ol>
-      <li>Prodávající prodává zejména kusové sběratelské karty (např. Pokémon TCG). U každé položky je uveden popis, případně fotografie a stav (např. NM/EX/LP/MP/HP apod.).</li>
-      <li>U sběratelských karet kupující bere na vědomí, že hodnocení stavu je do určité míry subjektivní. Prodávající se snaží stav popsat férově; jsou-li u produktu uvedeny fotografie konkrétní karty, mají při posouzení přednost.</li>
-      <li>Veškerá prezentace zboží v katalogu internetového obchodu je informativního charakteru a prodávající není povinen uzavřít kupní smlouvu ohledně tohoto zboží.</li>
-      <li>Ceny jsou uvedeny včetně všech daní a poplatků (případně uveď: „Prodávající není plátce DPH.“ / nebo „Ceny jsou uvedeny včetně DPH.“).</li>
-      <li>V internetovém obchodě jsou zveřejněny informace o nákladech spojených s balením a dodáním zboží. Tyto informace platí pro doručování v rámci území České republiky, není-li uvedeno jinak.</li>
-      <li>Případné slevy z kupní ceny nelze navzájem kombinovat, nedohodne-li se prodávající s kupujícím jinak.</li>
-      <li>Dojde-li ke zjevné technické chybě při uvedení ceny, prodávající není povinen dodat zboží za zjevně chybnou cenu.</li>
-    </ol>
-  </section>
+    <header class="legal-header" id="top">
+      <h1>Všeobecné obchodní podmínky</h1>
+      <p class="legal-sub">Poslední aktualizace: <span>[datum]</span></p>
+    </header>
 
-  <section class="legal-card" id="iii">
-    <h2>III. Objednávka a uzavření kupní smlouvy</h2>
-    <ol>
-      <li>Kupující provádí objednávku prostřednictvím objednávkového formuláře v internetovém obchodě, případně přes zákaznický účet (pokud je dostupný).</li>
-      <li>Před odesláním objednávky je kupujícímu umožněno zkontrolovat a měnit údaje, které do objednávky vložil. Objednávka je odeslána kliknutím na tlačítko potvrzující objednávku.</li>
-      <li>Podmínkou platnosti objednávky je vyplnění všech povinných údajů a potvrzení seznámení s těmito obchodními podmínkami.</li>
-      <li>Po obdržení objednávky zašle prodávající kupujícímu potvrzení o přijetí objednávky na e-mail. Toto potvrzení může být automatické a samo o sobě neznamená uzavření smlouvy.</li>
-      <li>Kupní smlouva je uzavřena okamžikem, kdy prodávající objednávku potvrdí (typicky e-mailem) nebo kdy dojde k odeslání zboží, není-li uvedeno jinak.</li>
-      <li>Kupující může zrušit objednávku do okamžiku, než je mu doručeno potvrzení přijetí objednávky prodávajícím / než dojde k expedici (dle toho, co používáš). Zrušení lze provést e-mailem nebo telefonicky.</li>
-      <li>Prodávající si vyhrazuje právo odmítnout objednávku zejména v případě vyprodání, nedostupnosti, podezření na zneužití systému, nebo pokud kupující v minulosti podstatně porušil své povinnosti.</li>
-    </ol>
-  </section>
+    <section class="legal-card">
+      <p>
+        Tyto všeobecné obchodní podmínky (dále jen „obchodní podmínky“) jsou vydané dle § 1751 a násl. zákona č. 89/2012 Sb., občanský zákoník (dále jen „občanský zákoník“).
+      </p>
 
-  <section class="legal-card" id="iv">
-    <h2>IV. Zákaznický účet (pokud je zaveden)</h2>
-    <ol>
-      <li>Na základě registrace může kupující přistupovat do svého zákaznického účtu. Kupující může objednávat i bez registrace, pokud to internetový obchod umožňuje.</li>
-      <li>Kupující je povinen uvádět pravdivé údaje a při změně je aktualizovat. Přístup k účtu je zabezpečen heslem; kupující je povinen chránit přístupové údaje.</li>
-      <li>Prodávající nenese odpovědnost za zneužití účtu třetími osobami. Prodávající může účet zrušit při porušení povinností nebo dlouhodobé neaktivitě.</li>
-    </ol>
-  </section>
+      <div class="legal-box">
+        <p><b>Prodávající:</b> [Tvoje jméno / název firmy]</p>
+        <p><b>IČO:</b> [IČO] &nbsp;&nbsp; <b>DIČ:</b> [DIČ – pokud máš]</p>
+        <p><b>Sídlo / místo podnikání:</b> [Adresa]</p>
+        <p><b>Zapsán:</b> [např. v živnostenském rejstříku / OR: oddíl, vložka – pokud s.r.o.]</p>
+        <p><b>E-mail:</b> [email]</p>
+        <p><b>Telefon:</b> [telefon]</p>
+        <p><b>Web:</b> [doména]</p>
+        <p><b>Provozovna (pokud máš):</b> [adresa / nebo „Nemáme provozovnu pro veřejnost“]</p>
+      </div>
 
-  <section class="legal-card" id="v">
-    <h2>V. Platební podmínky a dodání zboží</h2>
-    <ol>
-      <li>Kupující může uhradit kupní cenu zejména těmito způsoby: bezhotovostně převodem na účet, případně dalšími metodami uvedenými v košíku (např. dobírka, online platba).</li>
-      <li>Společně s kupní cenou je kupující povinen uhradit náklady na dopravu a balné dle zvolené metody.</li>
-      <li>V případě bezhotovostní platby je kupní cena splatná do [X] dnů od uzavření kupní smlouvy. Závazek je splněn připsáním částky na účet prodávajícího.</li>
-      <li>Zboží je kupujícímu dodáno: na adresu, do výdejního místa / boxu, nebo osobním odběrem (pokud umožňuješ).</li>
-      <li>Dodací lhůta je obvykle [1–3] pracovní dny od přijetí platby (u dobírky od potvrzení objednávky), není-li uvedeno jinak.</li>
-      <li>Při převzetí od přepravce je kupující povinen zkontrolovat neporušenost obalu. Při zjevném poškození zásilky je kupující oprávněn zásilku nepřevzít a je vhodné sepsat škodní protokol.</li>
-      <li>Nepřevezme-li kupující zboží bezdůvodně, může prodávajícímu vzniknout nárok na náhradu účelně vynaložených nákladů spojených s odesláním a případným vrácením zásilky.</li>
-      <li>Vlastnické právo ke zboží nabývá kupující zaplacením celé kupní ceny včetně dopravy, nejdříve však převzetím zboží.</li>
-    </ol>
-  </section>
+      <p class="legal-note">(dále jen „prodávající“)</p>
+    </section>
 
-  <section class="legal-card" id="vi">
-    <h2>VI. Odstoupení od smlouvy (spotřebitel)</h2>
-    <ol>
-      <li>Kupující – spotřebitel má právo odstoupit od smlouvy ve lhůtě 14 dnů od převzetí zboží.</li>
-      <li>Pro odstoupení může kupující využít vzorový formulář (příloha), nebo odstoupit e-mailem. Prodávající potvrdí přijetí oznámení o odstoupení bez zbytečného odkladu.</li>
-      <li>Kupující je povinen vrátit zboží nejpozději do 14 dnů od odstoupení. Náklady na vrácení zboží nese kupující.</li>
-      <li>Prodávající vrátí kupujícímu bez zbytečného odkladu, nejpozději do 14 dnů od odstoupení, všechny přijaté peněžní prostředky včetně nákladů na dodání, a to stejným způsobem, jakým je přijal; může však vrácení prostředků zadržet do doby, než obdrží zboží zpět nebo než kupující prokáže, že zboží odeslal.</li>
-      <li>Pokud kupující zvolil jiný než nejlevnější způsob dodání, prodávající vrátí náklady na dodání ve výši nejlevnější nabízené varianty.</li>
-      <li>Kupující odpovídá za snížení hodnoty zboží, pokud se zbožím nakládal jinak, než je nutné k seznámení se s jeho povahou a vlastnostmi. U sběratelských karet může být snížení hodnoty i výrazné (např. ohnutí, poškrábání, otisk, vlhkost).</li>
-    </ol>
-  </section>
+    <nav class="legal-toc" id="toc">
+      <h3>Obsah</h3>
+      <div class="toc-grid">
+        <a data-spy href="#i">I. Základní ustanovení</a>
+        <a data-spy href="#ii">II. Informace o zboží a cenách</a>
+        <a data-spy href="#iii">III. Objednávka a uzavření kupní smlouvy</a>
+        <a data-spy href="#iv">IV. Zákaznický účet</a>
+        <a data-spy href="#v">V. Platební podmínky a dodání zboží</a>
+        <a data-spy href="#vi">VI. Odstoupení od smlouvy</a>
+        <a data-spy href="#vii">VII. Práva z vadného plnění</a>
+        <a data-spy href="#viii">VIII. Doručování</a>
+        <a data-spy href="#ix">IX. Ochrana osobních údajů</a>
+        <a data-spy href="#x">X. Mimosoudní řešení sporů</a>
+        <a data-spy href="#xi">XI. Závěrečná ustanovení</a>
+      </div>
+    </nav>
 
-  <section class="legal-card" id="vii">
-    <h2>VII. Práva z vadného plnění (reklamace)</h2>
-    <ol>
-      <li>Prodávající odpovídá kupujícímu, že zboží při převzetí nemá vady a odpovídá popisu. U sběratelských karet se za vadu nepovažuje opotřebení odpovídající deklarovanému stavu (např. LP/MP/HP).</li>
-      <li>Kupující – spotřebitel může uplatnit práva z vady, která se projeví v době 24 měsíců od převzetí zboží. V prvním roce od převzetí se u spotřebitele uplatní zákonná domněnka, že vada existovala již při převzetí, pokud se neprokáže opak.</li>
-      <li>U použitého zboží může být doba pro uplatnění práv z vadného plnění zkrácena až na 12 měsíců, pokud je to sjednáno (např. uvedeno u produktu a v těchto podmínkách).</li>
-      <li>Reklamaci lze uplatnit e-mailem na [email] s uvedením: čísla objednávky, popisu vady a preferovaného způsobu vyřízení. Prodávající může požádat o fotografie / video pro rychlé posouzení.</li>
-      <li>Reklamace bude vyřízena bezodkladně, nejpozději do 30 dnů, pokud se strany nedohodnou jinak.</li>
-      <li>V případě uznané reklamace má kupující právo na odstranění vady (pokud dává smysl), přiměřenou slevu, výměnu (je-li možná), nebo odstoupení od smlouvy dle zákonných podmínek.</li>
-    </ol>
-  </section>
+    <section class="legal-card" id="i">
+      <h2>I. Základní ustanovení</h2>
+      <ol>
+        <li>
+          Tyto obchodní podmínky upravují vzájemná práva a povinnosti prodávajícího a osoby, která uzavírá kupní smlouvu mimo svou podnikatelskou činnost jako spotřebitel, nebo v rámci své podnikatelské činnosti (dále jen „kupující“) prostřednictvím webového rozhraní umístěného na webové stránce prodávajícího (dále jen „internetový obchod“).
+        </li>
+        <li>
+          Ustanovení obchodních podmínek jsou nedílnou součástí kupní smlouvy. Odchylná ujednání v kupní smlouvě mají přednost před ustanoveními těchto obchodních podmínek.
+        </li>
+        <li>Kupní smlouva i obchodní podmínky se uzavírají v českém jazyce.</li>
+        <li>
+          Prodávající je oprávněn obchodní podmínky měnit; pro konkrétní objednávku platí znění účinné v okamžiku odeslání objednávky kupujícím.
+        </li>
+      </ol>
+    </section>
 
-  <section class="legal-card" id="viii">
-    <h2>VIII. Doručování</h2>
-    <ol>
-      <li>Smluvní strany si mohou veškerou korespondenci doručovat elektronicky.</li>
-      <li>Kupující doručuje prodávajícímu na e-mail uvedený v identifikaci. Prodávající doručuje kupujícímu na e-mail uvedený v objednávce nebo v zákaznickém účtu.</li>
-    </ol>
-  </section>
+    <section class="legal-card" id="ii">
+      <h2>II. Informace o zboží a cenách</h2>
+      <ol>
+        <li>Prodávající prodává zejména kusové sběratelské karty (např. Pokémon TCG). U každé položky je uveden popis, případně fotografie a stav (např. NM/EX/LP/MP/HP apod.).</li>
+        <li>U sběratelských karet kupující bere na vědomí, že hodnocení stavu je do určité míry subjektivní. Prodávající se snaží stav popsat férově; jsou-li u produktu uvedeny fotografie konkrétní karty, mají při posouzení přednost.</li>
+        <li>Veškerá prezentace zboží v katalogu internetového obchodu je informativního charakteru a prodávající není povinen uzavřít kupní smlouvu ohledně tohoto zboží.</li>
+        <li>Ceny jsou uvedeny včetně všech daní a poplatků (případně uveď: „Prodávající není plátce DPH.“ / nebo „Ceny jsou uvedeny včetně DPH.“).</li>
+        <li>V internetovém obchodě jsou zveřejněny informace o nákladech spojených s balením a dodáním zboží. Tyto informace platí pro doručování v rámci území České republiky, není-li uvedeno jinak.</li>
+        <li>Případné slevy z kupní ceny nelze navzájem kombinovat, nedohodne-li se prodávající s kupujícím jinak.</li>
+        <li>Dojde-li ke zjevné technické chybě při uvedení ceny, prodávající není povinen dodat zboží za zjevně chybnou cenu.</li>
+      </ol>
+    </section>
 
-  <section class="legal-card" id="ix">
-    <h2>IX. Ochrana osobních údajů</h2>
-    <ol>
-      <li>Prodávající zpracovává osobní údaje kupujících v souladu s GDPR a souvisejícími právními předpisy.</li>
-      <li>Podrobné informace o zpracování osobních údajů jsou uvedeny na samostatné stránce „Zásady ochrany osobních údajů“.</li>
-      <li>Pokud zasíláš marketingové e-maily: uveď, že je lze kdykoli odmítnout (odhlášení v e-mailu).</li>
-    </ol>
-  </section>
+    <section class="legal-card" id="iii">
+      <h2>III. Objednávka a uzavření kupní smlouvy</h2>
+      <ol>
+        <li>Kupující provádí objednávku prostřednictvím objednávkového formuláře v internetovém obchodě, případně přes zákaznický účet (pokud je dostupný).</li>
+        <li>Před odesláním objednávky je kupujícímu umožněno zkontrolovat a měnit údaje, které do objednávky vložil. Objednávka je odeslána kliknutím na tlačítko potvrzující objednávku.</li>
+        <li>Podmínkou platnosti objednávky je vyplnění všech povinných údajů a potvrzení seznámení s těmito obchodními podmínkami.</li>
+        <li>Po obdržení objednávky zašle prodávající kupujícímu potvrzení o přijetí objednávky na e-mail. Toto potvrzení může být automatické a samo o sobě neznamená uzavření smlouvy.</li>
+        <li>Kupní smlouva je uzavřena okamžikem, kdy prodávající objednávku potvrdí (typicky e-mailem) nebo kdy dojde k odeslání zboží, není-li uvedeno jinak.</li>
+        <li>Kupující může zrušit objednávku do okamžiku, než je mu doručeno potvrzení přijetí objednávky prodávajícím / než dojde k expedici. Zrušení lze provést e-mailem nebo telefonicky.</li>
+        <li>Prodávající si vyhrazuje právo odmítnout objednávku zejména v případě vyprodání, nedostupnosti, podezření na zneužití systému, nebo pokud kupující v minulosti podstatně porušil své povinnosti.</li>
+      </ol>
+    </section>
 
-  <section class="legal-card" id="x">
-    <h2>X. Mimosoudní řešení sporů</h2>
-    <ol>
-      <li>K mimosoudnímu řešení spotřebitelských sporů z kupní smlouvy je příslušná Česká obchodní inspekce (ČOI). Informace o ADR jsou dostupné na adr.coi.cz.</li>
-    </ol>
-  </section>
+    <section class="legal-card" id="iv">
+      <h2>IV. Zákaznický účet (pokud je zaveden)</h2>
+      <ol>
+        <li>Na základě registrace může kupující přistupovat do svého zákaznického účtu. Kupující může objednávat i bez registrace, pokud to internetový obchod umožňuje.</li>
+        <li>Kupující je povinen uvádět pravdivé údaje a při změně je aktualizovat. Přístup k účtu je zabezpečen heslem; kupující je povinen chránit přístupové údaje.</li>
+        <li>Prodávající nenese odpovědnost za zneužití účtu třetími osobami. Prodávající může účet zrušit při porušení povinností nebo dlouhodobé neaktivitě.</li>
+      </ol>
+    </section>
 
-  <section class="legal-card" id="xi">
-    <h2>XI. Závěrečná ustanovení</h2>
-    <ol>
-      <li>Veškerá ujednání mezi prodávajícím a kupujícím se řídí právním řádem České republiky. Tím nejsou dotčena práva spotřebitele vyplývající z obecně závazných předpisů.</li>
-      <li>Prodávající není ve vztahu ke kupujícímu vázán žádnými kodexy chování, není-li uvedeno jinak.</li>
-      <li>Kupní smlouva včetně obchodních podmínek je archivována prodávajícím v elektronické podobě a není veřejně přístupná.</li>
-      <li>Tyto obchodní podmínky nabývají účinnosti dnem: [datum].</li>
-    </ol>
-  </section>
+    <section class="legal-card" id="v">
+      <h2>V. Platební podmínky a dodání zboží</h2>
+      <ol>
+        <li>Kupující může uhradit kupní cenu zejména těmito způsoby: bezhotovostně převodem na účet, případně dalšími metodami uvedenými v košíku (např. dobírka, online platba).</li>
+        <li>Společně s kupní cenou je kupující povinen uhradit náklady na dopravu a balné dle zvolené metody.</li>
+        <li>V případě bezhotovostní platby je kupní cena splatná do [X] dnů od uzavření kupní smlouvy. Závazek je splněn připsáním částky na účet prodávajícího.</li>
+        <li>Zboží je kupujícímu dodáno: na adresu, do výdejního místa / boxu, nebo osobním odběrem (pokud umožňuješ).</li>
+        <li>Dodací lhůta je obvykle [1–3] pracovní dny od přijetí platby (u dobírky od potvrzení objednávky), není-li uvedeno jinak.</li>
+        <li>Při převzetí od přepravce je kupující povinen zkontrolovat neporušenost obalu. Při zjevném poškození zásilky je kupující oprávněn zásilku nepřevzít a je vhodné sepsat škodní protokol.</li>
+        <li>Nepřevezme-li kupující zboží bezdůvodně, může prodávajícímu vzniknout nárok na náhradu účelně vynaložených nákladů spojených s odesláním a případným vrácením zásilky.</li>
+        <li>Vlastnické právo ke zboží nabývá kupující zaplacením celé kupní ceny včetně dopravy, nejdříve však převzetím zboží.</li>
+      </ol>
+    </section>
 
-  <div class="legal-end">
-    <hr>
-    <p>© <span id="year"></span> PokeKusovky</p>
-  </div>
+    <section class="legal-card" id="vi">
+      <h2>VI. Odstoupení od smlouvy (spotřebitel)</h2>
+      <ol>
+        <li>Kupující – spotřebitel má právo odstoupit od smlouvy ve lhůtě 14 dnů od převzetí zboží.</li>
+        <li>Pro odstoupení může kupující využít vzorový formulář (příloha), nebo odstoupit e-mailem. Prodávající potvrdí přijetí oznámení o odstoupení bez zbytečného odkladu.</li>
+        <li>Kupující je povinen vrátit zboží nejpozději do 14 dnů od odstoupení. Náklady na vrácení zboží nese kupující.</li>
+        <li>Prodávající vrátí kupujícímu bez zbytečného odkladu, nejpozději do 14 dnů od odstoupení, všechny přijaté peněžní prostředky včetně nákladů na dodání, stejným způsobem, jakým je přijal; může však vrácení prostředků zadržet do doby, než obdrží zboží zpět nebo než kupující prokáže, že zboží odeslal.</li>
+        <li>Pokud kupující zvolil jiný než nejlevnější způsob dodání, prodávající vrátí náklady na dodání ve výši nejlevnější nabízené varianty.</li>
+        <li>Kupující odpovídá za snížení hodnoty zboží, pokud se zbožím nakládal jinak, než je nutné k seznámení se s jeho povahou a vlastnostmi. U sběratelských karet může být snížení hodnoty i výrazné (např. ohnutí, poškrábání, otisk, vlhkost).</li>
+      </ol>
+    </section>
 
-</div>
+    <section class="legal-card" id="vii">
+      <h2>VII. Práva z vadného plnění (reklamace)</h2>
+      <ol>
+        <li>Prodávající odpovídá kupujícímu, že zboží při převzetí nemá vady a odpovídá popisu. U sběratelských karet se za vadu nepovažuje opotřebení odpovídající deklarovanému stavu (např. LP/MP/HP).</li>
+        <li>Kupující – spotřebitel může uplatnit práva z vady, která se projeví v době 24 měsíců od převzetí zboží. V prvním roce od převzetí se u spotřebitele uplatní zákonná domněnka, že vada existovala již při převzetí, pokud se neprokáže opak.</li>
+        <li>U použitého zboží může být doba pro uplatnění práv z vadného plnění zkrácena až na 12 měsíců, pokud je to sjednáno (např. uvedeno u produktu a v těchto podmínkách).</li>
+        <li>Reklamaci lze uplatnit e-mailem na [email] s uvedením: čísla objednávky, popisu vady a preferovaného způsobu vyřízení. Prodávající může požádat o fotografie / video pro rychlé posouzení.</li>
+        <li>Reklamace bude vyřízena bezodkladně, nejpozději do 30 dnů, pokud se strany nedohodnou jinak.</li>
+        <li>V případě uznané reklamace má kupující právo na odstranění vady (pokud dává smysl), přiměřenou slevu, výměnu (je-li možná), nebo odstoupení od smlouvy dle zákonných podmínek.</li>
+      </ol>
+    </section>
 
-<script>
-  document.getElementById('year').textContent = new Date().getFullYear();
-</script>
-<script src="js/footerfun.js"></script>
+    <section class="legal-card" id="viii">
+      <h2>VIII. Doručování</h2>
+      <ol>
+        <li>Smluvní strany si mohou veškerou korespondenci doručovat elektronicky.</li>
+        <li>Kupující doručuje prodávajícímu na e-mail uvedený v identifikaci. Prodávající doručuje kupujícímu na e-mail uvedený v objednávce nebo v zákaznickém účtu.</li>
+      </ol>
+    </section>
+
+    <section class="legal-card" id="ix">
+      <h2>IX. Ochrana osobních údajů</h2>
+      <ol>
+        <li>Prodávající zpracovává osobní údaje kupujících v souladu s GDPR a souvisejícími právními předpisy.</li>
+        <li>Podrobné informace o zpracování osobních údajů jsou uvedeny na samostatné stránce „Zásady ochrany osobních údajů“.</li>
+        <li>Pokud zasíláš marketingové e-maily: uveď, že je lze kdykoli odmítnout (odhlášení v e-mailu).</li>
+      </ol>
+    </section>
+
+    <section class="legal-card" id="x">
+      <h2>X. Mimosoudní řešení sporů</h2>
+      <ol>
+        <li>K mimosoudnímu řešení spotřebitelských sporů z kupní smlouvy je příslušná Česká obchodní inspekce (ČOI). Informace o ADR jsou dostupné na adr.coi.cz.</li>
+      </ol>
+    </section>
+
+    <section class="legal-card" id="xi">
+      <h2>XI. Závěrečná ustanovení</h2>
+      <ol>
+        <li>Veškerá ujednání mezi prodávajícím a kupujícím se řídí právním řádem České republiky. Tím nejsou dotčena práva spotřebitele vyplývající z obecně závazných předpisů.</li>
+        <li>Prodávající není ve vztahu ke kupujícímu vázán žádnými kodexy chování, není-li uvedeno jinak.</li>
+        <li>Kupní smlouva včetně obchodních podmínek je archivována prodávajícím v elektronické podobě a není veřejně přístupná.</li>
+        <li>Tyto obchodní podmínky nabývají účinnosti dnem: [datum].</li>
+      </ol>
+    </section>
+
+    <div class="legal-end">
+      <hr>
+      <p>© <span id="year"></span> PokeKusovky</p>
+    </div>
+
+  </main>
+
+  <!-- Back to top -->
+  <button type="button" class="back-to-top" id="backToTop" aria-label="Zpět nahoru">↑</button>
+
+  <!-- Scripts -->
+  <script src="js/headerfun.js"></script>
+  <script src="js/legalfun.js"></script>
+  <script src="js/footerfun.js"></script>
+</body>
+</html>
