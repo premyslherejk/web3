@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>Reklamace | PokeKusovky</title>
 
   <!-- Global styles -->
   <link rel="stylesheet" href="css/headervis.css" />
   <link rel="stylesheet" href="css/footervis.css" />
 
-  <!-- Legal page style -->
+  <!-- Legal page style (shared) -->
   <link rel="stylesheet" href="css/legalvis.css" />
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
@@ -23,7 +22,6 @@
     <div class="logo" onclick="location.href='index.html'">PokeKusovky</div>
   </header>
 
-
   <div class="legal-page">
 
     <!-- TITLE -->
@@ -34,20 +32,18 @@
       </p>
     </header>
 
-
     <!-- TOC -->
     <nav class="legal-toc">
       <h3>Obsah</h3>
       <div class="toc-grid">
-        <a href="#jak">Jak reklamovat</a>
-        <a href="#co">Co poslat</a>
-        <a href="#lhuta">Lhůty</a>
-        <a href="#doprava">Doprava</a>
-        <a href="#karty">Specifika karet</a>
-        <a href="#kontakt">Kontakt</a>
+        <a href="#jak" data-spy>Jak reklamovat</a>
+        <a href="#co" data-spy>Co poslat</a>
+        <a href="#lhuta" data-spy>Lhůty</a>
+        <a href="#doprava" data-spy>Doprava</a>
+        <a href="#karty" data-spy>Specifika karet</a>
+        <a href="#kontakt" data-spy>Kontakt</a>
       </div>
     </nav>
-
 
     <!-- SECTION -->
     <section class="legal-card" id="jak">
@@ -65,7 +61,6 @@
       </ol>
     </section>
 
-
     <section class="legal-card" id="co">
       <h2>Co musí reklamace obsahovat</h2>
       <p>
@@ -80,7 +75,6 @@
         <li>Preferovaný způsob řešení (sleva / výměna / vrácení)</li>
       </ol>
     </section>
-
 
     <section class="legal-card" id="lhuta">
       <h2>Lhůty pro vyřízení reklamace</h2>
@@ -97,7 +91,6 @@
         </li>
       </ol>
     </section>
-
 
     <section class="legal-card" id="doprava">
       <h2>Doprava při reklamaci</h2>
@@ -116,7 +109,6 @@
       </p>
     </section>
 
-
     <section class="legal-card" id="karty">
       <h2>Specifika sběratelských karet</h2>
       <p>
@@ -124,18 +116,11 @@
       </p>
 
       <ol>
-        <li>
-          Fotografie konkrétní karty mají přednost před obecným popisem.
-        </li>
-        <li>
-          Opotřebení odpovídající deklarovanému stavu (NM/EX/GD/PO) není vadou.
-        </li>
-        <li>
-          Poškození vzniklé nevhodnou manipulací kupujícího nelze reklamovat.
-        </li>
+        <li>Fotografie konkrétní karty mají přednost před obecným popisem.</li>
+        <li>Opotřebení odpovídající deklarovanému stavu (NM/EX/GD/PO) není vadou.</li>
+        <li>Poškození vzniklé nevhodnou manipulací kupujícího nelze reklamovat.</li>
       </ol>
     </section>
-
 
     <section class="legal-card" id="kontakt">
       <h2>Kontakt pro reklamace</h2>
@@ -143,14 +128,13 @@
       <div class="legal-box">
         <p><b>E-mail:</b> reklamace@pokekusovky.cz</p>
         <p><b>Adresa pro reklamace:</b> [Ulice 123, 110 00 Praha]</p>
-        <p><b>Zásilkovna/Balíkovna:</b> dle domluvy v e-mailu</p>
+        <p><b>Zásilkovna / Balíkovna:</b> dle domluvy v e-mailu</p>
       </div>
 
       <p class="legal-note">
         Reklamace neposílej bez předchozí domluvy – vždy nejdřív napiš e-mail.
       </p>
     </section>
-
 
     <!-- END -->
     <div class="legal-end">
@@ -160,16 +144,11 @@
 
   </div>
 
-
-  <!-- Back to top button -->
-  <button id="backTop">↑ Zpět nahoru</button>
-
+  <!-- Back to top button (must match your shared JS+CSS) -->
+  <button id="backToTop" class="back-to-top" type="button" aria-label="Zpět nahoru">↑</button>
 
   <!-- Scripts -->
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-  </script>
-
+  <script src="js/legalfun.js"></script>
   <script src="js/legalfun.js"></script>
   <script src="js/footerfun.js"></script>
 
