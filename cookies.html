@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cookies | PokeKusovky</title>
+
+  <!-- Global styles -->
+  <link rel="stylesheet" href="css/headervis.css" />
+  <link rel="stylesheet" href="css/footervis.css" />
+
+  <!-- Legal style -->
+  <link rel="stylesheet" href="css/legalvis.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="logo" onclick="location.href='index.html'">PokeKusovky</div>
+  </header>
+
+  <div class="legal-page">
+
+    <!-- TITLE -->
+    <header class="legal-header">
+      <h1>Cookies</h1>
+      <p class="legal-sub">
+        Jak na webu používáme cookies a podobné technologie.
+      </p>
+    </header>
+
+    <!-- TOC -->
+    <nav class="legal-toc">
+      <h3>Obsah</h3>
+      <div class="toc-grid">
+        <a href="#co" data-spy>Co jsou cookies</a>
+        <a href="#coPouzivame" data-spy>Co používáme my</a>
+        <a href="#localstorage" data-spy>Košík a LocalStorage</a>
+        <a href="#tretistrany" data-spy>Služby třetích stran</a>
+        <a href="#sprava" data-spy>Jak to můžeš spravovat</a>
+        <a href="#kontakt" data-spy>Kontakt</a>
+      </div>
+    </nav>
+
+    <section class="legal-card" id="co">
+      <h2>Co jsou cookies</h2>
+      <p>
+        Cookies jsou malé textové soubory, které si web může uložit do tvého zařízení,
+        aby si pamatoval určité informace (např. volby na webu).
+      </p>
+      <p class="legal-note">
+        Vedle cookies existují i podobné technologie, např. LocalStorage v prohlížeči.
+      </p>
+    </section>
+
+    <section class="legal-card" id="coPouzivame">
+      <h2>Co používáme my</h2>
+      <p>
+        Aktuálně na tomto webu <b>nepoužíváme analytické ani marketingové cookies</b>
+        (žádné Google Analytics, Facebook Pixel, remarketing apod.).
+      </p>
+      <ol>
+        <li><b>Nezbytné technické prvky</b> pro fungování webu (např. načítání obsahu, bezpečné zobrazení stránek).</li>
+        <li><b>Uložení košíku</b> pomocí LocalStorage (viz níže).</li>
+      </ol>
+      <p class="legal-note">
+        Pokud v budoucnu přidáme měření návštěvnosti nebo marketingové nástroje, stránku aktualizujeme
+        a případně doplníme i souhlasový banner.
+      </p>
+    </section>
+
+    <section class="legal-card" id="localstorage">
+      <h2>Košík a LocalStorage</h2>
+      <p>
+        Košík si web ukládá do <b>LocalStorage</b> v prohlížeči. Je to úložiště na tvém zařízení,
+        které funguje podobně jako cookies, ale technicky to není cookie.
+      </p>
+
+      <div class="legal-box">
+        <p><b>Účel:</b> aby se ti košík nevymazal po refreshi stránky.</p>
+        <p><b>Rozsah:</b> typicky ID produktů a cena (dle implementace košíku).</p>
+        <p><b>Doba uložení:</b> dokud si LocalStorage nesmažeš, nebo košík nevyprázdníš.</p>
+      </div>
+
+      <p class="legal-note">
+        LocalStorage můžeš kdykoli smazat v nastavení prohlížeče (viz sekce „Jak to můžeš spravovat“).
+      </p>
+    </section>
+
+    <section class="legal-card" id="tretistrany">
+      <h2>Služby třetích stran</h2>
+      <p>
+        Web běží na hostingu <b>GitHub Pages</b> a pro načítání dat o kartách používá <b>Supabase</b>.
+      </p>
+      <ol>
+        <li>
+          <b>GitHub Pages</b> – statické hostování webu.
+        </li>
+        <li>
+          <b>Supabase</b> – databáze / API pro načítání produktů (karet).
+        </li>
+      </ol>
+      <p class="legal-note">
+        Jelikož nemáš login, nepoužíváš analytiku ani reklamy, tak typicky nejde o marketingové cookies.
+        Přesto se mohou zpracovávat technické údaje při komunikaci se serverem (např. IP adresa v logách).
+      </p>
+    </section>
+
+    <section class="legal-card" id="sprava">
+      <h2>Jak to můžeš spravovat</h2>
+      <p>
+        Pokud chceš, můžeš cookies a podobné technologie spravovat přímo v prohlížeči:
+      </p>
+      <ol>
+        <li>
+          <b>Smazání uložených dat webu:</b> v nastavení prohlížeče vyhledej „Smazat údaje o prohlížení“
+          nebo „Data webu“ (tím smažeš i LocalStorage).
+        </li>
+        <li>
+          <b>Blokace cookies:</b> můžeš nastavit blokaci všech cookies nebo jen cookies třetích stran.
+        </li>
+        <li>
+          <b>Režim anonymního okna:</b> po zavření okna se většina dat smaže automaticky.
+        </li>
+      </ol>
+      <p class="legal-note">
+        Pozor: pokud zablokuješ všechny cookies/uložiště, některé části webu (např. košík) nemusí fungovat správně.
+      </p>
+    </section>
+
+    <section class="legal-card" id="kontakt">
+      <h2>Kontakt</h2>
+      <div class="legal-box">
+        <p><b>E-mail:</b> [email@pokekusovky.cz]</p>
+        <p><b>Provozovatel:</b> [Tvoje jméno / firma]</p>
+        <p><b>IČO:</b> [IČO]</p>
+      </div>
+    </section>
+
+    <div class="legal-end">
+      <hr />
+      <p>© <span id="year"></span> PokeKusovky</p>
+    </div>
+
+  </div>
+
+  <!-- Back to top (sjednocený s legalvis + legalfun) -->
+  <button id="backToTop" class="back-to-top" type="button" aria-label="Zpět nahoru">↑</button>
+
+  <!-- Scripts -->
+  <script src="js/legalfun.js"></script>
+  <script src="js/footerfun.js"></script>
+
+</body>
+</html>
