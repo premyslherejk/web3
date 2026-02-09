@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Odstoupení od kupní smlouvy | PokeKusovky</title>
+
+  <!-- Global styles -->
+  <link rel="stylesheet" href="css/headervis.css" />
+  <link rel="stylesheet" href="css/footervis.css" />
+
+  <!-- Legal page style (shared) -->
+  <link rel="stylesheet" href="css/legalvis.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="logo" onclick="location.href='index.html'">PokeKusovky</div>
+  </header>
+
+  <div class="legal-page">
+
+    <!-- TITLE -->
+    <header class="legal-header">
+      <h1>Odstoupení od kupní smlouvy</h1>
+      <p class="legal-sub">
+        Formulář + návod. Pokud jsi spotřebitel, máš typicky <b>14 dní</b> od převzetí zboží na odstoupení.
+      </p>
+    </header>
+
+    <!-- TOC -->
+    <nav class="legal-toc">
+      <h3>Obsah</h3>
+      <div class="toc-grid">
+        <a href="#pravo" data-spy>Jak funguje odstoupení</a>
+        <a href="#kdy-ne" data-spy>Kdy to nejde</a>
+        <a href="#jak" data-spy>Jak postupovat</a>
+        <a href="#form" data-spy>Formulář</a>
+        <a href="#kontakt" data-spy>Kam to poslat</a>
+      </div>
+    </nav>
+
+    <!-- LEGAL EXPLANATION -->
+    <section class="legal-card" id="pravo">
+      <h2>Jak funguje odstoupení (právně)</h2>
+      <p>
+        Pokud jsi spotřebitel a nakoupil jsi na dálku (přes e-shop), máš právo odstoupit od kupní smlouvy do
+        <b>14 dnů</b> od převzetí zboží. Nemusíš uvádět důvod.
+      </p>
+      <ol>
+        <li>Odstoupení nám můžeš poslat e-mailem (stačí text + údaje) nebo použít formulář níže.</li>
+        <li>Zboží pak odešli zpět nejpozději do <b>14 dnů</b> od odstoupení.</li>
+        <li>Peníze vracíme do <b>14 dnů</b>, ale můžeme počkat, dokud zboží nedorazí nebo neprokážeš odeslání.</li>
+        <li>Pokud jsi zvolil jiný než nejlevnější způsob dodání, vrací se max. cena nejlevnější varianty.</li>
+      </ol>
+      <p class="legal-note">
+        U sběratelských karet může mít použití / poškození velký vliv na hodnotu — pokud se zbožím zacházíš víc než “na prohlídku”, může se krátit vracená částka.
+      </p>
+    </section>
+
+    <section class="legal-card" id="kdy-ne">
+      <h2>Kdy odstoupení nemusí jít</h2>
+      <p>
+        Existují výjimky (např. zboží upravené na míru, hygienické zboží po rozbalení apod.).
+        U kusových karet to většinou nebývá problém — ale platí, že:
+      </p>
+      <ol>
+        <li>Zboží musí být vráceno v rozumném stavu (bez nového poškození).</li>
+        <li>Pokud karta dostane ohyb / škrábanec / vlhkost až u tebe, může se hodnota výrazně snížit.</li>
+      </ol>
+    </section>
+
+    <!-- SIMPLE GUIDE -->
+    <section class="legal-card" id="jak">
+      <h2>Jak postupovat (pro normální lidi)</h2>
+      <p class="legal-mini">
+        Nejjednodušší flow:
+      </p>
+
+      <ul class="legal-check">
+        <li>
+          <span class="legal-dot">1</span>
+          Pošli nám e-mail na <b>[odstoupeni@pokekusovky.cz]</b> — napiš “Odstoupení od smlouvy” + číslo objednávky.
+        </li>
+        <li>
+          <span class="legal-dot">2</span>
+          Buď přilož vyplněný formulář (níže) nebo jen napiš údaje ručně do mailu.
+        </li>
+        <li>
+          <span class="legal-dot">3</span>
+          Zabal produkt tak, aby se cestou nezničil (u karet ideálně sleeve + top loader + pevná výztuha).
+        </li>
+        <li>
+          <span class="legal-dot">4</span>
+          Pošli zpět přes <b>Zásilkovnu</b> nebo <b>Balíkovnu</b> (detaily domluvíme v mailu).
+        </li>
+        <li>
+          <span class="legal-dot">5</span>
+          Jakmile zásilka dorazí / nebo pošleš podací číslo, jedeme refund.
+        </li>
+      </ul>
+
+      <div class="legal-box">
+        <p><b>Tip:</b> Pokud chceš mít klid, dej do balíku vytištěný formulář + číslo objednávky napsaný na papírek.</p>
+      </div>
+    </section>
+
+    <!-- FORM -->
+    <section class="legal-card" id="form">
+      <h2>Formulář pro odstoupení od smlouvy</h2>
+      <p>
+        Vyplň, ulož (Tisk → PDF) nebo vytiskni a vlož do balíku. Můžeš to poslat i jen e-mailem.
+      </p>
+
+      <div class="legal-actions">
+        <div class="legal-actions-left">
+          <button type="button" class="btn-legal primary" id="btnPrint">🖨️ Tisk / PDF</button>
+          <button type="button" class="btn-legal" id="btnToday">📅 Dnešní datum</button>
+          <button type="button" class="btn-legal" id="btnClear">🧼 Vymazat</button>
+        </div>
+        <div class="legal-mini" id="formHint">Tip: v prohlížeči vyber “Uložit jako PDF”.</div>
+      </div>
+
+      <form class="legal-form" id="withdrawForm" autocomplete="on">
+        <div class="row">
+          <label>
+            Jméno a příjmení
+            <input name="customer_name" type="text" placeholder="Jan Novák" />
+          </label>
+
+          <label>
+            E-mail
+            <input name="customer_email" type="email" placeholder="jan@email.cz" />
+          </label>
+        </div>
+
+        <div class="row">
+          <label>
+            Telefon
+            <input name="customer_phone" type="tel" placeholder="+420 777 123 456" />
+          </label>
+
+          <label>
+            Číslo objednávky
+            <input name="order_number" type="text" placeholder="OBJ-12345" />
+          </label>
+        </div>
+
+        <label>
+          Adresa kupujícího
+          <textarea name="customer_address" placeholder="Ulice 12&#10;110 00 Praha"></textarea>
+        </label>
+
+        <div class="row">
+          <label>
+            Datum převzetí zboží
+            <input name="received_date" type="date" />
+          </label>
+
+          <label>
+            Datum odstoupení
+            <input name="withdraw_date" type="date" id="withdrawDate" />
+          </label>
+        </div>
+
+        <label>
+          Zboží (co přesně vracíš)
+          <textarea name="goods" placeholder="Např. Pokémon karta: Charizard… / počet ks / poznámka"></textarea>
+        </label>
+
+        <label>
+          Způsob vrácení peněz
+          <textarea name="refund" placeholder="Stejnou platební metodou / číslo účtu (pokud je potřeba)"></textarea>
+        </label>
+
+        <label>
+          Podpis (při tištěné verzi)
+          <input name="signature" type="text" placeholder="(podepiš se ručně po vytištění)" />
+        </label>
+
+        <p class="legal-note">
+          Odesláním formuláře e-mailem stačí napsané jméno. Podpis je relevantní hlavně u tištěné verze.
+        </p>
+      </form>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="legal-card" id="kontakt">
+      <h2>Kam odstoupení poslat</h2>
+
+      <div class="legal-box">
+        <p><b>E-mail:</b> odstoupeni@pokekusovky.cz</p>
+        <p><b>Adresa pro vrácení zboží:</b> [Ulice 123, 110 00 Praha]</p>
+        <p><b>Zásilkovna / Balíkovna:</b> dle domluvy v e-mailu</p>
+      </div>
+
+      <p class="legal-note">
+        Než něco pošleš, radši nejdřív napiš e-mail (ať se nestratí identifikace zásilky).
+      </p>
+    </section>
+
+    <!-- END -->
+    <div class="legal-end">
+      <hr />
+      <p>© <span id="year"></span> PokeKusovky</p>
+    </div>
+
+  </div>
+
+  <!-- Back to top button (shared contract) -->
+  <button id="backToTop" class="back-to-top" type="button" aria-label="Zpět nahoru">↑</button>
+
+  <!-- Scripts -->
+  <script src="js/legalfun.js"></script>
+  <script src="js/footerfun.js"></script>
+
+</body>
+</html>
