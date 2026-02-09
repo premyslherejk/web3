@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <h4>Info</h4>
         <a href="terms.html">Obchodní podmínky</a>
         <a href="odstoupeni.html">Odstoupení od kupní smlouvy</a>
+        <a href="doprava-a-platba.html">Doprava a platba</a>
         <a href="reklamace.html">Reklamace</a>
         <a href="gdpr.html">GDPR</a>
         <a href="cookies.html">Cookies</a>
