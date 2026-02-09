@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Reklamace | PokeKusovky</title>
+
+  <!-- Global styles -->
+  <link rel="stylesheet" href="css/headervis.css" />
+  <link rel="stylesheet" href="css/footervis.css" />
+
+  <!-- Legal page style -->
+  <link rel="stylesheet" href="css/legalvis.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="logo" onclick="location.href='index.html'">PokeKusovky</div>
+  </header>
+
+
+  <div class="legal-page">
+
+    <!-- TITLE -->
+    <header class="legal-header">
+      <h1>Reklamace</h1>
+      <p class="legal-sub">
+        Jednoduchý návod, jak postupovat při reklamaci zboží.
+      </p>
+    </header>
+
+
+    <!-- TOC -->
+    <nav class="legal-toc">
+      <h3>Obsah</h3>
+      <div class="toc-grid">
+        <a href="#jak">Jak reklamovat</a>
+        <a href="#co">Co poslat</a>
+        <a href="#lhuta">Lhůty</a>
+        <a href="#doprava">Doprava</a>
+        <a href="#karty">Specifika karet</a>
+        <a href="#kontakt">Kontakt</a>
+      </div>
+    </nav>
+
+
+    <!-- SECTION -->
+    <section class="legal-card" id="jak">
+      <h2>Jak reklamovat zboží</h2>
+      <p>
+        Pokud má zakoupené zboží vadu, máš právo reklamaci uplatnit v souladu
+        s občanským zákoníkem.
+      </p>
+
+      <ol>
+        <li>Napiš nám e-mail na <b>[reklamace@pokekusovky.cz]</b></li>
+        <li>Uveď číslo objednávky a popis problému</li>
+        <li>Přilož fotky nebo video vady (ideálně hned)</li>
+        <li>Domluvíme se na dalším postupu</li>
+      </ol>
+    </section>
+
+
+    <section class="legal-card" id="co">
+      <h2>Co musí reklamace obsahovat</h2>
+      <p>
+        Aby byla reklamace rychlá a bez stresu, pošli prosím:
+      </p>
+
+      <ol>
+        <li>Číslo objednávky</li>
+        <li>Jméno a kontakt</li>
+        <li>Popis vady</li>
+        <li>Fotodokumentaci (pokud je to možné)</li>
+        <li>Preferovaný způsob řešení (sleva / výměna / vrácení)</li>
+      </ol>
+    </section>
+
+
+    <section class="legal-card" id="lhuta">
+      <h2>Lhůty pro vyřízení reklamace</h2>
+      <p>
+        Reklamace vyřizujeme co nejrychleji.
+      </p>
+
+      <ol>
+        <li>
+          Spotřebitel může uplatnit reklamaci do <b>24 měsíců</b> od převzetí zboží.
+        </li>
+        <li>
+          Reklamace bude vyřízena nejpozději do <b>30 dnů</b>, pokud se nedohodneme jinak.
+        </li>
+      </ol>
+    </section>
+
+
+    <section class="legal-card" id="doprava">
+      <h2>Doprava při reklamaci</h2>
+      <p>
+        Zboží lze zaslat zpět přes:
+      </p>
+
+      <ol>
+        <li><b>Zásilkovnu</b></li>
+        <li><b>Balíkovnu</b></li>
+      </ol>
+
+      <p>
+        Pokud je reklamace uznána, náklady na dopravu hradí prodávající.
+        Pokud uznána nebude, dopravu zpět hradí kupující.
+      </p>
+    </section>
+
+
+    <section class="legal-card" id="karty">
+      <h2>Specifika sběratelských karet</h2>
+      <p>
+        Pokémon karty jsou sběratelské zboží a jejich stav může být částečně subjektivní.
+      </p>
+
+      <ol>
+        <li>
+          Fotografie konkrétní karty mají přednost před obecným popisem.
+        </li>
+        <li>
+          Opotřebení odpovídající deklarovanému stavu (NM/EX/GD/PO) není vadou.
+        </li>
+        <li>
+          Poškození vzniklé nevhodnou manipulací kupujícího nelze reklamovat.
+        </li>
+      </ol>
+    </section>
+
+
+    <section class="legal-card" id="kontakt">
+      <h2>Kontakt pro reklamace</h2>
+
+      <div class="legal-box">
+        <p><b>E-mail:</b> reklamace@pokekusovky.cz</p>
+        <p><b>Adresa pro reklamace:</b> [Ulice 123, 110 00 Praha]</p>
+        <p><b>Zásilkovna/Balíkovna:</b> dle domluvy v e-mailu</p>
+      </div>
+
+      <p class="legal-note">
+        Reklamace neposílej bez předchozí domluvy – vždy nejdřív napiš e-mail.
+      </p>
+    </section>
+
+
+    <!-- END -->
+    <div class="legal-end">
+      <hr />
+      <p>© <span id="year"></span> PokeKusovky</p>
+    </div>
+
+  </div>
+
+
+  <!-- Back to top button -->
+  <button id="backTop">↑ Zpět nahoru</button>
+
+
+  <!-- Scripts -->
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+
+  <script src="js/legalfun.js"></script>
+  <script src="js/footerfun.js"></script>
+
+</body>
+</html>
