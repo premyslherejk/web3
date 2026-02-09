@@ -77,4 +77,39 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('scroll', updateBackBtn, { passive: true });
   window.addEventListener('resize', updateBackBtn);
   updateBackBtn();
+
+  /* =====================
+     ADDED: OPTIONAL FORM ACTIONS (non-breaking)
+     Works only if those elements exist on the page.
+  ===================== */
+
+  const btnPrint = document.getElementById('btnPrint');
+  const btnToday = document.getElementById('btnToday');
+  const btnClear = document.getElementById('btnClear');
+  const withdrawDate = document.getElementById('withdrawDate');
+  const withdrawForm = document.getElementById('withdrawForm');
+
+  const pad = (n) => String(n).padStart(2,'0');
+  const todayISO = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  };
+
+  if (btnPrint){
+    btnPrint.addEventListener('click', () => window.print());
+  }
+
+  if (btnToday){
+    btnToday.addEventListener('click', () => {
+      if (withdrawDate) withdrawDate.value = todayISO();
+    });
+  }
+
+  if (btnClear){
+    btnClear.addEventListener('click', () => {
+      if (withdrawForm) withdrawForm.reset();
+      if (withdrawDate) withdrawDate.value = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
 });
