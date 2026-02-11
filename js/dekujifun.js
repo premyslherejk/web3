@@ -9,6 +9,7 @@ createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ===================== BANK CONFIG (upraviš později) =====================
 // Doporučení: dej IBAN + BIC, nebo aspoň účet.
 // QR platba string: SPD*1.0*ACC:...*AM:...*CC:CZK*X-VS:...*MSG:...
+const BANK_ACC_HUMAN = '2978973018/3030'; // <- sem svoje CZ číslo účtu
 const BANK_ACC_IBAN = 'CZ7530300000002978973018'; // <- sem dej IBAN
 const BANK_MSG_PREFIX = 'PokeKusovky objednávka';  // <- volitelné
 
@@ -46,10 +47,19 @@ function formatDeadline(ts) {
 }
 
 function buildSpd({ amount, vs, msg }) {
-  // QR Platba (SPD)
-  // Pozn: některé banky chtějí AM s tečkou jako desetinná, ale ty máš integer -> posíláme bez desetin
   const am = Number(amount || 0);
   const cleanMsg = (msg || '').slice(0, 60);
+
+  return [
+    'SPD*1.0',
+    `ACC:${BANK_ACC_IBAN.replace(/\s+/g,'').toUpperCase()}`,
+    `AM:${am.toFixed(0)}`,        // integer ok
+    'CC:CZK',
+    vs ? `X-VS:${vs}` : '',
+    cleanMsg ? `MSG:${cleanMsg}` : ''
+  ].filter(Boolean).join('*');
+}
+
 
   return [
     'SPD*1.0',
@@ -176,16 +186,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     setText('payAmount', formatKc(data.total));
     setText('payVS', vs || '—');
-    setText('payAcc', BANK_ACC_IBAN);
+    setText('payAcc', BANK_ACC_HUMAN);
     setText('payMsg', msg);
 
     // QR render
-    const canvas = document.getElementById('qrCanvas');
-    if (canvas && window.QRCode) {
-      QRCode.toCanvas(canvas, spd, { width: 260, margin: 1 }, (err) => {
-        if (err) console.error(err);
-      });
-    }
+   const canvas = document.getElementById('qrCanvas');
+
+try {
+  if (!window.QRCode) throw new Error('QR knihovna se nenačetla (QRCode is undefined).');
+
+  await new Promise((resolve, reject) => {
+    QRCode.toCanvas(canvas, spd, { width: 260, margin: 1 }, (err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+
+} catch (err) {
+  console.error('QR render fail:', err);
+  // fallback: aspoň text
+  const wrap = canvas?.parentElement;
+  if (wrap) {
+    wrap.innerHTML = `
+      <div style="text-align:center; opacity:.8; line-height:1.5">
+        <b>QR se nepovedlo vykreslit.</b><br>
+        Zaplať klasicky: účet + VS + částka.<br>
+        (SPD text máš níž na zkopírování.)
+      </div>
+    `;
+  }
+}
+
 
     setupCopySpd(spd);
     installPrintCssForBankOnly();
