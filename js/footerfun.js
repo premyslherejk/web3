@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <a href="odstoupeni.html">Odstoupení od kupní smlouvy</a>
         <a href="doprava-a-platba.html">Doprava a platba</a>
         <a href="reklamace.html">Reklamace</a>
+        <a href="contact.html">Kontakt</a>
         <a href="gdpr.html">GDPR</a>
         <a href="cookies.html">Cookies</a>
       </div>
