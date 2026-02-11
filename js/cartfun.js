@@ -39,9 +39,59 @@ function showToast(msg) {
   }, 2500);
 }
 
+// ===== CART STORAGE HELPERS =====
+function readCartRaw() {
+  try {
+    return JSON.parse(localStorage.getItem('cart')) || [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * MIGRACE: sjednotíme strukturu položek v localStorage,
+ * aby checkout našel image_url (a ideálně i card_id).
+ *
+ * Podporované vstupy:
+ * - { image: "..." }  -> image_url
+ * - { image_url: "..." } (ok)
+ * - { id: "uuid" } -> card_id
+ * - { card_id: "uuid" } (ok)
+ */
+function migrateCart(cart) {
+  let changed = false;
+
+  const next = cart.map((it) => {
+    const out = { ...it };
+
+    // id -> card_id (pro checkout / RPC payload)
+    if (!out.card_id && out.id) {
+      out.card_id = out.id;
+      changed = true;
+    }
+
+    // image -> image_url (to je tvůj hlavní bug)
+    if (!out.image_url && out.image) {
+      out.image_url = out.image;
+      changed = true;
+    }
+
+    // pro kompatibilitu necháme i starý klíč image,
+    // ale renderovat budeme image_url
+    return out;
+  });
+
+  if (changed) {
+    localStorage.setItem('cart', JSON.stringify(next));
+    document.dispatchEvent(new Event('cartUpdated'));
+  }
+
+  return next;
+}
+
 // ===== LOAD CART =====
 function loadCart() {
-  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const cart = migrateCart(readCartRaw());
 
   itemsWrap.innerHTML = '';
   let total = 0;
@@ -57,20 +107,22 @@ function loadCart() {
   summaryEl.style.display = 'flex';
 
   cart.forEach((item, index) => {
-    total += item.price;
+    total += Number(item.price || 0);
+
+    const img = item.image_url || item.image || ''; // fallback
 
     const div = document.createElement('div');
     div.className = 'cart-item';
     div.dataset.index = index;
 
     div.innerHTML = `
-      <img src="${item.image}" alt="">
+      <img src="${img}" alt="">
       <div class="item-info">
-        <div class="item-name">${item.name}</div>
+        <div class="item-name">${item.name || 'Karta'}</div>
         <div class="item-meta">
           ${item.psa ? `PSA ${item.psa}` : 'Raw karta'}
         </div>
-        <div class="item-price">${item.price} Kč</div>
+        <div class="item-price">${Number(item.price || 0)} Kč</div>
       </div>
       <button class="remove">✕</button>
     `;
@@ -138,7 +190,7 @@ itemsWrap.addEventListener('click', e => {
     card.classList.add('delete-anim');
 
     setTimeout(() => {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const cart = readCartRaw();
       cart.splice(index, 1);
       localStorage.setItem('cart', JSON.stringify(cart));
 
@@ -152,7 +204,7 @@ itemsWrap.addEventListener('click', e => {
 const cartCountEl = document.getElementById('cart-count');
 
 function updateCartCount() {
-  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const cart = readCartRaw();
   if (cartCountEl) cartCountEl.textContent = cart.length;
 }
 
