@@ -201,15 +201,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const canvas = document.getElementById('qrCanvas');
 
     try {
-      if (!window.QRCode) throw new Error('QR knihovna se nenačetla (QRCode is undefined).');
-      if (!canvas) throw new Error('Chybí <canvas id="qrCanvas">');
+      const QR = window.QRCode || window.qrcode;
+if (!QR) throw new Error('QR knihovna se nenačetla (QRCode/qrcode undefined).');
 
-      await new Promise((resolve, reject) => {
-        QRCode.toCanvas(canvas, spd, { width: 260, margin: 1 }, (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
+await new Promise((resolve, reject) => {
+  QR.toCanvas(canvas, spd, { width: 260, margin: 1 }, (err) => {
+    if (err) reject(err);
+    else resolve();
+  });
+});
 
     } catch (err) {
       console.error('QR render fail:', err);
