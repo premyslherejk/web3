@@ -9,7 +9,7 @@ createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ===================== BANK CONFIG (upraviš později) =====================
 // Doporučení: dej IBAN + BIC, nebo aspoň účet.
 // QR platba string: SPD*1.0*ACC:...*AM:...*CC:CZK*X-VS:...*MSG:...
-const BANK_ACC_IBAN = 'CZ0000000000000000000000'; // <- sem dej IBAN
+const BANK_ACC_IBAN = 'CZ7530300000002978973018'; // <- sem dej IBAN
 const BANK_MSG_PREFIX = 'PokeKusovky objednávka';  // <- volitelné
 
 function formatKc(n) {
