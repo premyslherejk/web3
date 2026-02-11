@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Děkujeme | PokeKusovky</title>
+
+  <link rel="stylesheet" href="css/headervis.css" />
+  <link rel="stylesheet" href="css/footervis.css" />
+  <link rel="stylesheet" href="css/checkoutvis.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <!-- QR generator -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="logo" onclick="location.href='index.html'">PokeKusovky</div>
+  </header>
+
+  <main class="checkout-page">
+    <header class="checkout-header">
+      <h1>Děkujeme 🧡</h1>
+      <p class="checkout-sub">Objednávka je vytvořená. Teď už jen dokončit platbu / čekat na odeslání.</p>
+    </header>
+
+    <section class="checkout-card">
+      <div class="thanks-grid">
+        <div>
+          <h2>Detaily objednávky</h2>
+
+          <div class="legal-boxish">
+            <p><b>Číslo objednávky:</b> <span id="orderNumber">—</span></p>
+            <p><b>E-mail:</b> <span id="orderEmail">—</span></p>
+            <p><b>Platba:</b> <span id="orderPayment">—</span></p>
+            <p><b>Doprava:</b> <span id="orderDelivery">—</span></p>
+            <p><b>Celkem:</b> <span id="orderTotal">—</span></p>
+            <p id="orderDeadlineRow" class="muted"></p>
+          </div>
+
+          <div class="sep"></div>
+
+          <h2>Co máš dělat (pro lidi)</h2>
+          <ol class="plain-ol" id="simpleSteps">
+            <li>—</li>
+          </ol>
+        </div>
+
+        <div id="bankBox" class="bank-box hidden">
+          <h2>Platba QR</h2>
+          <p class="muted">
+            Naskenuj a zaplať. Variabilní symbol je navázaný na objednávku.
+          </p>
+
+          <div class="qr-wrap">
+            <canvas id="qrCanvas"></canvas>
+          </div>
+
+          <div class="bank-details">
+            <div class="row"><span>Částka</span><strong id="payAmount">—</strong></div>
+            <div class="row"><span>VS</span><strong id="payVS">—</strong></div>
+            <div class="row"><span>Účet</span><strong id="payAcc">—</strong></div>
+            <div class="row"><span>Zpráva</span><strong id="payMsg">—</strong></div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn-primary" id="copySpd" type="button">Zkopírovat QR text</button>
+            <button class="btn-ghost" id="printBank" type="button">Tisk</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="btn-row">
+        <button class="btn-ghost" type="button" onclick="location.href='cards.html'">Pokračovat v nákupu</button>
+        <button class="btn-primary" type="button" onclick="location.href='index.html'">Domů</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/dekujifun.js"></script>
+  <script src="js/footerfun.js"></script>
+</body>
+</html>
