@@ -4,12 +4,12 @@ const { createClient } = supabase;
 const SUPABASE_URL = 'https://hwjbfrhbgeczukcjkmca.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3amJmcmhiZ2VjenVrY2prbWNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0NDU5MjQsImV4cCI6MjA4NTAyMTkyNH0.BlgIov7kFq2EUW17hLs6o1YujL1i9elD7wILJP6h-lQ';
 
-const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ===================== BANK CONFIG (upravíš později) =====================
-const BANK_ACC_HUMAN = '2978973018/3030';               // CZ účet
-const BANK_ACC_IBAN  = 'CZ7530300000002978973018';      // IBAN bez mezer
-const BANK_MSG_PREFIX = 'PokeKusovky objednávka';        // text do zprávy
+const BANK_ACC_HUMAN  = '2978973018/3030';          // CZ účet pro lidi
+const BANK_ACC_IBAN   = 'CZ7530300000002978973018'; // IBAN bez mezer
+const BANK_MSG_PREFIX = 'PokeKusovky objednávka';   // text do zprávy
 
 function escapeHtml(s){
   return String(s ?? '')
@@ -136,13 +136,33 @@ function renderSteps(payment) {
   ];
 }
 
+function renderQrToCanvas(canvas, text) {
+  if (!canvas) throw new Error('qrCanvas nenalezen');
+
+  // Qrious globál: window.QRious
+  if (!window.QRious) throw new Error('QR knihovna se nenačetla (QRious undefined).');
+
+  // Qrious kreslí do canvas přes element
+  // (clear + render)
+  // eslint-disable-next-line no-new
+  new QRious({
+    element: canvas,
+    value: text,
+    size: 260,
+    level: 'M'
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const qs = getQs();
   const last = readLastOrder();
 
-  // Když se user sem dostane bez sessionStorage (refresh / otevřel link), ať se to nerozsype:
+  // Když refresh / otevřel link a nemáme sessionStorage
   if (!last && !qs.order_number) {
-    setHtml('simpleSteps', `<li>${escapeHtml('Nenašli jsme data objednávky (pravděpodobně refresh). Pokud ti přišel e-mail, řiď se jím. Jinak nám napiš.')}</li>`);
+    setHtml(
+      'simpleSteps',
+      `<li>${escapeHtml('Nenašli jsme data objednávky (pravděpodobně refresh). Pokud ti přišel e-mail, řiď se jím. Jinak nám napiš.')}</li>`
+    );
   }
 
   const data = last || {};
@@ -197,20 +217,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     setText('payAcc', BANK_ACC_HUMAN);
     setText('payMsg', msg);
 
-    // QR render
     const canvas = document.getElementById('qrCanvas');
 
     try {
-      const QR = window.QRCode || window.qrcode;
-if (!QR) throw new Error('QR knihovna se nenačetla (QRCode/qrcode undefined).');
-
-await new Promise((resolve, reject) => {
-  QR.toCanvas(canvas, spd, { width: 260, margin: 1 }, (err) => {
-    if (err) reject(err);
-    else resolve();
-  });
-});
-
+      renderQrToCanvas(canvas, spd);
     } catch (err) {
       console.error('QR render fail:', err);
       const wrap = canvas?.parentElement;
