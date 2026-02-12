@@ -1,0 +1,251 @@
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+body{
+  background:#0f0f14;
+  color:#fff;
+  font-family:Inter,system-ui,sans-serif;
+}
+
+.hidden{ display:none !important; }
+
+.buy-page{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 18px;
+}
+
+.buy-header{
+  margin-bottom: 16px;
+}
+
+.buy-header h1{
+  font-size: 2.1rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.sub{
+  margin-top: 10px;
+  opacity: .7;
+  font-size: .95rem;
+  line-height: 1.4;
+}
+
+.card{
+  background:#15151d;
+  border:1px solid #2a2a33;
+  border-radius:20px;
+  padding: 18px;
+  margin-top: 14px;
+}
+
+.card h2{
+  font-size: 1.15rem;
+  font-weight: 900;
+  color:#ff3b3b;
+  margin-bottom: 12px;
+}
+
+.muted{ opacity:.7; }
+.small{ font-size:.9rem; line-height:1.45; }
+
+.sep{
+  height: 1px;
+  background: #2a2a33;
+  margin: 12px 0;
+}
+
+.form{
+  display:grid;
+  gap: 12px;
+}
+
+label{
+  display:grid;
+  gap: 6px;
+  font-size: .88rem;
+  color:#aaa;
+}
+
+input, textarea{
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid #2a2a33;
+  background: #0f0f14;
+  color: #fff;
+  outline: none;
+}
+
+textarea{ resize: vertical; min-height: 92px; }
+
+.grid-2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.btn-primary{
+  width: min(420px, 100%);
+  margin: 14px auto 0;
+  display:block;
+  padding: 16px 22px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg,#ff3b3b,#c40000);
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+  transition: .15s;
+  font-size: 1.05rem;
+}
+
+.btn-primary:hover{ transform: translateY(-1px); }
+.btn-primary:disabled{ opacity:.6; cursor:not-allowed; transform:none; }
+
+.btn-ghost{
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid #2a2a33;
+  background: #0f0f14;
+  color: #fff;
+  font-weight: 900;
+  cursor:pointer;
+}
+.btn-ghost:hover{
+  border-color: rgba(255,59,59,.45);
+  box-shadow: 0 0 0 2px rgba(255,59,59,.10);
+}
+
+.msg{
+  margin-top: 10px;
+  font-size: .95rem;
+  opacity: .92;
+  text-align:center;
+}
+.msg.ok{ color: #7dffb2; }
+.msg.err{ color: #ff6b6b; }
+
+.type-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.type-card{
+  text-align:left;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid #2a2a33;
+  background:#0f0f14;
+  cursor:pointer;
+  transition:.15s;
+}
+
+.type-card .title{
+  font-weight: 900;
+  font-size: 1.05rem;
+}
+.type-card .desc{
+  margin-top: 6px;
+  opacity:.7;
+  font-size: .9rem;
+  line-height:1.35;
+}
+
+.type-card:hover{
+  border-color: rgba(255,59,59,.45);
+  box-shadow: 0 0 0 2px rgba(255,59,59,.10);
+}
+.type-card.active{
+  border-color: rgba(255,59,59,.65);
+  box-shadow: 0 0 0 2px rgba(255,59,59,.14);
+}
+
+.how{
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid #2a2a33;
+  background:#0f0f14;
+  line-height:1.5;
+}
+
+.row-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap: 10px;
+}
+
+.hint{
+  opacity:.75;
+  font-size:.9rem;
+  line-height:1.45;
+}
+
+.items{
+  display:grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.item-row{
+  border: 1px solid #2a2a33;
+  background:#0f0f14;
+  border-radius: 16px;
+  padding: 12px;
+  display:grid;
+  gap: 10px;
+}
+
+.item-top{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items:center;
+}
+
+.item-title{
+  font-weight:900;
+  color:#fff;
+  font-size:.98rem;
+}
+
+.item-actions{
+  display:flex;
+  gap: 8px;
+}
+
+.btn-mini{
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid #2a2a33;
+  background:#15151d;
+  color:#fff;
+  font-weight:900;
+  cursor:pointer;
+}
+.btn-mini:hover{
+  border-color: rgba(255,59,59,.45);
+  box-shadow: 0 0 0 2px rgba(255,59,59,.10);
+}
+.btn-mini.danger{
+  border-color: rgba(255,107,107,.45);
+}
+
+.item-grid{
+  display:grid;
+  grid-template-columns: 1.1fr .9fr .9fr;
+  gap: 10px;
+}
+
+@media (max-width: 900px){
+  .buy-page{ padding: 28px 14px; }
+  .buy-header h1{ font-size: 1.75rem; }
+  .type-grid{ grid-template-columns: 1fr; }
+  .grid-2{ grid-template-columns: 1fr; }
+  .item-grid{ grid-template-columns: 1fr; }
+  .row-head{ flex-direction: column; align-items: stretch; }
+  .btn-primary{ max-width: 520px; }
+}
