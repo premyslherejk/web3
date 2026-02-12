@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin | PokeKusovky</title>
+
+  <link rel="stylesheet" href="css/headervis.css" />
+  <link rel="stylesheet" href="css/footervis.css" />
+  <link rel="stylesheet" href="css/adminvis.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="logo" onclick="location.href='index.html'">PokeKusovky</div>
+  </header>
+
+  <main class="admin-page">
+    <header class="admin-header">
+      <h1>Admin</h1>
+      <p class="sub">Přihlášení přes Supabase Auth. Bez admin práv uvidíš „Access denied“.</p>
+    </header>
+
+    <!-- LOGIN VIEW -->
+    <section class="card" id="loginView">
+      <h2>Přihlášení</h2>
+
+      <form id="loginForm" class="form" novalidate>
+        <label>
+          E-mail
+          <input id="loginEmail" type="email" autocomplete="email" required />
+        </label>
+
+        <label>
+          Heslo
+          <input id="loginPassword" type="password" autocomplete="current-password" required />
+        </label>
+
+        <button class="btn-primary" id="loginBtn" type="submit">Přihlásit</button>
+        <p class="msg" id="loginMsg" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <!-- DASHBOARD VIEW -->
+    <section class="card hidden" id="dashView">
+      <div class="dash-top">
+        <div>
+          <h2>Objednávky</h2>
+          <div class="meta">
+            Přihlášen: <span id="whoami">—</span>
+            <span class="dot">•</span>
+            Celkem načteno: <span id="countAll">0</span>
+          </div>
+        </div>
+
+        <div class="dash-actions">
+          <button class="btn-ghost" id="refreshBtn" type="button">Reload</button>
+          <button class="btn-ghost" id="logoutBtn" type="button">Logout</button>
+        </div>
+      </div>
+
+      <div class="filters">
+        <input id="searchInput" class="input" type="text" placeholder="Hledat: číslo, email, jméno…" autocomplete="off" />
+        <select id="statusFilter" class="input">
+          <option value="all">Vše</option>
+          <option value="awaiting_payment">awaiting_payment (bank)</option>
+          <option value="new">new (dobírka)</option>
+          <option value="paid">paid</option>
+          <option value="shipped">shipped</option>
+          <option value="expired">expired</option>
+          <option value="cancelled">cancelled</option>
+          <option value="returned">returned</option>
+        </select>
+        <select id="paymentFilter" class="input">
+          <option value="all">Platba: vše</option>
+          <option value="bank">bank</option>
+          <option value="cod">cod</option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table" id="ordersTable">
+          <thead>
+            <tr>
+              <th>Číslo</th>
+              <th>Stav</th>
+              <th>Platba</th>
+              <th>Celkem</th>
+              <th>Zákazník</th>
+              <th>Doručení</th>
+              <th>Pickup</th>
+              <th>Vytvořeno</th>
+              <th>Deadline</th>
+              <th>Akce</th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody">
+            <tr><td colspan="10" class="muted">Načítám…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="msg" id="dashMsg" aria-live="polite"></p>
+    </section>
+
+    <!-- ACCESS DENIED VIEW -->
+    <section class="card hidden" id="deniedView">
+      <h2>Access denied</h2>
+      <p class="sub">
+        Jsi přihlášený, ale nejsi admin. (Tvoje user_id není v admin_users.)
+      </p>
+      <div class="dash-actions">
+        <button class="btn-ghost" id="deniedLogoutBtn" type="button">Logout</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="js/adminfun.js"></script>
+  <script src="js/footerfun.js"></script>
+</body>
+</html>
