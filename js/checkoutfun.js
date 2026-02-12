@@ -9,8 +9,7 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ===================== PACKETA (Zásilkovna) =====================
 // Získej API key v administraci Packeta / Zásilkovna.
 // (Bez toho widget neotevřeš.)
-const PACKETA_API_KEY = '4b32c40ade3173fb
-';
+const PACKETA_API_KEY = '4b32c40ade3173fb';
 
 const PACKETA_OPTIONS = {
   language: 'cs',
@@ -151,8 +150,8 @@ function renderPickup() {
 }
 
 function openPacketaWidget() {
-  if (!PACKETA_API_KEY || PACKETA_API_KEY === '4b32c40ade3173fb
-') {
+  if (!PACKETA_API_KEY || PACKETA_API_KEY === '4b32c40ade3173fb') 
+  {
     setMsg('err', 'Chybí Packeta API key. Doplň ho do checkoutfun.js (PACKETA_API_KEY).');
     return;
   }
