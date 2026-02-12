@@ -53,9 +53,10 @@ body{
   margin-bottom: 12px;
 }
 
+/* ✅ sticky offset, aby to header nepřekrýval */
 .sticky{
   position: sticky;
-  top: 16px;
+  top: 80px; /* bylo 16px */
 }
 
 /* ===================== FORM ===================== */
@@ -176,11 +177,47 @@ textarea{ resize: vertical; min-height: 92px; }
   white-space: nowrap;
 }
 
-.hint{
-  margin-top: 10px;
+/* ===================== PACKETA ===================== */
+.packeta-block{
+  margin-top: 12px;
+  display: grid;
+  gap: 12px;
+}
+
+.btn-packeta{
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,59,59,.55);
+  background: linear-gradient(135deg, rgba(255,59,59,.18), rgba(196,0,0,.12));
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+  transition: .15s;
+  text-align: center;
+}
+
+.btn-packeta:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 2px rgba(255,59,59,.12);
+}
+
+.pickup-selected{
+  border: 1px solid #2a2a33;
+  background: #0f0f14;
+  border-radius: 16px;
+  padding: 12px;
+  min-height: 48px;
+}
+
+.pickup-line strong{
+  font-size: .95rem;
+}
+
+.pickup-meta{
+  margin-top: 6px;
+  font-size: .85rem;
   opacity: .65;
-  font-size: .9rem;
-  line-height: 1.45;
 }
 
 /* ===================== BUTTONS ===================== */
@@ -297,133 +334,41 @@ textarea{ resize: vertical; min-height: 92px; }
 .form-msg.ok{ color: #7dffb2; }
 .form-msg.err{ color: #ff6b6b; }
 
-/* ===================== THANK YOU ===================== */
-.thanks-grid{
-  display:grid;
-  grid-template-columns: 1.2fr .8fr;
-  gap: 16px;
-  align-items:start;
-}
-
-.legal-boxish{
-  background:#0f0f14;
-  border:1px solid #2a2a33;
-  border-radius:18px;
-  padding: 14px;
-  display:grid;
-  gap: 8px;
-}
-
-.legal-boxish p{ opacity:.88; }
-.legal-boxish b{ opacity: 1; }
 .muted{ opacity: .65; }
-
-.bank-box{
-  background:#0f0f14;
-  border:1px solid #2a2a33;
-  border-radius:18px;
-  padding: 14px;
-}
-
-.hidden{ display:none; }
-
-.qr-wrap{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  margin: 12px 0;
-  padding: 12px;
-  border-radius: 16px;
-  border:1px solid #2a2a33;
-  background:#15151d;
-}
-
-.bank-details{
-  display:grid;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.bank-details .row{
-  display:flex;
-  justify-content:space-between;
-  gap: 10px;
-}
-
-/* lists */
-.plain-ol{
-  padding-left: 18px;
-  display:grid;
-  gap: 10px;
-}
-.plain-ol li{ opacity: .9; line-height: 1.6; }
 
 /* ===================== MOBILE ===================== */
 @media (max-width: 900px){
   .checkout-page{ padding: 28px 14px; }
-
   .checkout-header h1{ font-size: 1.75rem; }
 
+  /* ✅ mobil: dáme to jako flex column, a přeházíme pořadí */
   .checkout-layout{
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
   }
 
-  .sticky{ position: static; }
+  /* form první */
+  .checkout-layout > section.checkout-card{ order: 1; }
+
+  /* shrnutí hned po poznámce (díky tomu, že confirm sekce je až potom) */
+  .checkout-layout > aside.checkout-card{
+    order: 2;
+    margin-top: 12px;
+    position: static;
+  }
 
   .grid-2{ grid-template-columns: 1fr; }
-
-
-  /* ===================== PICKUP BOX (Packeta) ===================== */
-.pickup-box{
-  margin-top: 10px;
-  padding: 12px;
-  border-radius: 16px;
-  border: 1px solid #2a2a33;
-  background: #0f0f14;
-}
-
-.pickup-head{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap: 12px;
-}
-
-.pickup-title{
-  font-weight: 900;
-  color:#fff;
-  font-size: .95rem;
-}
-
-.pickup-sub{
-  margin-top: 4px;
-  font-size: .88rem;
-}
-
-.pickup-selected{
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 14px;
-  border: 1px solid #2a2a33;
-  background: #15151d;
-}
-
-.pickup-line{
-  display:grid;
-  gap: 4px;
-}
-
-.pickup-meta{
-  margin-top: 8px;
-  font-size: .86rem;
-}
-
-.btn-small{
-  padding: 10px 12px;
-  margin-top: 0;
-}
-
   .grid-3{ grid-template-columns: 1fr; }
 
-  .thanks-grid{ grid-template-columns: 1fr; }
+  /* ✅ uvnitř formu přehodíme sekce:
+     fakturační = implicitně první, pak delivery, payment, confirm */
+  .checkout-form{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .section-delivery{ order: 2; }
+  .section-payment{ order: 3; }
+  .section-confirm{ order: 4; }
 }
