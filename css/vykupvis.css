@@ -249,3 +249,187 @@ textarea{ resize: vertical; min-height: 92px; }
   .row-head{ flex-direction: column; align-items: stretch; }
   .btn-primary{ max-width: 520px; }
 }
+
+/* ===================== VYKUP VIS – HOTFIX / POLISH ===================== */
+/* Dej to na KONEC vykupvis.css, ať to přepíše starý styly. */
+
+/* 1) Globální čitelnost textu (červeně na screenu) */
+.vykup-page,
+.vykup-page *{
+  color: #fff;
+}
+
+.vykup-page .muted,
+.vykup-page .sub,
+.vykup-page small,
+.vykup-page .hint,
+.vykup-page .help,
+.vykup-page .desc{
+  color: rgba(255,255,255,.72) !important;
+}
+
+/* Labely/input text */
+.vykup-page label{
+  color: rgba(255,255,255,.78) !important;
+}
+.vykup-page input,
+.vykup-page textarea,
+.vykup-page select{
+  color: #fff !important;
+  background: #0f0f14 !important;
+  border: 1px solid #2a2a33 !important;
+}
+
+/* Placeholder aby byl čitelnej */
+.vykup-page input::placeholder,
+.vykup-page textarea::placeholder{
+  color: rgba(255,255,255,.45);
+}
+
+/* 2) Typ výkupu (Kusové/Bulk) – udělat z toho “karty” co jsou jasně klikací (modře) */
+.vykup-page .type-grid,
+.vykup-page .selltype-grid,
+.vykup-page .choice-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 900px){
+  .vykup-page .type-grid,
+  .vykup-page .selltype-grid,
+  .vykup-page .choice-grid{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* chytáme víc možností názvů tříd */
+.vykup-page .type-card,
+.vykup-page .selltype-card,
+.vykup-page .choice-card,
+.vykup-page .choice{
+  border-radius: 18px;
+  border: 1px solid #2a2a33;
+  background: #0f0f14;
+  padding: 16px 16px;
+  cursor: pointer;
+  transition: .15s;
+  min-height: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.vykup-page .type-card:hover,
+.vykup-page .selltype-card:hover,
+.vykup-page .choice-card:hover,
+.vykup-page .choice:hover{
+  border-color: rgba(255,59,59,.45);
+  box-shadow: 0 0 0 2px rgba(255,59,59,.10);
+  transform: translateY(-1px);
+}
+
+/* aktivní vybraná karta (podle toho jak máš řešený "active/selected") */
+.vykup-page .type-card.is-active,
+.vykup-page .selltype-card.is-active,
+.vykup-page .choice.is-active,
+.vykup-page .choice.selected,
+.vykup-page .choice:has(input:checked){
+  border-color: rgba(255,59,59,.75);
+  background: linear-gradient(135deg, rgba(255,59,59,.16), rgba(196,0,0,.10));
+  box-shadow: 0 0 0 2px rgba(255,59,59,.10);
+}
+
+/* Titulek uvnitř volby */
+.vykup-page .type-title,
+.vykup-page .choice-title{
+  font-weight: 900;
+  font-size: 1.02rem;
+  color: #fff !important;
+}
+.vykup-page .type-sub,
+.vykup-page .choice-sub{
+  color: rgba(255,255,255,.68) !important;
+  font-size: .9rem;
+}
+
+/* 3) “Přidat kartu” – hezčí, výraznější a ne tak tiny (modře) */
+.vykup-page .add-row,
+.vykup-page .row-actions,
+.vykup-page .form-top{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.vykup-page #addCardBtn,
+.vykup-page .btn-add,
+.vykup-page .add-btn{
+  padding: 11px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(125,255,178,.35);
+  background: rgba(125,255,178,.08);
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+  transition: .15s;
+}
+
+.vykup-page #addCardBtn:hover,
+.vykup-page .btn-add:hover,
+.vykup-page .add-btn:hover{
+  border-color: rgba(125,255,178,.65);
+  box-shadow: 0 0 0 2px rgba(125,255,178,.10);
+  transform: translateY(-1px);
+}
+
+/* 4) File inputy – udělat to “web friendly” (modře u vybrat soubor) */
+.vykup-page input[type="file"]{
+  width: 100%;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid #2a2a33;
+  background: #0f0f14;
+  color: rgba(255,255,255,.75);
+}
+
+.vykup-page input[type="file"]::file-selector-button{
+  margin-right: 10px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,59,59,.55);
+  background: linear-gradient(135deg, rgba(255,59,59,.16), rgba(196,0,0,.10));
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+  transition: .15s;
+}
+
+.vykup-page input[type="file"]::file-selector-button:hover{
+  box-shadow: 0 0 0 2px rgba(255,59,59,.10);
+  transform: translateY(-1px);
+}
+
+/* 5) Submit tlačítko na střed a větší (ať je to “call to action”) */
+.vykup-page .btn-primary,
+.vykup-page #submitBuy,
+.vykup-page #submitRequest{
+  width: min(420px, 100%);
+  margin: 18px auto 0;
+  display: block;
+  padding: 16px 22px;
+  font-size: 1.05rem;
+  border-radius: 999px;
+}
+
+/* 6) Ta poslední věta “Odesláním souhlasíš…” – na střed */
+.vykup-page .consent,
+.vykup-page .legal,
+.vykup-page .fineprint{
+  text-align: center !important;
+  margin-top: 12px;
+  color: rgba(255,255,255,.55) !important;
+}
