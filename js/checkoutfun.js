@@ -9,7 +9,6 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ===================== PACKETA (Zásilkovna) =====================
 const PACKETA_API_KEY = '4b32c40ade3173fb';
 
-// doporučené options – modal + CZ + Z-Box
 const PACKETA_OPTIONS = {
   language: 'cs',
   view: 'modal',
@@ -65,11 +64,19 @@ function grabEls() {
   els.terms = document.getElementById('termsAccepted');
   els.gdpr = document.getElementById('gdprAccepted');
 
+  // desktop summary (původní id)
   els.cartMini = document.getElementById('cartMini');
   els.sumSubtotal = document.getElementById('sumSubtotal');
   els.sumShip = document.getElementById('sumShip');
   els.sumTotal = document.getElementById('sumTotal');
   els.reserveHint = document.getElementById('reserveHint');
+
+  // inline summary (mobile id)
+  els.cartMiniInline = document.getElementById('cartMiniInline');
+  els.sumSubtotalInline = document.getElementById('sumSubtotalInline');
+  els.sumShipInline = document.getElementById('sumShipInline');
+  els.sumTotalInline = document.getElementById('sumTotalInline');
+  els.reserveHintInline = document.getElementById('reserveHintInline');
 
   els.pickBtn = document.getElementById('pickPacketa');
   els.pickSelected = document.getElementById('pickupSelected');
@@ -146,7 +153,6 @@ function renderPickup() {
 }
 
 function openPacketaWidget() {
-  // ✅ debug ať přesně víš co se děje
   console.log('Packeta click:', {
     hasPacketa: !!window.Packeta,
     hasPick: !!window.Packeta?.Widget?.pick,
@@ -164,25 +170,46 @@ function openPacketaWidget() {
   }
 
   const onPick = (point) => {
-    if (!point) return; // user zavřel bez výběru
+    if (!point) return;
     savePickup(point);
     renderPickup();
     setMsg('ok', 'Výdejní místo vybráno ✅');
   };
 
-  // ✅ otevři widget
   window.Packeta.Widget.pick(PACKETA_API_KEY, onPick, PACKETA_OPTIONS);
+}
+
+// ===================== SUMMARY SYNC (desktop -> inline mobile) =====================
+function syncInlineSummaryFromDesktop() {
+  // Pokud inline verze v HTML není, nic nedělej (failsafe)
+  if (!els.cartMiniInline || !els.sumSubtotalInline || !els.sumShipInline || !els.sumTotalInline || !els.reserveHintInline) return;
+
+  // Překopíruj hotový render z desktopu
+  els.cartMiniInline.innerHTML = els.cartMini?.innerHTML ?? '';
+  els.sumSubtotalInline.textContent = els.sumSubtotal?.textContent ?? '0 Kč';
+  els.sumShipInline.textContent = els.sumShip?.textContent ?? '0 Kč';
+  els.sumTotalInline.textContent = els.sumTotal?.textContent ?? '0 Kč';
+  els.reserveHintInline.textContent = els.reserveHint?.textContent ?? '';
+}
+
+function setEmptySummary() {
+  const emptyHtml = `<p style="opacity:.7">Košík je prázdný.</p>`;
+
+  if (els.cartMini) els.cartMini.innerHTML = emptyHtml;
+  if (els.sumSubtotal) els.sumSubtotal.textContent = formatKc(0);
+  if (els.sumShip) els.sumShip.textContent = formatKc(0);
+  if (els.sumTotal) els.sumTotal.textContent = formatKc(0);
+  if (els.reserveHint) els.reserveHint.textContent = '';
+
+  syncInlineSummaryFromDesktop();
 }
 
 // ===================== MINI SUMMARY =====================
 function renderMiniSummary() {
   const cart = readCart();
+
   if (!cart.length) {
-    els.cartMini.innerHTML = `<p style="opacity:.7">Košík je prázdný.</p>`;
-    els.sumSubtotal.textContent = formatKc(0);
-    els.sumShip.textContent = formatKc(0);
-    els.sumTotal.textContent = formatKc(0);
-    els.reserveHint.textContent = '';
+    setEmptySummary();
     return;
   }
 
@@ -212,16 +239,23 @@ function renderMiniSummary() {
     `;
   }).join('');
 
-  els.cartMini.innerHTML = itemsHtml + (cart.length > 12 ? `<p class="muted">+ další položky…</p>` : '');
+  if (els.cartMini) {
+    els.cartMini.innerHTML = itemsHtml + (cart.length > 12 ? `<p class="muted">+ další položky…</p>` : '');
+  }
 
-  els.sumSubtotal.textContent = formatKc(subtotal);
-  els.sumShip.textContent = formatKc(fees.extra);
-  els.sumTotal.textContent = formatKc(subtotal + fees.extra);
+  if (els.sumSubtotal) els.sumSubtotal.textContent = formatKc(subtotal);
+  if (els.sumShip) els.sumShip.textContent = formatKc(fees.extra);
+  if (els.sumTotal) els.sumTotal.textContent = formatKc(subtotal + fees.extra);
 
-  els.reserveHint.textContent =
-    payment === 'bank'
-      ? 'Rezervace na 24 hodin po vytvoření objednávky.'
-      : 'Dobírka: rezervace bez limitu, stav se uzavírá ručně.';
+  if (els.reserveHint) {
+    els.reserveHint.textContent =
+      payment === 'bank'
+        ? 'Rezervace na 24 hodin po vytvoření objednávky.'
+        : 'Dobírka: rezervace bez limitu, stav se uzavírá ručně.';
+  }
+
+  // ✅ zrcadli do inline shrnutí na mobil
+  syncInlineSummaryFromDesktop();
 }
 
 // ===================== SUBMIT =====================
@@ -299,6 +333,7 @@ function buildPayload() {
 }
 
 function lockUI(locked) {
+  if (!els.btn) return;
   els.btn.disabled = !!locked;
   els.btn.textContent = locked ? 'Vytvářím objednávku…' : 'Objednat';
 }
@@ -338,16 +373,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderPickup();
 
-  // ✅ click na tlačítko
+  // click na Packeta button
   els.pickBtn?.addEventListener('click', () => {
     setMsg('', '');
     openPacketaWidget();
   });
 
+  // summary
   renderMiniSummary();
   document.getElementById('paymentChoices')?.addEventListener('change', renderMiniSummary);
 
-  els.form.addEventListener('submit', async (e) => {
+  els.form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     setMsg('', '');
 
