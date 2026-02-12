@@ -1,435 +1,106 @@
-*{ box-sizing:border-box; margin:0; padding:0; }
+/* ===================== VYKUP FIX – REAL SELECTORS (buy-page) ===================== */
 
-body{
-  background:#0f0f14;
-  color:#fff;
-  font-family:Inter,system-ui,sans-serif;
-}
-
-.hidden{ display:none !important; }
-
-.buy-page{
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 40px 18px;
-}
-
-.buy-header{
-  margin-bottom: 16px;
-}
-
-.buy-header h1{
-  font-size: 2.1rem;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-}
-
-.sub{
-  margin-top: 10px;
-  opacity: .7;
-  font-size: .95rem;
-  line-height: 1.4;
-}
-
-.card{
-  background:#15151d;
-  border:1px solid #2a2a33;
-  border-radius:20px;
-  padding: 18px;
-  margin-top: 14px;
-}
-
-.card h2{
-  font-size: 1.15rem;
-  font-weight: 900;
-  color:#ff3b3b;
-  margin-bottom: 12px;
-}
-
-.muted{ opacity:.7; }
-.small{ font-size:.9rem; line-height:1.45; }
-
-.sep{
-  height: 1px;
-  background: #2a2a33;
-  margin: 12px 0;
-}
-
-.form{
-  display:grid;
-  gap: 12px;
-}
-
-label{
-  display:grid;
-  gap: 6px;
-  font-size: .88rem;
-  color:#aaa;
-}
-
-input, textarea{
-  padding: 12px 12px;
-  border-radius: 14px;
-  border: 1px solid #2a2a33;
-  background: #0f0f14;
-  color: #fff;
-  outline: none;
-}
-
-textarea{ resize: vertical; min-height: 92px; }
-
-.grid-2{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.btn-primary{
-  width: min(420px, 100%);
-  margin: 14px auto 0;
-  display:block;
-  padding: 16px 22px;
-  border: none;
-  border-radius: 999px;
-  background: linear-gradient(135deg,#ff3b3b,#c40000);
-  color: #fff;
-  font-weight: 900;
-  cursor: pointer;
-  transition: .15s;
-  font-size: 1.05rem;
-}
-
-.btn-primary:hover{ transform: translateY(-1px); }
-.btn-primary:disabled{ opacity:.6; cursor:not-allowed; transform:none; }
-
-.btn-ghost{
-  padding: 10px 12px;
-  border-radius: 999px;
-  border: 1px solid #2a2a33;
-  background: #0f0f14;
-  color: #fff;
-  font-weight: 900;
-  cursor:pointer;
-}
-.btn-ghost:hover{
-  border-color: rgba(255,59,59,.45);
-  box-shadow: 0 0 0 2px rgba(255,59,59,.10);
-}
-
-.msg{
-  margin-top: 10px;
-  font-size: .95rem;
-  opacity: .92;
-  text-align:center;
-}
-.msg.ok{ color: #7dffb2; }
-.msg.err{ color: #ff6b6b; }
-
-.type-grid{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.type-card{
-  text-align:left;
-  padding: 14px;
-  border-radius: 16px;
-  border: 1px solid #2a2a33;
-  background:#0f0f14;
-  cursor:pointer;
-  transition:.15s;
-}
-
-.type-card .title{
-  font-weight: 900;
-  font-size: 1.05rem;
-}
-.type-card .desc{
-  margin-top: 6px;
-  opacity:.7;
-  font-size: .9rem;
-  line-height:1.35;
-}
-
-.type-card:hover{
-  border-color: rgba(255,59,59,.45);
-  box-shadow: 0 0 0 2px rgba(255,59,59,.10);
-}
-.type-card.active{
-  border-color: rgba(255,59,59,.65);
-  box-shadow: 0 0 0 2px rgba(255,59,59,.14);
-}
-
-.how{
-  margin-top: 12px;
-  padding: 12px;
-  border-radius: 16px;
-  border: 1px solid #2a2a33;
-  background:#0f0f14;
-  line-height:1.5;
-}
-
-.row-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap: 10px;
-}
-
-.hint{
-  opacity:.75;
-  font-size:.9rem;
-  line-height:1.45;
-}
-
-.items{
-  display:grid;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.item-row{
-  border: 1px solid #2a2a33;
-  background:#0f0f14;
-  border-radius: 16px;
-  padding: 12px;
-  display:grid;
-  gap: 10px;
-}
-
-.item-top{
-  display:grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
-  align-items:center;
-}
-
-.item-title{
-  font-weight:900;
-  color:#fff;
-  font-size:.98rem;
-}
-
-.item-actions{
-  display:flex;
-  gap: 8px;
-}
-
-.btn-mini{
-  padding: 8px 10px;
-  border-radius: 999px;
-  border: 1px solid #2a2a33;
-  background:#15151d;
-  color:#fff;
-  font-weight:900;
-  cursor:pointer;
-}
-.btn-mini:hover{
-  border-color: rgba(255,59,59,.45);
-  box-shadow: 0 0 0 2px rgba(255,59,59,.10);
-}
-.btn-mini.danger{
-  border-color: rgba(255,107,107,.45);
-}
-
-.item-grid{
-  display:grid;
-  grid-template-columns: 1.1fr .9fr .9fr;
-  gap: 10px;
-}
-
-@media (max-width: 900px){
-  .buy-page{ padding: 28px 14px; }
-  .buy-header h1{ font-size: 1.75rem; }
-  .type-grid{ grid-template-columns: 1fr; }
-  .grid-2{ grid-template-columns: 1fr; }
-  .item-grid{ grid-template-columns: 1fr; }
-  .row-head{ flex-direction: column; align-items: stretch; }
-  .btn-primary{ max-width: 520px; }
-}
-
-/* ===================== VYKUP VIS – HOTFIX / POLISH ===================== */
-/* Dej to na KONEC vykupvis.css, ať to přepíše starý styly. */
-
-/* 1) Globální čitelnost textu (červeně na screenu) */
-.vykup-page,
-.vykup-page *{
-  color: #fff;
-}
-
-.vykup-page .muted,
-.vykup-page .sub,
-.vykup-page small,
-.vykup-page .hint,
-.vykup-page .help,
-.vykup-page .desc{
+/* ČITELNOST – ať se nic “neztratí” */
+.buy-page{ color:#fff; }
+.buy-page .sub,
+.buy-page .muted,
+.buy-page .hint,
+.buy-page .type-card .desc,
+.buy-page .small{
   color: rgba(255,255,255,.72) !important;
+  opacity: 1 !important; /* zruší “utlumení do neviditelna” */
 }
 
-/* Labely/input text */
-.vykup-page label{
-  color: rgba(255,255,255,.78) !important;
-}
-.vykup-page input,
-.vykup-page textarea,
-.vykup-page select{
-  color: #fff !important;
-  background: #0f0f14 !important;
-  border: 1px solid #2a2a33 !important;
+.buy-page label{
+  color: rgba(255,255,255,.82) !important;
 }
 
-/* Placeholder aby byl čitelnej */
-.vykup-page input::placeholder,
-.vykup-page textarea::placeholder{
+/* Inputy */
+.buy-page input,
+.buy-page textarea{
+  color:#fff !important;
+  background:#0f0f14 !important;
+  border:1px solid #2a2a33 !important;
+}
+
+.buy-page input::placeholder,
+.buy-page textarea::placeholder{
   color: rgba(255,255,255,.45);
 }
 
-/* 2) Typ výkupu (Kusové/Bulk) – udělat z toho “karty” co jsou jasně klikací (modře) */
-.vykup-page .type-grid,
-.vykup-page .selltype-grid,
-.vykup-page .choice-grid{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+/* TYPE CARDS (Kusové/Bulk) – ať to je jasně klikací */
+.type-card{
+  min-height: 78px;
+  display:flex;
+  flex-direction: column;
+  justify-content:center;
+  gap: 4px;
 }
 
-@media (max-width: 900px){
-  .vykup-page .type-grid,
-  .vykup-page .selltype-grid,
-  .vykup-page .choice-grid{
-    grid-template-columns: 1fr;
-  }
-}
+.type-card .title{ color:#fff; }
+.type-card .desc{ color: rgba(255,255,255,.72) !important; opacity:1 !important; }
 
-/* chytáme víc možností názvů tříd */
-.vykup-page .type-card,
-.vykup-page .selltype-card,
-.vykup-page .choice-card,
-.vykup-page .choice{
-  border-radius: 18px;
-  border: 1px solid #2a2a33;
-  background: #0f0f14;
-  padding: 16px 16px;
-  cursor: pointer;
-  transition: .15s;
-  min-height: 74px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-}
-
-.vykup-page .type-card:hover,
-.vykup-page .selltype-card:hover,
-.vykup-page .choice-card:hover,
-.vykup-page .choice:hover{
-  border-color: rgba(255,59,59,.45);
-  box-shadow: 0 0 0 2px rgba(255,59,59,.10);
+.type-card:hover{
   transform: translateY(-1px);
 }
 
-/* aktivní vybraná karta (podle toho jak máš řešený "active/selected") */
-.vykup-page .type-card.is-active,
-.vykup-page .selltype-card.is-active,
-.vykup-page .choice.is-active,
-.vykup-page .choice.selected,
-.vykup-page .choice:has(input:checked){
-  border-color: rgba(255,59,59,.75);
-  background: linear-gradient(135deg, rgba(255,59,59,.16), rgba(196,0,0,.10));
-  box-shadow: 0 0 0 2px rgba(255,59,59,.10);
+.type-card.active{
+  border-color: rgba(168,85,247,.85); /* fialová */
+  box-shadow: 0 0 0 2px rgba(168,85,247,.20);
+  background: linear-gradient(135deg, rgba(168,85,247,.14), rgba(34,211,238,.06));
 }
 
-/* Titulek uvnitř volby */
-.vykup-page .type-title,
-.vykup-page .choice-title{
-  font-weight: 900;
-  font-size: 1.02rem;
-  color: #fff !important;
-}
-.vykup-page .type-sub,
-.vykup-page .choice-sub{
-  color: rgba(255,255,255,.68) !important;
-  font-size: .9rem;
-}
-
-/* 3) “Přidat kartu” – hezčí, výraznější a ne tak tiny (modře) */
-.vykup-page .add-row,
-.vykup-page .row-actions,
-.vykup-page .form-top{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.vykup-page #addCardBtn,
-.vykup-page .btn-add,
-.vykup-page .add-btn{
+/* “Přidat kartu” – výrazná fialová pilulka */
+.btn-ghost#addCardBtn,
+#addCardBtn.btn-ghost,
+#addCardBtn{
   padding: 11px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(125,255,178,.35);
-  background: rgba(125,255,178,.08);
+  border: 1px solid rgba(168,85,247,.65);
+  background: linear-gradient(135deg, rgba(168,85,247,.22), rgba(124,58,237,.14));
   color: #fff;
   font-weight: 900;
   cursor: pointer;
   transition: .15s;
 }
 
-.vykup-page #addCardBtn:hover,
-.vykup-page .btn-add:hover,
-.vykup-page .add-btn:hover{
-  border-color: rgba(125,255,178,.65);
-  box-shadow: 0 0 0 2px rgba(125,255,178,.10);
+#addCardBtn:hover{
   transform: translateY(-1px);
+  box-shadow: 0 0 0 2px rgba(168,85,247,.18);
 }
 
-/* 4) File inputy – udělat to “web friendly” (modře u vybrat soubor) */
-.vykup-page input[type="file"]{
+/* FILE INPUT – konec devadesátek */
+.buy-page input[type="file"]{
   width: 100%;
-  padding: 10px;
+  padding: 10px 10px;
   border-radius: 14px;
   border: 1px solid #2a2a33;
   background: #0f0f14;
   color: rgba(255,255,255,.75);
 }
 
-.vykup-page input[type="file"]::file-selector-button{
+.buy-page input[type="file"]::file-selector-button{
   margin-right: 10px;
   padding: 10px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(255,59,59,.55);
-  background: linear-gradient(135deg, rgba(255,59,59,.16), rgba(196,0,0,.10));
+  border: 1px solid rgba(168,85,247,.70);
+  background: linear-gradient(135deg, rgba(168,85,247,.22), rgba(124,58,237,.14));
   color: #fff;
   font-weight: 900;
   cursor: pointer;
   transition: .15s;
 }
 
-.vykup-page input[type="file"]::file-selector-button:hover{
-  box-shadow: 0 0 0 2px rgba(255,59,59,.10);
+.buy-page input[type="file"]::file-selector-button:hover{
+  box-shadow: 0 0 0 2px rgba(168,85,247,.18);
   transform: translateY(-1px);
 }
 
-/* 5) Submit tlačítko na střed a větší (ať je to “call to action”) */
-.vykup-page .btn-primary,
-.vykup-page #submitBuy,
-.vykup-page #submitRequest{
-  width: min(420px, 100%);
-  margin: 18px auto 0;
-  display: block;
-  padding: 16px 22px;
-  font-size: 1.05rem;
-  border-radius: 999px;
-}
-
-/* 6) Ta poslední věta “Odesláním souhlasíš…” – na střed */
-.vykup-page .consent,
-.vykup-page .legal,
-.vykup-page .fineprint{
+/* POSLEDNÍ TEXT – centrovat */
+.buy-page .consent,
+.buy-page .legal,
+.buy-page .fineprint,
+.buy-page .small.muted{
   text-align: center !important;
   margin-top: 12px;
-  color: rgba(255,255,255,.55) !important;
 }
