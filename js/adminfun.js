@@ -49,9 +49,7 @@ function setMsg(el, type, text) {
   el.textContent = text || '';
 }
 
-function fmtKc(n) {
-  return `${Number(n || 0)} Kč`;
-}
+function fmtKc(n) { return `${Number(n || 0)} Kč`; }
 
 function fmtDt(ts) {
   if (!ts) return '—';
@@ -145,6 +143,7 @@ function getRowClass(order) {
     if (st === 'paid') return 'is-green';
   }
 
+  // expired/cancelled/returned necháme default
   return '';
 }
 
@@ -203,12 +202,12 @@ function renderTable() {
       <tr class="${rowClass}">
         <td><input type="checkbox" class="pickbox" data-pick="${o.id}"></td>
 
-        <td><strong>${escapeHtml(o.order_number)}</strong></td>
-        <td>${escapeHtml(o.status)}</td>
-        <td>${escapeHtml(o.payment_method)}</td>
+        <td><strong>${escapeHtml(o.order_number || '—')}</strong></td>
+        <td>${escapeHtml(o.status || '—')}</td>
+        <td>${escapeHtml(o.payment_method || '—')}</td>
         <td><strong>${fmtKc(o.total)}</strong></td>
-        <td>${escapeHtml(o.first_name)} ${escapeHtml(o.last_name)}</td>
-        <td>${escapeHtml(o.street)}, ${escapeHtml(o.city)}</td>
+        <td>${escapeHtml(o.first_name || '')} ${escapeHtml(o.last_name || '')}</td>
+        <td>${escapeHtml(o.street || '')}, ${escapeHtml(o.city || '')}</td>
         <td>${escapeHtml(o.delivery_point_id || '—')}</td>
         <td>${fmtDt(o.created_at)}</td>
         <td>${o.payment_method === 'bank' ? fmtDt(o.reserved_until) : '—'}</td>
@@ -240,69 +239,142 @@ async function doAction(act, orderId) {
   renderTable();
 }
 
-// ===================== CSV EXPORT =====================
+// ===================== CSV EXPORT (Packeta CZ, version 8) =====================
+// Hlavičky bereme jako v jejich šabloně (bez závorek/vysvětlivek)
+const PACKETA_VERSION_LINE = 'version 8';
+
+// Jen to, co reálně potřebuješ pro ČR import:
+const PACKETA_HEADERS_CZ = [
+  'Číslo',
+  'Jméno',
+  'Příjmení',
+  'E-mail',
+  'Telefon',
+  'Dobírka',
+  'Měna',
+  'Hodnota',
+  'Hmotnost',
+  'Výdejní místo nebo dopravce',
+  'Ulice',
+  'Číslo popisné',
+  'Město',
+  'PSČ',
+  'Poznámka',
+];
+
+// street parser: "Rybniční 1234/56" -> { streetName:"Rybniční", house:"1234/56" }
 function parseStreet(street) {
-  if (!street) return { streetName:'', house:'' };
+  const s = String(street || '').trim();
+  if (!s) return { streetName: '', house: '' };
 
-  const match = street.match(/^(.*?)(\d+\w*)$/);
-  if (!match) return { streetName: street, house:'' };
+  // časté tvary: "Něco 12", "Něco 12A", "Něco 123/45", "Něco 1234/56A"
+  const m = s.match(/^(.*?)(\s+(\d+[a-zA-Z0-9\/\-]*))\s*$/);
+  if (!m) return { streetName: s, house: '' };
 
-  return {
-    streetName: match[1].trim(),
-    house: match[2].trim()
-  };
+  return { streetName: (m[1] || '').trim(), house: (m[3] || '').trim() };
 }
 
-function exportCsv() {
-  const picked = Array.from(document.querySelectorAll("[data-pick]:checked"))
-    .map(x => x.getAttribute("data-pick"));
+function csvEscape(v) {
+  const s = String(v ?? '');
+  return `"${s.replaceAll('"','""')}"`;
+}
+
+function clampLen(s, max) {
+  const x = String(s ?? '');
+  return x.length > max ? x.slice(0, max) : x;
+}
+
+function exportCsvPacketa() {
+  const picked = Array.from(document.querySelectorAll('[data-pick]:checked'))
+    .map(x => x.getAttribute('data-pick'))
+    .filter(Boolean);
 
   if (!picked.length) {
-    alert("Nejdřív označ objednávky checkboxem.");
+    alert('Nejdřív označ objednávky checkboxem.');
     return;
   }
 
-  const selectedOrders = ORDERS.filter(o => picked.includes(o.id));
+  const selected = ORDERS.filter(o => picked.includes(o.id));
 
-  const headers = [
-    "order_number","first_name","last_name","email","phone",
-    "cod","value","currency","weight_grams",
-    "pickup_point_id","street","house_number","city","note"
-  ];
+  // hard stop: vyhoď nesmysly (cancel/expired/returned)
+  const blocked = selected.filter(o => ['cancelled','expired','returned'].includes(o.status));
+  if (blocked.length) {
+    alert(`Vybral jsi i zrušené/expir./vrácené objednávky (${blocked.length}). Odškrtni je a zkus znovu.`);
+    return;
+  }
 
-  let csv = "\uFEFF" + headers.join(";") + "\n";
+  // Packeta potřebuje pickup ID
+  const missingPickup = selected.filter(o => !o.delivery_point_id);
+  if (missingPickup.length) {
+    alert(`Některým objednávkám chybí výdejní místo (${missingPickup.length}). Odškrtni je nebo doplň pickup.`);
+    return;
+  }
 
-  selectedOrders.forEach(o => {
-    const isCod = o.payment_method === "cod";
+  // CSV: BOM + verze + hlavička, oddělovač ; (stejně jako šablona)
+  let csv = '\uFEFF' + PACKETA_VERSION_LINE + '\n';
+  csv += PACKETA_HEADERS_CZ.join(';') + '\n';
+
+  selected.forEach(o => {
+    const isCod = o.payment_method === 'cod';
+
+    // Dobírka = jen u COD (typicky celková částka)
+    const codAmount = isCod ? Number(o.total || 0) : 0;
+
+    // Hodnota zásilky = hodnota zboží (lepší než total)
+    // vezmeme subtotal, fallback = total - shipping_price
+    const subtotal = (o.subtotal != null) ? Number(o.subtotal) : null;
+    const fallbackGoods = Number(o.total || 0) - Number(o.shipping_price || 0);
+    const goodsValue = Number((subtotal != null ? subtotal : fallbackGoods) || 0);
+
+    // Hmotnost v gramech máš v orders.weight_grams
+    const weight = Number(o.weight_grams || 0);
+
     const { streetName, house } = parseStreet(o.street);
+    const zip = String(o.zip || '').trim();
+
+    const note = clampLen(o.note || '', 128);
+    const streetOut = clampLen(streetName, 32);
+    const houseOut = clampLen(house, 16);
+    const cityOut = clampLen(o.city || '', 32);
+
+    // Packeta limity: jméno/příjmení 32, telefon/email formát atd.
+    const first = clampLen(o.first_name || '', 32);
+    const last = clampLen(o.last_name || '', 32);
+    const email = clampLen(o.email || '', 255);
+    const phone = clampLen(o.phone || '', 32);
 
     const row = [
-      o.order_number,
-      o.first_name,
-      o.last_name,
-      o.email,
-      o.phone || "",
-      isCod ? "1" : "0",
-      o.total,
-      "CZK",
-      o.weight_grams || 0,
-      o.delivery_point_id || "",
-      streetName,
-      house,
-      o.city,
-      o.note || ""
+      o.order_number,          // Číslo
+      first,                   // Jméno
+      last,                    // Příjmení
+      email,                   // E-mail
+      phone,                   // Telefon
+      codAmount,               // Dobírka
+      'CZK',                   // Měna
+      goodsValue,              // Hodnota
+      weight,                  // Hmotnost (v gramech)
+      o.delivery_point_id,     // Výdejní místo nebo dopravce (ID výdejního místa)
+      streetOut,               // Ulice
+      houseOut,                // Číslo popisné
+      cityOut,                 // Město
+      zip,                     // PSČ
+      note,                    // Poznámka
     ];
 
-    csv += row.map(v => `"${String(v ?? "").replaceAll('"','""')}"`).join(";") + "\n";
+    csv += row.map(csvEscape).join(';') + '\n';
   });
 
-  const blob = new Blob([csv], { type:"text/csv;charset=utf-8" });
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
 
-  const a = document.createElement("a");
+  const a = document.createElement('a');
   a.href = url;
-  a.download = "zasilkovna_export.csv";
+  a.download = `zasilkovna_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
   a.click();
+  a.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
 }
 
 // ===================== AUTH FLOW =====================
@@ -310,7 +382,7 @@ async function refreshAuthUI() {
   const { data: { session } } = await sb.auth.getSession();
 
   if (!session) {
-    showView("login");
+    showView('login');
     return;
   }
 
@@ -318,53 +390,58 @@ async function refreshAuthUI() {
 
   const ok = await isAdmin();
   if (!ok) {
-    showView("denied");
+    showView('denied');
     return;
   }
 
-  showView("dash");
+  showView('dash');
   await loadOrders();
   renderTable();
 }
 
 // ===================== EVENTS =====================
-document.addEventListener("DOMContentLoaded", async () => {
-
-  els.loginForm.addEventListener("submit", async (e) => {
+document.addEventListener('DOMContentLoaded', async () => {
+  els.loginForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const email = els.loginEmail.value.trim();
-    const password = els.loginPassword.value;
+    const email = String(els.loginEmail.value || '').trim();
+    const password = String(els.loginPassword.value || '');
 
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) return alert(error.message);
+    if (!email || !password) {
+      setMsg(els.loginMsg, 'err', 'Vyplň email i heslo.');
+      return;
+    }
 
-    refreshAuthUI();
+    try {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      await refreshAuthUI();
+    } catch (err) {
+      console.error(err);
+      setMsg(els.loginMsg, 'err', err?.message || String(err));
+    }
   });
 
-  els.logoutBtn.addEventListener("click", async () => {
+  async function logout() {
     await sb.auth.signOut();
-    showView("login");
-  });
+    showView('login');
+  }
+  els.logoutBtn?.addEventListener('click', logout);
+  els.deniedLogoutBtn?.addEventListener('click', logout);
 
-  els.deniedLogoutBtn.addEventListener("click", async () => {
-    await sb.auth.signOut();
-    showView("login");
-  });
-
-  els.refreshBtn.addEventListener("click", async () => {
+  els.refreshBtn?.addEventListener('click', async () => {
     await loadOrders();
     renderTable();
   });
 
-  els.exportCsvBtn.addEventListener("click", exportCsv);
+  els.exportCsvBtn?.addEventListener('click', exportCsvPacketa);
 
-  els.searchInput.addEventListener("input", renderTable);
-  els.statusFilter.addEventListener("change", renderTable);
-  els.paymentFilter.addEventListener("change", renderTable);
+  els.searchInput?.addEventListener('input', renderTable);
+  els.statusFilter?.addEventListener('change', renderTable);
+  els.paymentFilter?.addEventListener('change', renderTable);
 
-  els.ordersBody.addEventListener("click", async (e) => {
-    const btn = e.target.closest("button[data-act]");
+  els.ordersBody?.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-act]');
     if (!btn) return;
 
     const act = btn.dataset.act;
@@ -373,9 +450,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       await doAction(act, id);
     } catch (err) {
-      alert("Chyba: " + err.message);
+      alert('Chyba: ' + (err?.message || err));
     }
   });
 
-  refreshAuthUI();
+  await refreshAuthUI();
 });
