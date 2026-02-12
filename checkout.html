@@ -11,6 +11,9 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <!-- Packeta (Zásilkovna) widget -->
+  <script src="https://widget.packeta.com/www/js/library.js"></script>
 </head>
 
 <body>
@@ -23,7 +26,7 @@
   <main class="checkout-page">
     <header class="checkout-header">
       <h1>Objednávka</h1>
-      <p class="checkout-sub">Vyplň údaje, zvol dopravu a platbu. Pak to odpálíme.</p>
+      <p class="checkout-sub">Vyplň údaje, zvol platbu, vyber výdejní místo a pak to odpálíme.</p>
     </header>
 
     <div class="checkout-layout">
@@ -80,29 +83,34 @@
           <div class="sep"></div>
 
           <h2>Doprava</h2>
+
+          <!-- Jen Packeta -->
           <div class="choice-grid" id="deliveryChoices">
             <label class="choice">
               <input type="radio" name="delivery" value="zasilkovna" checked />
               <span class="choice-main">
-                <span class="choice-title">Zásilkovna</span>
-                <span class="choice-sub">Výdejní místo / box</span>
+                <span class="choice-title">Zásilkovna (Packeta)</span>
+                <span class="choice-sub">Výdejní místo / Z-BOX</span>
               </span>
               <span class="choice-price">89 Kč</span>
             </label>
-
-            <label class="choice">
-              <input type="radio" name="delivery" value="balikovna" />
-              <span class="choice-main">
-                <span class="choice-title">Balíkovna</span>
-                <span class="choice-sub">Výdejní místo / box</span>
-              </span>
-              <span class="choice-price">85 Kč</span>
-            </label>
           </div>
 
-          <div class="hint">
-            Výběr konkrétního výdejního místa (widget) doplníme v dalším kroku.
-            Zatím to necháme „dle domluvy“ – objednávka projde i bez toho.
+          <!-- Pick-up point picker -->
+          <div class="pickup-box">
+            <div class="pickup-head">
+              <div>
+                <div class="pickup-title">Výdejní místo*</div>
+                <div class="pickup-sub muted">Vyber konkrétní box / pobočku. Bez toho objednávku nepustíme.</div>
+              </div>
+              <button class="btn-ghost btn-small" id="pickPacketa" type="button">
+                Vybrat výdejní místo
+              </button>
+            </div>
+
+            <div class="pickup-selected" id="pickupSelected">
+              <span class="muted">Zatím nic vybráno.</span>
+            </div>
           </div>
 
           <div class="sep"></div>
