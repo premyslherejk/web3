@@ -7,20 +7,16 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ===================== PACKETA (Zásilkovna) =====================
-// Získej API key v administraci Packeta / Zásilkovna.
-// (Bez toho widget neotevřeš.)
 const PACKETA_API_KEY = '4b32c40ade3173fb';
 
+// doporučené options – modal + CZ + Z-Box
 const PACKETA_OPTIONS = {
   language: 'cs',
   view: 'modal',
-  // doporučeno z jejich příkladu: vendors + group zbox
   vendors: [
     { country: 'cz' },
     { country: 'cz', group: 'zbox' },
   ],
-  // formát uložené hodnoty (nepovinné, ale hodí se)
-  valueFormat: '"Packeta",id,carrierId,carrierPickupPointId,name,city,street'
 };
 
 const PICKUP_SS_KEY = 'checkout_pickup_packeta';
@@ -80,6 +76,7 @@ function grabEls() {
 }
 
 function setMsg(type, text) {
+  if (!els.msg) return;
   els.msg.className = 'form-msg ' + (type || '');
   els.msg.textContent = text || '';
 }
@@ -134,7 +131,6 @@ function renderPickup() {
     return;
   }
 
-  // Packeta point object mívá různé názvy, držíme se toho, co typicky vrací:
   const name = p?.name || p?.place || 'Výdejní místo';
   const city = p?.city || '';
   const street = p?.street || '';
@@ -142,7 +138,7 @@ function renderPickup() {
 
   els.pickSelected.innerHTML = `
     <div class="pickup-line">
-      <strong>${escapeHtml(name)}</strong>
+      <strong>${escapeHtml(name)}</strong><br>
       <span class="muted">${escapeHtml([street, city].filter(Boolean).join(', '))}</span>
     </div>
     <div class="pickup-meta muted">ID: ${escapeHtml(String(id || '—'))}</div>
@@ -150,29 +146,32 @@ function renderPickup() {
 }
 
 function openPacketaWidget() {
-  if (!PACKETA_API_KEY || PACKETA_API_KEY === '4b32c40ade3173fb') 
-  {
-    setMsg('err', 'Chybí Packeta API key. Doplň ho do checkoutfun.js (PACKETA_API_KEY).');
+  // ✅ debug ať přesně víš co se děje
+  console.log('Packeta click:', {
+    hasPacketa: !!window.Packeta,
+    hasPick: !!window.Packeta?.Widget?.pick,
+    apiKeyLen: (PACKETA_API_KEY || '').length
+  });
+
+  if (!PACKETA_API_KEY) {
+    setMsg('err', 'Chybí Packeta API key (PACKETA_API_KEY).');
     return;
   }
 
-  if (!window.Packeta || !Packeta.Widget || !Packeta.Widget.pick) {
-    setMsg('err', 'Packeta widget se nenačetl. Zkontroluj, že v HTML je <script src="https://widget.packeta.com/www/js/library.js"></script> v <head>.');
+  if (!window.Packeta?.Widget?.pick) {
+    setMsg('err', 'Packeta widget se nenačetl. Zkontroluj, že v <head> je library.js.');
     return;
   }
 
-  // callback po výběru
   const onPick = (point) => {
-    // když user zavře bez výběru
-    if (!point) return;
-
-    // uložíme celý objekt (je nejjednodušší)
+    if (!point) return; // user zavřel bez výběru
     savePickup(point);
     renderPickup();
-    setMsg('', '');
+    setMsg('ok', 'Výdejní místo vybráno ✅');
   };
 
-  Packeta.Widget.pick(PACKETA_API_KEY, onPick, PACKETA_OPTIONS);
+  // ✅ otevři widget
+  window.Packeta.Widget.pick(PACKETA_API_KEY, onPick, PACKETA_OPTIONS);
 }
 
 // ===================== MINI SUMMARY =====================
@@ -263,9 +262,6 @@ function buildPayload() {
   const payment_method = getSelected('payment') || 'bank';
   const pickup = readPickup();
 
-  const fees = calcFees(payment_method); // jen pro info (server si stejně počítá sám)
-
-  // bezpečně vytáhnout id + název (podle toho, co widget vrátí)
   const pickupId =
     pickup?.id ||
     pickup?.carrierPickupPointId ||
@@ -275,7 +271,7 @@ function buildPayload() {
   const pickupName =
     pickup?.name ||
     pickup?.place ||
-    pickup?.formatedValue || // v jejich příkladu
+    pickup?.formatedValue ||
     null;
 
   return {
@@ -340,16 +336,14 @@ function goThankYou(orderId, orderNumber) {
 document.addEventListener('DOMContentLoaded', () => {
   grabEls();
 
-  // render pick from sessionStorage (pokud user refreshne)
   renderPickup();
 
-  // pick button
+  // ✅ click na tlačítko
   els.pickBtn?.addEventListener('click', () => {
     setMsg('', '');
     openPacketaWidget();
   });
 
-  // mini summary
   renderMiniSummary();
   document.getElementById('paymentChoices')?.addEventListener('change', renderMiniSummary);
 
@@ -373,7 +367,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       saveLastOrder(resp, payload);
       clearCart();
-      // pickup může zůstat (kdyby user šel zpět), ale čistější je ho smazat:
       clearPickup();
 
       setMsg('ok', 'Objednávka vytvořena. Přesměrovávám…');
