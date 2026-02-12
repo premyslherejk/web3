@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-  <!-- Packeta (Zásilkovna) widget -->
+  <!-- ✅ Packeta / Zásilkovna widget (MUSÍ být v <head>) -->
   <script src="https://widget.packeta.com/www/js/library.js"></script>
 </head>
 
@@ -84,31 +84,24 @@
 
           <h2>Doprava</h2>
 
-          <!-- Jen Packeta -->
-          <div class="choice-grid" id="deliveryChoices">
+          <!-- ✅ Už jen Zásilkovna -->
+          <div class="choice-grid">
             <label class="choice">
               <input type="radio" name="delivery" value="zasilkovna" checked />
               <span class="choice-main">
-                <span class="choice-title">Zásilkovna (Packeta)</span>
-                <span class="choice-sub">Výdejní místo / Z-BOX</span>
+                <span class="choice-title">Zásilkovna</span>
+                <span class="choice-sub">Výdejní místo / box (vybereš níž)</span>
               </span>
               <span class="choice-price">89 Kč</span>
             </label>
           </div>
 
-          <!-- Pick-up point picker -->
-          <div class="pickup-box">
-            <div class="pickup-head">
-              <div>
-                <div class="pickup-title">Výdejní místo*</div>
-                <div class="pickup-sub muted">Vyber konkrétní box / pobočku. Bez toho objednávku nepustíme.</div>
-              </div>
-              <button class="btn-ghost btn-small" id="pickPacketa" type="button">
-                Vybrat výdejní místo
-              </button>
-            </div>
-
-            <div class="pickup-selected" id="pickupSelected">
+          <!-- ✅ Packeta picker UI -->
+          <div class="packeta-block">
+            <button id="pickPacketa" class="btn-ghost" type="button">
+              Vybrat výdejní místo
+            </button>
+            <div id="pickupSelected" class="pickup-selected">
               <span class="muted">Zatím nic vybráno.</span>
             </div>
           </div>
