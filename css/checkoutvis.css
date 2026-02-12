@@ -404,3 +404,43 @@ textarea{ resize: vertical; min-height: 92px; }
     margin-bottom: 18px; /* hlavně oddělí poznámku od shrnutí */
   }
 }
+
+
+/* ===================== THANK YOU PAGE SAFETY (dekuji.html) ===================== */
+.thanks-page .checkout-card{
+  overflow: hidden; /* ať se nic nerozsype přes rohy */
+}
+
+.thanks-page .thanks-grid{
+  display: grid;
+  grid-template-columns: 1.15fr .85fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.thanks-page .bank-box{
+  background:#0f0f14;
+  border:1px solid #2a2a33;
+  border-radius:18px;
+  padding: 14px;
+}
+
+.thanks-page .thanks-actions{
+  justify-content: center;
+}
+
+.thanks-page .thanks-actions .btn-primary{
+  min-width: 220px;
+}
+
+/* Mobile */
+@media (max-width: 900px){
+  .thanks-page .thanks-grid{
+    grid-template-columns: 1fr;
+  }
+
+  .thanks-page .thanks-actions .btn-primary{
+    width: 100%;
+    max-width: 420px;
+  }
+}
