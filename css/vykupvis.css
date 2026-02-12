@@ -274,27 +274,28 @@ textarea{ resize: vertical; min-height: 92px; line-height: 1.5; }
   gap: 10px;
 }
 
-/* ===================== ADD CARD BUTTON (fialová, výrazná) ===================== */
-/* chytneme to přes ID i fallback třídy */
+
+/* ===================== ADD CARD BUTTON (stejný vibe jako file upload) ===================== */
 #addCardBtn,
 .btn-add,
 .add-btn{
-  padding: 11px 14px;
+  padding: 10px 12px;
   border-radius: 999px;
   border: 1px solid rgba(168,85,247,.70);
-  background: linear-gradient(135deg, rgba(168,85,247,.26), rgba(124,58,237,.16));
+  background: linear-gradient(135deg, rgba(168,85,247,.22), rgba(124,58,237,.14));
   color: #fff;
   font-weight: 900;
   cursor: pointer;
   transition: .15s;
-  white-space: nowrap;
 }
+
 #addCardBtn:hover,
 .btn-add:hover,
 .add-btn:hover{
-  transform: translateY(-1px);
   box-shadow: 0 0 0 2px rgba(168,85,247,.18);
+  transform: translateY(-1px);
 }
+
 
 /* ===================== FILE INPUT (konec 90s) ===================== */
 input[type="file"]{
@@ -351,4 +352,19 @@ input[type="file"]::file-selector-button:hover{
   .item-grid{ grid-template-columns: 1fr; }
   .row-head{ flex-direction: column; align-items: stretch; }
   .btn-primary{ max-width: 520px; }
+}
+
+
+/* ===================== BULK SPACING FIX ===================== */
+
+/* Bulk inputy potřebují víc vzduchu shora */
+.bulk-block label,
+.bulk-fields label,
+.bulk-row label{
+  margin-top: 14px;
+}
+
+/* fallback – když bulk nemá wrapper, tak aspoň všechny labely pod sebou */
+.form label + label{
+  margin-top: 10px;
 }
