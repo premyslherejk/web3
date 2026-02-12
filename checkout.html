@@ -80,77 +80,87 @@
             </label>
           </div>
 
-          <div class="sep"></div>
+          <!-- ===================== DOPRAVA ===================== -->
+          <div class="section-delivery">
+            <div class="sep"></div>
 
-          <h2>Doprava</h2>
+            <h2>Doprava</h2>
 
-          <!-- ✅ Už jen Zásilkovna -->
-          <div class="choice-grid">
-            <label class="choice">
-              <input type="radio" name="delivery" value="zasilkovna" checked />
-              <span class="choice-main">
-                <span class="choice-title">Zásilkovna</span>
-                <span class="choice-sub">Výdejní místo / box (vybereš níž)</span>
-              </span>
-              <span class="choice-price">89 Kč</span>
-            </label>
-          </div>
+            <div class="choice-grid">
+              <label class="choice">
+                <input type="radio" name="delivery" value="zasilkovna" checked />
+                <span class="choice-main">
+                  <span class="choice-title">Zásilkovna</span>
+                  <span class="choice-sub">Výdejní místo / box (vybereš níž)</span>
+                </span>
+                <span class="choice-price">89 Kč</span>
+              </label>
+            </div>
 
-          <!-- ✅ Packeta picker UI -->
-          <div class="packeta-block">
-            <button id="pickPacketa" class="btn-ghost" type="button">
-              Vybrat výdejní místo
-            </button>
-            <div id="pickupSelected" class="pickup-selected">
-              <span class="muted">Zatím nic vybráno.</span>
+            <!-- ✅ Packeta picker UI -->
+            <div class="packeta-block">
+              <button id="pickPacketa" class="btn-packeta" type="button">
+                📍 Vybrat výdejní místo
+              </button>
+
+              <div id="pickupSelected" class="pickup-selected">
+                <span class="muted">Zatím nic vybráno.</span>
+              </div>
             </div>
           </div>
 
-          <div class="sep"></div>
+          <!-- ===================== PLATBA + POZNÁMKA ===================== -->
+          <div class="section-payment">
+            <div class="sep"></div>
 
-          <h2>Platba</h2>
-          <div class="choice-grid" id="paymentChoices">
-            <label class="choice">
-              <input type="radio" name="payment" value="bank" checked />
-              <span class="choice-main">
-                <span class="choice-title">Platba převodem / QR</span>
-                <span class="choice-sub">Rezervace 24 hodin</span>
-              </span>
-              <span class="choice-price">0 Kč</span>
-            </label>
+            <h2>Platba</h2>
+            <div class="choice-grid" id="paymentChoices">
+              <label class="choice">
+                <input type="radio" name="payment" value="bank" checked />
+                <span class="choice-main">
+                  <span class="choice-title">Platba převodem / QR</span>
+                  <span class="choice-sub">Rezervace 24 hodin</span>
+                </span>
+                <span class="choice-price">0 Kč</span>
+              </label>
 
-            <label class="choice">
-              <input type="radio" name="payment" value="cod" />
-              <span class="choice-main">
-                <span class="choice-title">Dobírka</span>
-                <span class="choice-sub">+35 Kč, rezervace bez limitu</span>
-              </span>
-              <span class="choice-price">35 Kč</span>
+              <label class="choice">
+                <input type="radio" name="payment" value="cod" />
+                <span class="choice-main">
+                  <span class="choice-title">Dobírka</span>
+                  <span class="choice-sub">+35 Kč, rezervace bez limitu</span>
+                </span>
+                <span class="choice-price">35 Kč</span>
+              </label>
+            </div>
+
+            <label class="note">
+              Poznámka (volitelné)
+              <textarea id="note" rows="3" placeholder="Např. prosím zabalit extra safe…"></textarea>
             </label>
           </div>
 
-          <label class="note">
-            Poznámka (volitelné)
-            <textarea id="note" rows="3" placeholder="Např. prosím zabalit extra safe…"></textarea>
-          </label>
+          <!-- ===================== CHECKBOXY + SUBMIT ===================== -->
+          <div class="section-confirm">
+            <div class="sep"></div>
 
-          <div class="sep"></div>
+            <label class="check">
+              <input id="termsAccepted" type="checkbox" />
+              <span>Souhlasím s <a href="terms.html" target="_blank" rel="noopener">obchodními podmínkami</a>*</span>
+            </label>
 
-          <label class="check">
-            <input id="termsAccepted" type="checkbox" />
-            <span>Souhlasím s <a href="terms.html" target="_blank" rel="noopener">obchodními podmínkami</a>*</span>
-          </label>
+            <label class="check">
+              <input id="gdprAccepted" type="checkbox" />
+              <span>Souhlasím se <a href="gdpr.html" target="_blank" rel="noopener">zpracováním osobních údajů</a>*</span>
+            </label>
 
-          <label class="check">
-            <input id="gdprAccepted" type="checkbox" />
-            <span>Souhlasím se <a href="gdpr.html" target="_blank" rel="noopener">zpracováním osobních údajů</a>*</span>
-          </label>
+            <button class="btn-primary" id="submitOrder" type="submit">
+              Objednat
+            </button>
 
-          <button class="btn-primary" id="submitOrder" type="submit">
-            Objednat
-          </button>
+            <p class="form-msg" id="formMsg" aria-live="polite"></p>
+          </div>
 
-          <p class="form-msg" id="formMsg" aria-live="polite"></p>
         </form>
       </section>
 
