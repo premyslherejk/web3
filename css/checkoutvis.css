@@ -56,7 +56,7 @@ body{
 /* ✅ sticky offset, aby to header nepřekrýval */
 .sticky{
   position: sticky;
-  top: 80px; /* bylo 16px */
+  top: 80px;
 }
 
 /* ===================== FORM ===================== */
@@ -182,10 +182,13 @@ textarea{ resize: vertical; min-height: 92px; }
   margin-top: 12px;
   display: grid;
   gap: 12px;
+  justify-items: start; /* ✅ aby button byl vlevo */
 }
 
 .btn-packeta{
-  width: 100%;
+  width: 35%;
+  min-width: 220px;
+  max-width: 360px;
   padding: 14px 16px;
   border-radius: 18px;
   border: 1px solid rgba(255,59,59,.55);
@@ -208,11 +211,10 @@ textarea{ resize: vertical; min-height: 92px; }
   border-radius: 16px;
   padding: 12px;
   min-height: 48px;
+  width: 100%;
 }
 
-.pickup-line strong{
-  font-size: .95rem;
-}
+.pickup-line strong{ font-size: .95rem; }
 
 .pickup-meta{
   margin-top: 6px;
@@ -257,10 +259,13 @@ textarea{ resize: vertical; min-height: 92px; }
   box-shadow: 0 0 0 2px rgba(255,59,59,.10);
 }
 
-.btn-row{
-  display:flex;
-  gap:10px;
-  flex-wrap: wrap;
+/* ✅ Objednat: na střed + větší + níž */
+#submitOrder{
+  width: min(420px, 100%);
+  margin: 18px auto 0;
+  display: block;
+  padding: 16px 22px;
+  font-size: 1.05rem;
 }
 
 /* ===================== SUMMARY ===================== */
@@ -336,39 +341,44 @@ textarea{ resize: vertical; min-height: 92px; }
 
 .muted{ opacity: .65; }
 
+/* ✅ Inline shrnutí default skryté (desktop) */
+.summary-inline{ display: none; }
+
+/* ✅ Desktop shrnutí default viditelné */
+.summary-desktop{ display: block; }
+
 /* ===================== MOBILE ===================== */
 @media (max-width: 900px){
   .checkout-page{ padding: 28px 14px; }
   .checkout-header h1{ font-size: 1.75rem; }
 
-  /* ✅ mobil: dáme to jako flex column, a přeházíme pořadí */
   .checkout-layout{
     display: flex;
     flex-direction: column;
   }
 
-  /* form první */
-  .checkout-layout > section.checkout-card{ order: 1; }
-
-  /* shrnutí hned po poznámce (díky tomu, že confirm sekce je až potom) */
-  .checkout-layout > aside.checkout-card{
-    order: 2;
-    margin-top: 12px;
-    position: static;
-  }
+  .sticky{ position: static; }
 
   .grid-2{ grid-template-columns: 1fr; }
   .grid-3{ grid-template-columns: 1fr; }
 
-  /* ✅ uvnitř formu přehodíme sekce:
-     fakturační = implicitně první, pak delivery, payment, confirm */
-  .checkout-form{
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  /* ✅ mobil: zobraz inline shrnutí, schovej desktop shrnutí */
+  .summary-inline{ display: block; }
+  .summary-desktop{ display: none; }
+
+  /* ✅ Packeta tlačítko na mobilu full width (jak chceš) */
+  .btn-packeta{
+    width: 100%;
+    min-width: 0;
+    max-width: none;
   }
 
-  .section-delivery{ order: 2; }
-  .section-payment{ order: 3; }
-  .section-confirm{ order: 4; }
+  /* ✅ Objednat i na mobilu na střed + větší */
+  #submitOrder{
+    width: min(420px, 100%);
+    margin: 18px auto 0;
+    display: block;
+    padding: 16px 22px;
+    font-size: 1.05rem;
+  }
 }
