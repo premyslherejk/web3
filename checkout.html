@@ -138,6 +138,25 @@
               Poznámka (volitelné)
               <textarea id="note" rows="3" placeholder="Např. prosím zabalit extra safe…"></textarea>
             </label>
+
+            <!-- ✅ INLINE SUMMARY (mobile: hned po poznámce) -->
+<section class="checkout-card summary-inline" id="summaryInline">
+  <h2>Shrnutí</h2>
+
+  <div class="cart-mini" id="cartMini">
+    <p style="opacity:.7">Načítám košík…</p>
+  </div>
+
+  <div class="totals">
+    <div class="row"><span>Mezisoučet</span><strong id="sumSubtotal">0 Kč</strong></div>
+    <div class="row"><span>Doprava + poplatky</span><strong id="sumShip">0 Kč</strong></div>
+    <div class="row total"><span>Celkem</span><strong id="sumTotal">0 Kč</strong></div>
+    <div class="small" id="reserveHint"></div>
+  </div>
+
+  <button class="btn-ghost" type="button" onclick="location.href='cart.html'">← Zpět do košíku</button>
+</section>
+
           </div>
 
           <!-- ===================== CHECKBOXY + SUBMIT ===================== -->
@@ -165,7 +184,7 @@
       </section>
 
       <!-- RIGHT: SUMMARY -->
-      <aside class="checkout-card sticky">
+      <aside class="checkout-card sticky summary-desktop" id="summaryDesktop">
         <h2>Shrnutí</h2>
 
         <div class="cart-mini" id="cartMini">
