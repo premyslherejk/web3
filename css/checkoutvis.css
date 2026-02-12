@@ -542,3 +542,5 @@ textarea{ resize: vertical; min-height: 92px; }
     max-width: 420px;
   }
 }
+
+.hidden{ display:none !important; }
