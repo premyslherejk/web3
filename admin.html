@@ -11,6 +11,9 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <!-- ZIP pro "Stáhnout vše" -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
 
 <body>
@@ -48,61 +51,107 @@
     <section class="card hidden" id="dashView">
       <div class="dash-top">
         <div>
-          <h2>Objednávky</h2>
+          <h2>Dashboard</h2>
           <div class="meta">
             Přihlášen: <span id="whoami">—</span>
             <span class="dot">•</span>
-            Celkem načteno: <span id="countAll">0</span>
+            Objednávky: <span id="countAll">0</span>
+            <span class="dot">•</span>
+            Výkup: <span id="countBuy">0</span>
           </div>
         </div>
 
         <div class="dash-actions">
-          <button class="btn-ghost" id="exportCsvBtn" type="button">Export CSV (Zásilkovna)</button>
           <button class="btn-ghost" id="refreshBtn" type="button">Reload</button>
           <button class="btn-ghost" id="logoutBtn" type="button">Logout</button>
         </div>
       </div>
 
-      <div class="filters">
-        <input id="searchInput" class="input" type="text" placeholder="Hledat: číslo, email, jméno…" autocomplete="off" />
-        <select id="statusFilter" class="input">
-          <option value="all">Vše</option>
-          <option value="awaiting_payment">awaiting_payment (bank)</option>
-          <option value="new">new (dobírka)</option>
-          <option value="paid">paid</option>
-          <option value="shipped">shipped</option>
-          <option value="expired">expired</option>
-          <option value="cancelled">cancelled</option>
-          <option value="returned">returned</option>
-        </select>
-        <select id="paymentFilter" class="input">
-          <option value="all">Platba: vše</option>
-          <option value="bank">bank</option>
-          <option value="cod">cod</option>
-        </select>
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab active" id="tabOrders" type="button">Objednávky</button>
+        <button class="tab" id="tabBuy" type="button">Výkup</button>
       </div>
 
-      <div class="table-wrap">
-        <table class="table" id="ordersTable">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Číslo</th>
-              <th>Stav</th>
-              <th>Platba</th>
-              <th>Celkem</th>
-              <th>Zákazník</th>
-              <th>Doručení</th>
-              <th>Pickup</th>
-              <th>Vytvořeno</th>
-              <th>Deadline</th>
-              <th>Akce</th>
-            </tr>
-          </thead>
-          <tbody id="ordersBody">
-            <tr><td colspan="11" class="muted">Načítám…</td></tr>
-          </tbody>
-        </table>
+      <!-- ===================== ORDERS VIEW ===================== -->
+      <div id="ordersPane">
+        <div class="filters">
+          <input id="searchInput" class="input" type="text" placeholder="Hledat: číslo, email, jméno…" autocomplete="off" />
+          <select id="statusFilter" class="input">
+            <option value="all">Vše</option>
+            <option value="awaiting_payment">awaiting_payment (bank)</option>
+            <option value="new">new (dobírka)</option>
+            <option value="paid">paid</option>
+            <option value="shipped">shipped</option>
+            <option value="expired">expired</option>
+            <option value="cancelled">cancelled</option>
+            <option value="returned">returned</option>
+          </select>
+          <select id="paymentFilter" class="input">
+            <option value="all">Platba: vše</option>
+            <option value="bank">bank</option>
+            <option value="cod">cod</option>
+          </select>
+
+          <button class="btn-ghost" id="exportCsvBtn" type="button">Export CSV (Zásilkovna)</button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="table" id="ordersTable">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Číslo</th>
+                <th>Stav</th>
+                <th>Platba</th>
+                <th>Celkem</th>
+                <th>Zákazník</th>
+                <th>Doručení</th>
+                <th>Pickup</th>
+                <th>Vytvořeno</th>
+                <th>Deadline</th>
+                <th>Akce</th>
+              </tr>
+            </thead>
+            <tbody id="ordersBody">
+              <tr><td colspan="11" class="muted">Načítám…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===================== BUY VIEW ===================== -->
+      <div id="buyPane" class="hidden">
+        <div class="filters">
+          <input id="buySearchInput" class="input" type="text" placeholder="Hledat: email, typ, poznámka…" autocomplete="off" />
+          <select id="buyTypeFilter" class="input">
+            <option value="all">Typ: vše</option>
+            <option value="singles">Kusové</option>
+            <option value="bulk">Bulk</option>
+          </select>
+          <select id="buySort" class="input">
+            <option value="newest">Nejnovější</option>
+            <option value="oldest">Nejstarší</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table class="table" id="buyTable">
+            <thead>
+              <tr>
+                <th>Čas</th>
+                <th>Typ</th>
+                <th>E-mail</th>
+                <th>Obsah</th>
+                <th>Fotky</th>
+                <th>Akce</th>
+              </tr>
+            </thead>
+            <tbody id="buyBody">
+              <tr><td colspan="6" class="muted">Načítám…</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <p class="msg" id="dashMsg" aria-live="polite"></p>
@@ -111,13 +160,32 @@
     <!-- ACCESS DENIED VIEW -->
     <section class="card hidden" id="deniedView">
       <h2>Access denied</h2>
-      <p class="sub">
-        Jsi přihlášený, ale nejsi admin. (Tvoje user_id není v admin_users.)
-      </p>
+      <p class="sub">Jsi přihlášený, ale nejsi admin. (Tvoje user_id není v admin_users.)</p>
       <div class="dash-actions">
         <button class="btn-ghost" id="deniedLogoutBtn" type="button">Logout</button>
       </div>
     </section>
+
+    <!-- PHOTO MODAL -->
+    <div class="modal hidden" id="photoModal" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <div class="modal-top">
+          <div>
+            <div class="modal-title">Fotky výkupu</div>
+            <div class="muted small" id="photoMeta">—</div>
+          </div>
+          <button class="btn-ghost" id="closeModalBtn" type="button">Zavřít</button>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-primary" id="downloadZipBtn" type="button">Stáhnout vše (ZIP)</button>
+        </div>
+
+        <div class="photo-grid" id="photoGrid"></div>
+        <p class="msg" id="modalMsg" aria-live="polite"></p>
+      </div>
+    </div>
+
   </main>
 
   <script src="js/adminfun.js"></script>
