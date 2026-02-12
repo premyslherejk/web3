@@ -152,24 +152,30 @@ function getActions(order) {
   const pm = order.payment_method;
   const st = order.status;
 
+  // HOTOVO po 21 dnech od shipped -> už nic
   if (st === 'shipped' && isDone21Days(order)) {
     return { done: true, actions: [] };
   }
 
+  // helper: cancel povolíme skoro vždycky, dokud není done / returned / expired
+  const canCancel = !['expired', 'returned'].includes(st);
+
   if (pm === 'bank') {
-    if (st === 'awaiting_payment') return { done:false, actions:['paid','cancel'] };
-    if (st === 'paid') return { done:false, actions:['shipped'] };
-    if (st === 'shipped') return { done:false, actions:['returned'] };
+    if (st === 'awaiting_payment') return { done:false, actions: ['paid', ...(canCancel ? ['cancel'] : [])] };
+    if (st === 'paid')            return { done:false, actions: ['shipped', ...(canCancel ? ['cancel'] : [])] };
+    if (st === 'shipped')         return { done:false, actions: ['returned', ...(canCancel ? ['cancel'] : [])] };
   }
 
   if (pm === 'cod') {
-    if (st === 'new') return { done:false, actions:['shipped','cancel'] };
-    if (st === 'shipped') return { done:false, actions:['paid','returned','cancel'] };
-    if (st === 'paid') return { done:false, actions:['returned'] };
+    if (st === 'new')     return { done:false, actions: ['shipped', ...(canCancel ? ['cancel'] : [])] };
+    if (st === 'shipped') return { done:false, actions: ['paid', 'returned', ...(canCancel ? ['cancel'] : [])] };
+    if (st === 'paid')    return { done:false, actions: ['returned', ...(canCancel ? ['cancel'] : [])] };
   }
 
-  return { done:false, actions:[] };
+  // cancelled/expired/returned -> nic
+  return { done:false, actions: [] };
 }
+
 
 function actionButtons(order) {
   const { done, actions } = getActions(order);
