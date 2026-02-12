@@ -12,10 +12,7 @@ body{
   padding: 40px 18px;
 }
 
-.admin-header{
-  margin-bottom: 16px;
-}
-
+.admin-header{ margin-bottom: 16px; }
 .admin-header h1{
   font-size: 2.1rem;
   font-weight: 900;
@@ -77,14 +74,8 @@ label{
   cursor: pointer;
   transition: .15s;
 }
-
 .btn-primary:hover{ transform: translateY(-1px); }
-
-.btn-primary:disabled{
-  opacity: .6;
-  cursor: not-allowed;
-  transform: none;
-}
+.btn-primary:disabled{ opacity: .6; cursor: not-allowed; transform: none; }
 
 .btn-ghost{
   padding: 12px 14px;
@@ -95,18 +86,12 @@ label{
   font-weight: 900;
   cursor:pointer;
 }
-
 .btn-ghost:hover{
   border-color: rgba(255,59,59,.45);
   box-shadow: 0 0 0 2px rgba(255,59,59,.10);
 }
 
-.msg{
-  margin-top: 10px;
-  font-size: .95rem;
-  opacity: .92;
-}
-
+.msg{ margin-top: 10px; font-size: .95rem; opacity: .92; }
 .msg.ok{ color: #7dffb2; }
 .msg.err{ color: #ff6b6b; }
 .muted{ opacity:.7; }
@@ -119,19 +104,10 @@ label{
   margin-bottom: 12px;
 }
 
-.meta{
-  opacity: .75;
-  font-size: .9rem;
-  margin-top: 6px;
-}
-
+.meta{ opacity: .75; font-size: .9rem; margin-top: 6px; }
 .dot{ margin: 0 8px; opacity:.6; }
 
-.dash-actions{
-  display:flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
+.dash-actions{ display:flex; gap: 10px; flex-wrap: wrap; }
 
 .filters{
   display:grid;
@@ -183,14 +159,7 @@ label{
   background:#15151d;
 }
 
-.badge.bank{ border-color: rgba(255,59,59,.45); }
-.badge.cod{ border-color: rgba(125,255,178,.35); }
-
-.actions{
-  display:flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
+.actions{ display:flex; gap: 8px; flex-wrap: wrap; }
 
 .btn-small{
   padding: 9px 12px;
@@ -201,15 +170,11 @@ label{
   font-weight: 900;
   cursor: pointer;
 }
-
 .btn-small:hover{
   border-color: rgba(255,59,59,.45);
   box-shadow: 0 0 0 2px rgba(255,59,59,.10);
 }
-
-.btn-small.danger{
-  border-color: rgba(255,107,107,.45);
-}
+.btn-small.danger{ border-color: rgba(255,107,107,.45); }
 
 @media (max-width: 900px){
   .filters{ grid-template-columns: 1fr; }
@@ -222,18 +187,10 @@ tr.is-blue   { background: rgba(80,150,255,.10); }
 tr.is-yellow { background: rgba(255,200,60,.10); }
 tr.is-green  { background: rgba(125,255,178,.10); }
 
-tr.is-red td:first-child{
-  border-left: 4px solid #ff3b3b;
-}
-tr.is-blue td:first-child{
-  border-left: 4px solid #5096ff;
-}
-tr.is-yellow td:first-child{
-  border-left: 4px solid #ffc83c;
-}
-tr.is-green td:first-child{
-  border-left: 4px solid #7dffb2;
-}
+tr.is-red td:first-child{ border-left: 4px solid #ff3b3b; }
+tr.is-blue td:first-child{ border-left: 4px solid #5096ff; }
+tr.is-yellow td:first-child{ border-left: 4px solid #ffc83c; }
+tr.is-green td:first-child{ border-left: 4px solid #7dffb2; }
 
 /* checkbox */
 .pickbox{
