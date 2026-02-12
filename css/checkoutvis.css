@@ -382,3 +382,25 @@ textarea{ resize: vertical; min-height: 92px; }
     font-size: 1.05rem;
   }
 }
+
+
+/* ===================== NOTE SPACING (Poznámka) ===================== */
+
+/* víc vzduchu nad poznámkou (po platbě) + pod poznámkou (před shrnutím / checkboxy) */
+.note{
+  margin-top: 14px;      /* mezera od volby platby (dobírka) */
+  margin-bottom: 16px;   /* mezera k dalšímu bloku (shrnutí / checkboxy) */
+}
+
+/* trochu “card feel” pro textarea, ať to nevypadá nalepeně */
+.note textarea{
+  margin-top: 6px;
+}
+
+/* Mobil: ještě o chlup víc, protože tam je to nejvíc naplácaný */
+@media (max-width: 900px){
+  .note{
+    margin-top: 16px;
+    margin-bottom: 18px; /* hlavně oddělí poznámku od shrnutí */
+  }
+}
