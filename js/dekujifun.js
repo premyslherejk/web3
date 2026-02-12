@@ -117,20 +117,29 @@ document.addEventListener('DOMContentLoaded', async () => {
   const qs = getQs();
   const last = readLastOrder();
 
-  if (!last && !qs.order_number) {
+  // ✅ ber last_order jen když sedí na order_number v URL (jinak je to stará objednávka)
+  let data = {};
+  if (last && qs.order_number && last.order_number === qs.order_number) {
+    data = last;
+  } else if (last && !qs.order_number) {
+    data = last; // fallback, když URL nemá order_number
+  } else {
+    data = {};
+  }
+
+  // Když refresh / otevřel link a nemáme sessionStorage
+  if (!data.order_number && !qs.order_number) {
     setHtml(
       'simpleSteps',
       `<li>${escapeHtml('Nenašli jsme data objednávky (pravděpodobně refresh). Pokud ti přišel e-mail, řiď se jím. Jinak nám napiš.')}</li>`
     );
   }
 
-  const data = last || {};
-
   const orderNumber = data.order_number || qs.order_number || '—';
   const email = data.email || '—';
   const payment = data.payment_method || '—';
   const delivery = data.delivery_method || '—';
-  const total = (data.total != null) ? formatKc(data.total) : '—';
+  const totalText = (data.total != null) ? formatKc(data.total) : '—';
   const deadline = formatDeadline(data.reserved_until);
 
   setText('orderNumber', orderNumber);
@@ -149,7 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       : delivery
   );
 
-  setText('orderTotal', total);
+  setText('orderTotal', totalText);
 
   const deadlineRow = document.getElementById('orderDeadlineRow');
   if (deadlineRow) {
@@ -161,7 +170,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const steps = renderSteps(payment);
   setHtml('simpleSteps', steps.map(s => `<li>${escapeHtml(s)}</li>`).join(''));
 
-  if (payment === 'bank') {
+  // ✅ QR box jen pro bank a jen když máme amount (jinak prázdnej box nikdy)
+  if (payment === 'bank' && data.total != null) {
     show('bankBox', true);
 
     const vs = firstPartVs(orderNumber);
