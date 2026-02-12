@@ -7,9 +7,9 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ===================== BANK CONFIG (upravíš později) =====================
-const BANK_ACC_HUMAN  = '2978973018/3030';          // CZ účet pro lidi
-const BANK_ACC_IBAN   = 'CZ7530300000002978973018'; // IBAN bez mezer
-const BANK_MSG_PREFIX = 'PokeKusovky objednávka';   // text do zprávy
+const BANK_ACC_HUMAN  = '2978973018/3030';
+const BANK_ACC_IBAN   = 'CZ7530300000002978973018';
+const BANK_MSG_PREFIX = 'PokeKusovky objednávka';
 
 function escapeHtml(s){
   return String(s ?? '')
@@ -40,7 +40,6 @@ function readLastOrder() {
 }
 
 function firstPartVs(orderNumber) {
-  // 10001-110226 -> VS = 10001
   if (!orderNumber) return '';
   return String(orderNumber).split('-')[0] || '';
 }
@@ -86,64 +85,25 @@ function show(elId, yes) {
   el.classList.toggle('hidden', !yes);
 }
 
-function installPrintCssForBankOnly() {
-  const style = document.createElement('style');
-  style.textContent = `
-@media print{
-  body * { visibility: hidden !important; }
-  #bankBox, #bankBox * { visibility: visible !important; }
-  #bankBox { position: absolute !important; left: 0; top: 0; width: 100% !important; }
-}
-`;
-  document.head.appendChild(style);
-}
-
-function setupPrintOnlyBankBox() {
-  const btn = document.getElementById('printBank');
-  if (!btn) return;
-  btn.addEventListener('click', () => window.print());
-}
-
-function setupCopySpd(spdText) {
-  const btn = document.getElementById('copySpd');
-  if (!btn) return;
-
-  btn.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(spdText);
-      const old = btn.textContent;
-      btn.textContent = 'Zkopírováno ✅';
-      setTimeout(() => (btn.textContent = old), 1200);
-    } catch {
-      alert('Kopírování se nepovedlo. Zkus to ručně.');
-    }
-  });
-}
-
 function renderSteps(payment) {
   if (payment === 'bank') {
     return [
       'Otevři banku a zaplať QR (nebo opis VS + částku).',
       'Po zaplacení objednávku ručně označíme jako zaplacenou a posíláme.',
-      'Když to nebude uhrazené do deadline, objednávka se automaticky zruší a karty se vrátí do prodeje.',
+      'Když to nebude uhrazené do deadline, objednávka se automaticky zruší a karty se vrátí do prodeje.'
     ];
   }
-  // COD
   return [
     'Hotovo. Objednávka je vytvořená a karty jsou rezervované.',
     'Až to odešleme, přijde e-mail „Odesláno“.',
-    'Dobírku zaplatíš při převzetí.',
+    'Dobírku zaplatíš při převzetí.'
   ];
 }
 
 function renderQrToCanvas(canvas, text) {
   if (!canvas) throw new Error('qrCanvas nenalezen');
-
-  // Qrious globál: window.QRious
   if (!window.QRious) throw new Error('QR knihovna se nenačetla (QRious undefined).');
 
-  // Qrious kreslí do canvas přes element
-  // (clear + render)
   // eslint-disable-next-line no-new
   new QRious({
     element: canvas,
@@ -157,7 +117,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const qs = getQs();
   const last = readLastOrder();
 
-  // Když refresh / otevřel link a nemáme sessionStorage
   if (!last && !qs.order_number) {
     setHtml(
       'simpleSteps',
@@ -187,7 +146,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   setText(
     'orderDelivery',
     delivery === 'zasilkovna' ? 'Zásilkovna'
-      : delivery === 'balikovna' ? 'Balíkovna'
       : delivery
   );
 
@@ -200,11 +158,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       : '';
   }
 
-  // steps
   const steps = renderSteps(payment);
   setHtml('simpleSteps', steps.map(s => `<li>${escapeHtml(s)}</li>`).join(''));
 
-  // bank QR box
   if (payment === 'bank') {
     show('bankBox', true);
 
@@ -228,16 +184,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         wrap.innerHTML = `
           <div style="text-align:center; opacity:.85; line-height:1.5">
             <b>QR se nepovedlo vykreslit.</b><br>
-            Zaplať klasicky: účet + VS + částka.<br>
-            SPD text zkopíruješ tlačítkem níž.
+            Zaplať klasicky: účet + VS + částka.
           </div>
         `;
       }
     }
-
-    setupCopySpd(spd);
-    installPrintCssForBankOnly();
-    setupPrintOnlyBankBox();
   } else {
     show('bankBox', false);
   }
