@@ -371,6 +371,58 @@ textarea{ resize: vertical; min-height: 92px; }
   .sticky{ position: static; }
 
   .grid-2{ grid-template-columns: 1fr; }
+
+
+  /* ===================== PICKUP BOX (Packeta) ===================== */
+.pickup-box{
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid #2a2a33;
+  background: #0f0f14;
+}
+
+.pickup-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+}
+
+.pickup-title{
+  font-weight: 900;
+  color:#fff;
+  font-size: .95rem;
+}
+
+.pickup-sub{
+  margin-top: 4px;
+  font-size: .88rem;
+}
+
+.pickup-selected{
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid #2a2a33;
+  background: #15151d;
+}
+
+.pickup-line{
+  display:grid;
+  gap: 4px;
+}
+
+.pickup-meta{
+  margin-top: 8px;
+  font-size: .86rem;
+}
+
+.btn-small{
+  padding: 10px 12px;
+  margin-top: 0;
+}
+
   .grid-3{ grid-template-columns: 1fr; }
 
   .thanks-grid{ grid-template-columns: 1fr; }
