@@ -2,14 +2,31 @@
 const { createClient } = supabase;
 
 const SUPABASE_URL = 'https://hwjbfrhbgeczukcjkmca.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3amJmcmhiZ2VjenVrY2prbWNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0NDU5MjQsImV4cCI6MjA4NTAyMTkyNH0.BlgIov7kFq2EUW17hLs6o1YujL1i9elD7wILJP6h-lQ'; // <- vlož stejnou jako používáš jinde
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3amJmcmhiZ2VjenVrY2prbWNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0NDU5MjQsImV4cCI6MjA4NTAyMTkyNH0.BlgIov7kFq2EUW17hLs6o1YujL1i9elD7wILJP6h-lQ';
 
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// ===================== PACKETA (Zásilkovna) =====================
+// Získej API key v administraci Packeta / Zásilkovna.
+// (Bez toho widget neotevřeš.)
+const PACKETA_API_KEY = '4b32c40ade3173fb
+';
+
+const PACKETA_OPTIONS = {
+  language: 'cs',
+  view: 'modal',
+  // doporučeno z jejich příkladu: vendors + group zbox
+  vendors: [
+    { country: 'cz' },
+    { country: 'cz', group: 'zbox' },
+  ],
+  // formát uložené hodnoty (nepovinné, ale hodí se)
+  valueFormat: '"Packeta",id,carrierId,carrierPickupPointId,name,city,street'
+};
+
+const PICKUP_SS_KEY = 'checkout_pickup_packeta';
+
 // ===================== CART HELPERS =====================
-// Podporujeme víc formátů, protože každý to má v localStorage jinak.
-// Preferované: [{ card_id: "...uuid...", qty: 1 }]
-// Fallback: [{ id: "...uuid...", qty: 1 }]
 function readCart() {
   const raw = localStorage.getItem('cart');
   if (!raw) return [];
@@ -30,7 +47,6 @@ function normalizeCartItems(cart) {
     if (!card_id) continue;
     out.push({ card_id, qty });
   }
-  // u tebe jsou kusovky -> qty vždy 1 (ale necháme to obecně)
   return out;
 }
 
@@ -59,6 +75,9 @@ function grabEls() {
   els.sumShip = document.getElementById('sumShip');
   els.sumTotal = document.getElementById('sumTotal');
   els.reserveHint = document.getElementById('reserveHint');
+
+  els.pickBtn = document.getElementById('pickPacketa');
+  els.pickSelected = document.getElementById('pickupSelected');
 }
 
 function setMsg(type, text) {
@@ -71,9 +90,9 @@ function getSelected(name) {
   return el ? el.value : null;
 }
 
-// Ceník
-function calcFees(delivery, payment) {
-  const ship = delivery === 'zasilkovna' ? 89 : (delivery === 'balikovna' ? 85 : 0);
+// Jen Zásilkovna + dobírka fee
+function calcFees(payment) {
+  const ship = 89;
   const cod = payment === 'cod' ? 35 : 0;
   return { ship, cod, extra: ship + cod };
 }
@@ -83,9 +102,81 @@ function formatKc(n) {
   return `${x} Kč`;
 }
 
+function escapeHtml(s) {
+  return String(s ?? '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+}
+
+// ===================== PICKUP (sessionStorage) =====================
+function readPickup() {
+  const raw = sessionStorage.getItem(PICKUP_SS_KEY);
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch { return null; }
+}
+
+function savePickup(point) {
+  sessionStorage.setItem(PICKUP_SS_KEY, JSON.stringify(point));
+}
+
+function clearPickup() {
+  sessionStorage.removeItem(PICKUP_SS_KEY);
+}
+
+function renderPickup() {
+  const p = readPickup();
+  if (!els.pickSelected) return;
+
+  if (!p) {
+    els.pickSelected.innerHTML = `<span class="muted">Zatím nic vybráno.</span>`;
+    return;
+  }
+
+  // Packeta point object mívá různé názvy, držíme se toho, co typicky vrací:
+  const name = p?.name || p?.place || 'Výdejní místo';
+  const city = p?.city || '';
+  const street = p?.street || '';
+  const id = p?.id || p?.pickupPointId || p?.carrierPickupPointId || '';
+
+  els.pickSelected.innerHTML = `
+    <div class="pickup-line">
+      <strong>${escapeHtml(name)}</strong>
+      <span class="muted">${escapeHtml([street, city].filter(Boolean).join(', '))}</span>
+    </div>
+    <div class="pickup-meta muted">ID: ${escapeHtml(String(id || '—'))}</div>
+  `;
+}
+
+function openPacketaWidget() {
+  if (!PACKETA_API_KEY || PACKETA_API_KEY === '4b32c40ade3173fb
+') {
+    setMsg('err', 'Chybí Packeta API key. Doplň ho do checkoutfun.js (PACKETA_API_KEY).');
+    return;
+  }
+
+  if (!window.Packeta || !Packeta.Widget || !Packeta.Widget.pick) {
+    setMsg('err', 'Packeta widget se nenačetl. Zkontroluj, že v HTML je <script src="https://widget.packeta.com/www/js/library.js"></script> v <head>.');
+    return;
+  }
+
+  // callback po výběru
+  const onPick = (point) => {
+    // když user zavře bez výběru
+    if (!point) return;
+
+    // uložíme celý objekt (je nejjednodušší)
+    savePickup(point);
+    renderPickup();
+    setMsg('', '');
+  };
+
+  Packeta.Widget.pick(PACKETA_API_KEY, onPick, PACKETA_OPTIONS);
+}
+
 // ===================== MINI SUMMARY =====================
-// Pro mini shrnutí si vezmeme data z localStorage, pokud tam máš uložené i jméno/cenu.
-// Pokud ne, pořád to ukáže aspoň počet položek.
 function renderMiniSummary() {
   const cart = readCart();
   if (!cart.length) {
@@ -97,11 +188,9 @@ function renderMiniSummary() {
     return;
   }
 
-  const delivery = getSelected('delivery') || 'zasilkovna';
   const payment = getSelected('payment') || 'bank';
-  const fees = calcFees(delivery, payment);
+  const fees = calcFees(payment);
 
-  // subtotal z localstorage (pokud existuje price)
   let subtotal = 0;
   for (const it of cart) {
     const price = Number(it?.price ?? it?.card?.price ?? 0);
@@ -109,10 +198,9 @@ function renderMiniSummary() {
     subtotal += price * qty;
   }
 
-  // list
   const itemsHtml = cart.slice(0, 12).map(it => {
     const name = it?.name || it?.card?.name || 'Karta';
-    const img = it?.image_url || it?.imageUrl || it?.card?.image_url || '';
+    const img = it?.image || it?.image_url || it?.imageUrl || it?.card?.image_url || '';
     const price = Number(it?.price ?? it?.card?.price ?? 0);
     return `
       <div class="mini-item">
@@ -138,15 +226,6 @@ function renderMiniSummary() {
       : 'Dobírka: rezervace bez limitu, stav se uzavírá ručně.';
 }
 
-function escapeHtml(s) {
-  return String(s ?? '')
-    .replaceAll('&','&amp;')
-    .replaceAll('<','&lt;')
-    .replaceAll('>','&gt;')
-    .replaceAll('"','&quot;')
-    .replaceAll("'","&#039;");
-}
-
 // ===================== SUBMIT =====================
 function validateForm() {
   const required = [
@@ -165,6 +244,9 @@ function validateForm() {
   if (!els.terms.checked) return 'Musíš souhlasit s obchodními podmínkami.';
   if (!els.gdpr.checked) return 'Musíš souhlasit se zpracováním osobních údajů.';
 
+  const pickup = readPickup();
+  if (!pickup) return 'Vyber výdejní místo (Zásilkovna).';
+
   const cart = normalizeCartItems(readCart());
   if (!cart.length) return 'Košík je prázdný.';
 
@@ -172,7 +254,6 @@ function validateForm() {
 }
 
 async function createOrder(payload) {
-  // RPC call: create_order_and_reserve(payload jsonb)
   const { data, error } = await sb.rpc('create_order_and_reserve', { payload });
   if (error) throw error;
   return data;
@@ -180,8 +261,23 @@ async function createOrder(payload) {
 
 function buildPayload() {
   const cart = normalizeCartItems(readCart());
-  const delivery_method = getSelected('delivery') || 'zasilkovna';
   const payment_method = getSelected('payment') || 'bank';
+  const pickup = readPickup();
+
+  const fees = calcFees(payment_method); // jen pro info (server si stejně počítá sám)
+
+  // bezpečně vytáhnout id + název (podle toho, co widget vrátí)
+  const pickupId =
+    pickup?.id ||
+    pickup?.carrierPickupPointId ||
+    pickup?.pickupPointId ||
+    null;
+
+  const pickupName =
+    pickup?.name ||
+    pickup?.place ||
+    pickup?.formatedValue || // v jejich příkladu
+    null;
 
   return {
     email: String(els.email.value || '').trim(),
@@ -193,10 +289,9 @@ function buildPayload() {
     zip: String(els.zip.value || '').trim(),
     country: String(els.country.value || 'CZ').trim(),
 
-    delivery_method,
-    // zatím bez widgetu:
-    delivery_point_id: null,
-    delivery_point_name: null,
+    delivery_method: 'zasilkovna',
+    delivery_point_id: pickupId,
+    delivery_point_name: pickupName,
 
     payment_method,
     note: String(els.note.value || '').trim() || null,
@@ -214,7 +309,6 @@ function lockUI(locked) {
 }
 
 function saveLastOrder(resp, payload) {
-  // uložíme pro dekuji.html
   const info = {
     created_at: new Date().toISOString(),
     order_id: resp?.order_id,
@@ -226,6 +320,8 @@ function saveLastOrder(resp, payload) {
     total: resp?.total,
     payment_method: payload?.payment_method,
     delivery_method: payload?.delivery_method,
+    delivery_point_id: payload?.delivery_point_id,
+    delivery_point_name: payload?.delivery_point_name,
     email: payload?.email
   };
   sessionStorage.setItem('last_order', JSON.stringify(info));
@@ -244,10 +340,18 @@ function goThankYou(orderId, orderNumber) {
 
 document.addEventListener('DOMContentLoaded', () => {
   grabEls();
-  renderMiniSummary();
 
-  // přepočítávat shrnutí při změně dopravy/platby
-  document.getElementById('deliveryChoices')?.addEventListener('change', renderMiniSummary);
+  // render pick from sessionStorage (pokud user refreshne)
+  renderPickup();
+
+  // pick button
+  els.pickBtn?.addEventListener('click', () => {
+    setMsg('', '');
+    openPacketaWidget();
+  });
+
+  // mini summary
+  renderMiniSummary();
   document.getElementById('paymentChoices')?.addEventListener('change', renderMiniSummary);
 
   els.form.addEventListener('submit', async (e) => {
@@ -266,12 +370,12 @@ document.addEventListener('DOMContentLoaded', () => {
       lockUI(true);
       const resp = await createOrder(payload);
 
-      if (!resp?.ok) {
-        throw new Error('Objednávku se nepodařilo vytvořit.');
-      }
+      if (!resp?.ok) throw new Error('Objednávku se nepodařilo vytvořit.');
 
       saveLastOrder(resp, payload);
       clearCart();
+      // pickup může zůstat (kdyby user šel zpět), ale čistější je ho smazat:
+      clearPickup();
 
       setMsg('ok', 'Objednávka vytvořena. Přesměrovávám…');
       goThankYou(resp.order_id, resp.order_number);
