@@ -215,3 +215,35 @@ label{
   .filters{ grid-template-columns: 1fr; }
   .dash-top{ flex-direction: column; }
 }
+
+/* ===================== ORDER COLORS ===================== */
+tr.is-red    { background: rgba(255,59,59,.10); }
+tr.is-blue   { background: rgba(80,150,255,.10); }
+tr.is-yellow { background: rgba(255,200,60,.10); }
+tr.is-green  { background: rgba(125,255,178,.10); }
+
+tr.is-red td:first-child{
+  border-left: 4px solid #ff3b3b;
+}
+tr.is-blue td:first-child{
+  border-left: 4px solid #5096ff;
+}
+tr.is-yellow td:first-child{
+  border-left: 4px solid #ffc83c;
+}
+tr.is-green td:first-child{
+  border-left: 4px solid #7dffb2;
+}
+
+/* checkbox */
+.pickbox{
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+/* HOTOVO label */
+.done-label{
+  font-weight: 900;
+  color: #7dffb2;
+}
