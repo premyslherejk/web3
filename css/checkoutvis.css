@@ -444,3 +444,101 @@ textarea{ resize: vertical; min-height: 92px; }
     max-width: 420px;
   }
 }
+
+
+/* ===================== THANK YOU PAGE POLISH (dekuji.html) ===================== */
+.thanks-page .thanks-grid{
+  grid-template-columns: 1.15fr .85fr;
+  gap: 18px;
+}
+
+/* --- ČERVENÁ: "Platba QR" je nalepená na obsah -> dej víc vzduchu --- */
+.thanks-page #bankBox h2{
+  margin-bottom: 10px;
+}
+.thanks-page #bankBox .muted{
+  margin-top: 2px;
+  margin-bottom: 12px;
+  line-height: 1.45;
+}
+
+/* QR wrap – ať to není nalepené na text */
+.thanks-page .qr-wrap{
+  margin-top: 10px;
+  margin-bottom: 14px;
+  padding: 16px;
+}
+
+/* --- ZELENÁ: bank detaily – dvojtečky + zarovnání vlevo/vpravo --- */
+.thanks-page .bank-details{
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.thanks-page .bank-details .row{
+  display: grid;
+  grid-template-columns: 1fr auto; /* label vlevo, hodnota vpravo */
+  align-items: baseline;
+  gap: 14px;
+}
+
+.thanks-page .bank-details .row span{
+  opacity: .75;
+}
+
+/* dvojtečky za názvem */
+.thanks-page .bank-details .row span::after{
+  content: ":";
+  margin-left: 2px;
+  opacity: .75;
+}
+
+.thanks-page .bank-details .row strong{
+  text-align: right;
+  font-weight: 900;
+  letter-spacing: .2px;
+}
+
+/* --- ŽLUTÁ: "Co máš dělat" – hezký číslování, žádný ujetý odsazení --- */
+.thanks-page .plain-ol{
+  padding-left: 22px;          /* normální odsazení pro čísla */
+  margin-top: 8px;
+  display: grid;
+  gap: 10px;
+  list-style-position: outside; /* důležitý */
+}
+
+.thanks-page .plain-ol li{
+  line-height: 1.7;
+  opacity: .92;
+}
+
+.thanks-page .plain-ol li::marker{
+  font-weight: 900;
+  color: #ffffff;
+}
+
+/* --- MODRÁ: tlačítko Domů na střed --- */
+.thanks-page .thanks-actions{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.thanks-page .thanks-actions .btn-primary{
+  min-width: 240px;
+}
+
+/* Mobile */
+@media (max-width: 900px){
+  .thanks-page .thanks-grid{
+    grid-template-columns: 1fr;
+  }
+
+  .thanks-page .thanks-actions .btn-primary{
+    width: 100%;
+    max-width: 420px;
+  }
+}
