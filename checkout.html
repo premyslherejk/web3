@@ -18,7 +18,6 @@
 
 <body>
 
-  <!-- HEADER -->
   <header class="site-header">
     <div class="logo" onclick="location.href='index.html'">PokeKusovky</div>
   </header>
@@ -80,10 +79,9 @@
             </label>
           </div>
 
-          <!-- ===================== DOPRAVA ===================== -->
+          <!-- DOPRAVA -->
           <div class="section-delivery">
             <div class="sep"></div>
-
             <h2>Doprava</h2>
 
             <div class="choice-grid">
@@ -97,7 +95,6 @@
               </label>
             </div>
 
-            <!-- ✅ Packeta picker UI -->
             <div class="packeta-block">
               <button id="pickPacketa" class="btn-packeta" type="button">
                 📍 Vybrat výdejní místo
@@ -109,11 +106,11 @@
             </div>
           </div>
 
-          <!-- ===================== PLATBA + POZNÁMKA ===================== -->
+          <!-- PLATBA + POZNÁMKA -->
           <div class="section-payment">
             <div class="sep"></div>
-
             <h2>Platba</h2>
+
             <div class="choice-grid" id="paymentChoices">
               <label class="choice">
                 <input type="radio" name="payment" value="bank" checked />
@@ -139,27 +136,27 @@
               <textarea id="note" rows="3" placeholder="Např. prosím zabalit extra safe…"></textarea>
             </label>
 
-            <!-- ✅ INLINE SUMMARY (mobile: hned po poznámce) -->
-<section class="checkout-card summary-inline" id="summaryInline">
-  <h2>Shrnutí</h2>
+            <!-- ✅ INLINE SUMMARY (jen mobil) -->
+            <section class="checkout-card summary-inline" id="summaryInline">
+              <h2>Shrnutí</h2>
 
-  <div class="cart-mini" id="cartMini">
-    <p style="opacity:.7">Načítám košík…</p>
-  </div>
+              <div class="cart-mini" id="cartMiniInline">
+                <p style="opacity:.7">Načítám košík…</p>
+              </div>
 
-  <div class="totals">
-    <div class="row"><span>Mezisoučet</span><strong id="sumSubtotal">0 Kč</strong></div>
-    <div class="row"><span>Doprava + poplatky</span><strong id="sumShip">0 Kč</strong></div>
-    <div class="row total"><span>Celkem</span><strong id="sumTotal">0 Kč</strong></div>
-    <div class="small" id="reserveHint"></div>
-  </div>
+              <div class="totals">
+                <div class="row"><span>Mezisoučet</span><strong id="sumSubtotalInline">0 Kč</strong></div>
+                <div class="row"><span>Doprava + poplatky</span><strong id="sumShipInline">0 Kč</strong></div>
+                <div class="row total"><span>Celkem</span><strong id="sumTotalInline">0 Kč</strong></div>
+                <div class="small" id="reserveHintInline"></div>
+              </div>
 
-  <button class="btn-ghost" type="button" onclick="location.href='cart.html'">← Zpět do košíku</button>
-</section>
+              <button class="btn-ghost" type="button" onclick="location.href='cart.html'">← Zpět do košíku</button>
+            </section>
 
           </div>
 
-          <!-- ===================== CHECKBOXY + SUBMIT ===================== -->
+          <!-- CHECKBOXY + SUBMIT -->
           <div class="section-confirm">
             <div class="sep"></div>
 
@@ -183,7 +180,7 @@
         </form>
       </section>
 
-      <!-- RIGHT: SUMMARY -->
+      <!-- RIGHT: SUMMARY (jen desktop) -->
       <aside class="checkout-card sticky summary-desktop" id="summaryDesktop">
         <h2>Shrnutí</h2>
 
