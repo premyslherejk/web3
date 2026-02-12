@@ -1,35 +1,160 @@
-/* ===================== VYKUP FIX – REAL SELECTORS (buy-page) ===================== */
+/* ===================== RESET ===================== */
+*{ box-sizing:border-box; margin:0; padding:0; }
 
-/* ČITELNOST – ať se nic “neztratí” */
-.buy-page{ color:#fff; }
-.buy-page .sub,
-.buy-page .muted,
-.buy-page .hint,
-.buy-page .type-card .desc,
-.buy-page .small{
-  color: rgba(255,255,255,.72) !important;
-  opacity: 1 !important; /* zruší “utlumení do neviditelna” */
+body{
+  background:#0f0f14;
+  color:#fff;
+  font-family:Inter,system-ui,sans-serif;
 }
 
-.buy-page label{
-  color: rgba(255,255,255,.82) !important;
+.hidden{ display:none !important; }
+
+/* ===================== PAGE ===================== */
+.buy-page{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 18px;
 }
 
-/* Inputy */
-.buy-page input,
-.buy-page textarea{
-  color:#fff !important;
-  background:#0f0f14 !important;
-  border:1px solid #2a2a33 !important;
+.buy-header{
+  margin-bottom: 16px;
 }
 
-.buy-page input::placeholder,
-.buy-page textarea::placeholder{
+.buy-header h1{
+  font-size: 2.1rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.sub{
+  margin-top: 10px;
+  opacity: .75;
+  font-size: .95rem;
+  line-height: 1.45;
+  color: rgba(255,255,255,.78);
+}
+
+/* ===================== CARD ===================== */
+.card{
+  background:#15151d;
+  border:1px solid #2a2a33;
+  border-radius:20px;
+  padding: 18px;
+  margin-top: 14px;
+}
+
+.card h2{
+  font-size: 1.15rem;
+  font-weight: 900;
+  color:#ff3b3b;
+  margin-bottom: 12px;
+}
+
+.muted{ opacity:.75; color: rgba(255,255,255,.75); }
+.small{ font-size:.9rem; line-height:1.45; color: rgba(255,255,255,.72); }
+
+.sep{
+  height: 1px;
+  background: #2a2a33;
+  margin: 12px 0;
+}
+
+/* ===================== FORM ===================== */
+.form{
+  display:grid;
+  gap: 12px;
+}
+
+label{
+  display:grid;
+  gap: 6px;
+  font-size: .88rem;
+  color: rgba(255,255,255,.82);
+}
+
+input, textarea, select{
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid #2a2a33;
+  background: #0f0f14;
+  color: #fff;
+  outline: none;
+}
+
+input::placeholder,
+textarea::placeholder{
   color: rgba(255,255,255,.45);
 }
 
-/* TYPE CARDS (Kusové/Bulk) – ať to je jasně klikací */
+textarea{ resize: vertical; min-height: 92px; line-height: 1.5; }
+
+.grid-2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* ===================== BUTTONS ===================== */
+.btn-primary{
+  width: min(420px, 100%);
+  margin: 16px auto 0;
+  display:block;
+  padding: 16px 22px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg,#ff3b3b,#c40000);
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+  transition: .15s;
+  font-size: 1.05rem;
+  text-align: center;
+}
+
+.btn-primary:hover{ transform: translateY(-1px); }
+.btn-primary:disabled{ opacity:.6; cursor:not-allowed; transform:none; }
+
+.btn-ghost{
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid #2a2a33;
+  background: #0f0f14;
+  color: #fff;
+  font-weight: 900;
+  cursor:pointer;
+  transition: .15s;
+}
+.btn-ghost:hover{
+  border-color: rgba(255,59,59,.45);
+  box-shadow: 0 0 0 2px rgba(255,59,59,.10);
+  transform: translateY(-1px);
+}
+
+.msg{
+  margin-top: 10px;
+  font-size: .95rem;
+  opacity: .92;
+  text-align:center;
+}
+.msg.ok{ color: #7dffb2; }
+.msg.err{ color: #ff6b6b; }
+
+/* ===================== TYPE PICKER (Kusové/Bulk) ===================== */
+.type-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
 .type-card{
+  text-align:left;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid #2a2a33;
+  background:#0f0f14;
+  cursor:pointer;
+  transition:.15s;
   min-height: 78px;
   display:flex;
   flex-direction: column;
@@ -37,49 +162,152 @@
   gap: 4px;
 }
 
-.type-card .title{ color:#fff; }
-.type-card .desc{ color: rgba(255,255,255,.72) !important; opacity:1 !important; }
+.type-card .title{
+  font-weight: 900;
+  font-size: 1.05rem;
+  color:#fff;
+}
+
+.type-card .desc{
+  margin-top: 4px;
+  opacity: 1;
+  color: rgba(255,255,255,.72);
+  font-size: .9rem;
+  line-height:1.35;
+}
 
 .type-card:hover{
+  border-color: rgba(255,59,59,.45);
+  box-shadow: 0 0 0 2px rgba(255,59,59,.10);
   transform: translateY(-1px);
 }
 
+/* active */
 .type-card.active{
-  border-color: rgba(168,85,247,.85); /* fialová */
-  box-shadow: 0 0 0 2px rgba(168,85,247,.20);
-  background: linear-gradient(135deg, rgba(168,85,247,.14), rgba(34,211,238,.06));
+  border-color: rgba(168,85,247,.85);
+  box-shadow: 0 0 0 2px rgba(168,85,247,.18);
+  background: linear-gradient(135deg, rgba(168,85,247,.16), rgba(124,58,237,.10));
 }
 
-/* “Přidat kartu” – výrazná fialová pilulka */
-.btn-ghost#addCardBtn,
-#addCardBtn.btn-ghost,
-#addCardBtn{
+/* ===================== HOW BOX ===================== */
+.how{
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid #2a2a33;
+  background:#0f0f14;
+  line-height:1.55;
+  color: rgba(255,255,255,.78);
+}
+
+/* ===================== ITEMS / ROWS ===================== */
+.row-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.hint{
+  opacity:.8;
+  font-size:.9rem;
+  line-height:1.45;
+  color: rgba(255,255,255,.75);
+}
+
+.items{
+  display:grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.item-row{
+  border: 1px solid #2a2a33;
+  background:#0f0f14;
+  border-radius: 18px;
+  padding: 12px;
+  display:grid;
+  gap: 10px;
+}
+
+.item-top{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items:center;
+}
+
+.item-title{
+  font-weight:900;
+  color:#fff;
+  font-size:.98rem;
+}
+
+.item-actions{
+  display:flex;
+  gap: 8px;
+}
+
+.btn-mini{
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid #2a2a33;
+  background:#15151d;
+  color:#fff;
+  font-weight:900;
+  cursor:pointer;
+  transition: .15s;
+}
+.btn-mini:hover{
+  border-color: rgba(255,59,59,.45);
+  box-shadow: 0 0 0 2px rgba(255,59,59,.10);
+  transform: translateY(-1px);
+}
+.btn-mini.danger{
+  border-color: rgba(255,107,107,.55);
+}
+
+.item-grid{
+  display:grid;
+  grid-template-columns: 1.1fr .9fr .9fr;
+  gap: 10px;
+}
+
+/* ===================== ADD CARD BUTTON (fialová, výrazná) ===================== */
+/* chytneme to přes ID i fallback třídy */
+#addCardBtn,
+.btn-add,
+.add-btn{
   padding: 11px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(168,85,247,.65);
-  background: linear-gradient(135deg, rgba(168,85,247,.22), rgba(124,58,237,.14));
+  border: 1px solid rgba(168,85,247,.70);
+  background: linear-gradient(135deg, rgba(168,85,247,.26), rgba(124,58,237,.16));
   color: #fff;
   font-weight: 900;
   cursor: pointer;
   transition: .15s;
+  white-space: nowrap;
 }
-
-#addCardBtn:hover{
+#addCardBtn:hover,
+.btn-add:hover,
+.add-btn:hover{
   transform: translateY(-1px);
   box-shadow: 0 0 0 2px rgba(168,85,247,.18);
 }
 
-/* FILE INPUT – konec devadesátek */
-.buy-page input[type="file"]{
+/* ===================== FILE INPUT (konec 90s) ===================== */
+input[type="file"]{
   width: 100%;
-  padding: 10px 10px;
+  padding: 10px;
   border-radius: 14px;
   border: 1px solid #2a2a33;
   background: #0f0f14;
-  color: rgba(255,255,255,.75);
+  color: rgba(255,255,255,.78);
 }
 
-.buy-page input[type="file"]::file-selector-button{
+/* modern browsers */
+input[type="file"]::file-selector-button{
   margin-right: 10px;
   padding: 10px 12px;
   border-radius: 999px;
@@ -90,17 +318,37 @@
   cursor: pointer;
   transition: .15s;
 }
-
-.buy-page input[type="file"]::file-selector-button:hover{
+input[type="file"]::file-selector-button:hover{
   box-shadow: 0 0 0 2px rgba(168,85,247,.18);
   transform: translateY(-1px);
 }
 
-/* POSLEDNÍ TEXT – centrovat */
-.buy-page .consent,
-.buy-page .legal,
-.buy-page .fineprint,
-.buy-page .small.muted{
-  text-align: center !important;
+/* ===================== CONSENT TEXT (na střed) ===================== */
+/* chytáme několik variant podle toho jak to máš v HTML */
+.consent,
+.legal,
+.fineprint,
+.form-consent{
+  text-align: center;
   margin-top: 12px;
+  color: rgba(255,255,255,.58);
+  font-size: .9rem;
+  line-height: 1.45;
+}
+
+/* Když máš poslední větu jako <p class="muted small"> ... */
+.card > .muted.small,
+.card .muted.small{
+  text-align: center;
+}
+
+/* ===================== MOBILE ===================== */
+@media (max-width: 900px){
+  .buy-page{ padding: 28px 14px; }
+  .buy-header h1{ font-size: 1.75rem; }
+  .type-grid{ grid-template-columns: 1fr; }
+  .grid-2{ grid-template-columns: 1fr; }
+  .item-grid{ grid-template-columns: 1fr; }
+  .row-head{ flex-direction: column; align-items: stretch; }
+  .btn-primary{ max-width: 520px; }
 }
