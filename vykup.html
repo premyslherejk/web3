@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Výkup karet | PokeKusovky</title>
+
+  <link rel="stylesheet" href="css/headervis.css" />
+  <link rel="stylesheet" href="css/footervis.css" />
+  <link rel="stylesheet" href="css/vykupvis.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="logo" onclick="location.href='index.html'">PokeKusovky</div>
+  </header>
+
+  <main class="buy-page">
+    <header class="buy-header">
+      <h1>Online výkup Pokémon karet</h1>
+      <p class="sub">Vyber typ výkupu, hoď fotky, napiš email. My se ozveme s cenovou nabídkou.</p>
+    </header>
+
+    <!-- TYPE SWITCH -->
+    <section class="card">
+      <h2>Co prodáváš?</h2>
+
+      <div class="type-grid" id="typeGrid">
+        <button type="button" class="type-card active" data-type="singles">
+          <div class="title">Kusové karty</div>
+          <div class="desc">Každá karta zvlášť (lepší výkup)</div>
+        </button>
+
+        <button type="button" class="type-card" data-type="bulk">
+          <div class="title">Bulk</div>
+          <div class="desc">Balík karet (common/uncommon apod.)</div>
+        </button>
+      </div>
+
+      <div class="how" id="howBlock">
+        <!-- vyplní JS -->
+      </div>
+    </section>
+
+    <!-- FORM -->
+    <section class="card">
+      <h2>Formulář</h2>
+
+      <form id="buyForm" class="form" novalidate>
+        <!-- SINGLE CARDS -->
+        <div id="singlesBlock">
+          <div class="row-head">
+            <div class="hint">Tip: u kusovek fakt prosím **předek + zadek**. Bez toho se hádá stav a to nechceš.</div>
+            <button class="btn-ghost" type="button" id="addRowBtn">+ Přidat kartu</button>
+          </div>
+
+          <div class="items" id="itemsWrap">
+            <!-- řádky vloží JS -->
+          </div>
+        </div>
+
+        <!-- BULK -->
+        <div id="bulkBlock" class="hidden">
+          <label>
+            Co v tom bulku je? (sety, roky, jazyky…)
+            <textarea id="bulkDesc" rows="4" placeholder="Např. 1200 karet, CZ/EN mix, Sword & Shield, pár holo, žádné graded."></textarea>
+          </label>
+
+          <div class="grid-2">
+            <label>
+              Počet karet (odhad)
+              <input id="bulkCount" type="number" min="0" placeholder="např. 1200">
+            </label>
+
+            <label>
+              Fotky (můžeš vybrat víc souborů najednou)
+              <input id="bulkPhotos" type="file" accept="image/*" multiple>
+            </label>
+          </div>
+
+          <p class="muted small">Stačí pár fotek: hromádka, detail pár karet, případně raritky.</p>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="grid-2">
+          <label>
+            E-mail*
+            <input id="email" type="email" autocomplete="email" required placeholder="tvuj@email.cz" />
+          </label>
+
+          <label>
+            Telefon (volitelné)
+            <input id="phone" type="tel" autocomplete="tel" placeholder="+420..." />
+          </label>
+        </div>
+
+        <label>
+          Poznámka (volitelné)
+          <textarea id="message" rows="3" placeholder="Cokoliv: stav, očekávání ceny, jak rychle to chceš, atd."></textarea>
+        </label>
+
+        <button class="btn-primary" id="submitBtn" type="submit">Odeslat žádost</button>
+        <p class="msg" id="formMsg" aria-live="polite"></p>
+
+        <p class="muted small" style="margin-top:10px;">
+          Odesláním souhlasíš se zpracováním údajů pro účely výkupu. Nic nespamujeme.
+        </p>
+      </form>
+    </section>
+  </main>
+
+  <script src="js/vykupfun.js"></script>
+  <script src="js/footerfun.js"></script>
+</body>
+</html>
