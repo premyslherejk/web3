@@ -945,8 +945,9 @@ async function uploadAuctionPhotos() {
     }
 
     // zapiš do DB
-    const { error: insErr } = await sb.from('auction_images').insert(inserted);
-    if (insErr) throw insErr;
+    const { error: insErr } = await sb.rpc('admin_add_auction_images', { p_rows: inserted });
+if (insErr) throw insErr;
+
 
     // refresh
     await loadAuctions();
