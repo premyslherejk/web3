@@ -10,6 +10,9 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const BUCKET = 'buy-requests';
 const SIGNED_URL_TTL = 60 * 10; // 10 min
 
+// Aukce bucket
+const AUC_BUCKET = 'auctions';
+
 // ===================== UI HELPERS =====================
 const $ = (id) => document.getElementById(id);
 
@@ -32,6 +35,7 @@ const els = {
   whoami: $('whoami'),
   countAll: $('countAll'),
   countBuy: $('countBuy'),
+  countAuc: $('countAuc'),
   refreshBtn: $('refreshBtn'),
   logoutBtn: $('logoutBtn'),
   deniedLogoutBtn: $('deniedLogoutBtn'),
@@ -39,8 +43,10 @@ const els = {
   // tabs
   tabOrders: $('tabOrders'),
   tabBuy: $('tabBuy'),
+  tabAuc: $('tabAuc'),
   ordersPane: $('ordersPane'),
   buyPane: $('buyPane'),
+  aucPane: $('aucPane'),
 
   // orders filters
   searchInput: $('searchInput'),
@@ -66,6 +72,34 @@ const els = {
   closeModalBtn: $('closeModalBtn'),
   downloadZipBtn: $('downloadZipBtn'),
   modalMsg: $('modalMsg'),
+
+  // auctions filters
+  aucSearchInput: $('aucSearchInput'),
+  aucPubFilter: $('aucPubFilter'),
+  aucSort: $('aucSort'),
+  aucNewBtn: $('aucNewBtn'),
+
+  // auctions table
+  aucBody: $('aucBody'),
+
+  // auctions editor
+  aucEditor: $('aucEditor'),
+  aucClearBtn: $('aucClearBtn'),
+  aucForm: $('aucForm'),
+  aucTitle: $('aucTitle'),
+  aucUrl: $('aucUrl'),
+  aucDesc: $('aucDesc'),
+  aucStarts: $('aucStarts'),
+  aucEnds: $('aucEnds'),
+  aucSortOrder: $('aucSortOrder'),
+  aucPublished: $('aucPublished'),
+  aucSaveBtn: $('aucSaveBtn'),
+  aucMsg: $('aucMsg'),
+
+  // auctions photos
+  aucPhotos: $('aucPhotos'),
+  aucUploadBtn: $('aucUploadBtn'),
+  aucPhotoGrid: $('aucPhotoGrid'),
 };
 
 function showView(which) {
@@ -113,9 +147,11 @@ function setTab(which) {
 
   els.tabOrders.classList.toggle('active', which === 'orders');
   els.tabBuy.classList.toggle('active', which === 'buy');
+  els.tabAuc.classList.toggle('active', which === 'auc');
 
   els.ordersPane.classList.toggle('hidden', which !== 'orders');
   els.buyPane.classList.toggle('hidden', which !== 'buy');
+  els.aucPane.classList.toggle('hidden', which !== 'auc');
 
   setMsg(els.dashMsg, '', '');
 }
@@ -123,6 +159,7 @@ function setTab(which) {
 // ===================== DATA =====================
 let ORDERS = [];
 let BUY = [];
+let AUCTIONS = [];
 
 // ---------- Orders ----------
 async function loadOrders() {
@@ -200,18 +237,17 @@ function getActions(order) {
   // BANK
   if (pm === 'bank') {
     if (st === 'awaiting_payment') return { done:false, actions:['paid','cancel'] };
-    if (st === 'paid') return { done:false, actions:['shipped','cancel'] }; // ✅ cancel zůstává
-    if (st === 'shipped') return { done:false, actions:['returned','cancel'] }; // ✅ cancel zůstává
+    if (st === 'paid') return { done:false, actions:['shipped','cancel'] };
+    if (st === 'shipped') return { done:false, actions:['returned','cancel'] };
   }
 
   // COD
   if (pm === 'cod') {
     if (st === 'new') return { done:false, actions:['shipped','cancel'] };
     if (st === 'shipped') return { done:false, actions:['paid','returned','cancel'] };
-    if (st === 'paid') return { done:false, actions:['returned','cancel'] }; // ✅ cancel zůstává
+    if (st === 'paid') return { done:false, actions:['returned','cancel'] };
   }
 
-  // ostatní stavy: nic
   return { done:false, actions:[] };
 }
 
@@ -278,7 +314,7 @@ async function doOrderAction(act, orderId) {
   renderOrdersTable();
 }
 
-// ---------- CSV export (tvoje) ----------
+// ---------- CSV export ----------
 function parseStreet(street) {
   if (!street) return { streetName:'', house:'' };
   const match = street.match(/^(.*?)(\d+\w*)$/);
@@ -540,7 +576,6 @@ async function downloadZipCurrent() {
       const { path, url } = MODAL_URLS[i];
       const name = baseNameFromPath(path) || `photo-${i+1}.jpg`;
 
-      // stáhni blob a přidej
       const blob = await fetchAsBlob(url);
       zip.file(name, blob);
     }
@@ -564,7 +599,395 @@ async function downloadZipCurrent() {
   }
 }
 
-// ===================== AUTH FLOW =====================
+/* ===================== AUKCE (NEW) ===================== */
+
+let AUC_EDIT_ID = null; // null = nová aukce
+
+function toDatetimeLocalValue(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  if (Number.isNaN(d.getTime())) return '';
+  const pad = (n) => String(n).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  const mm = pad(d.getMonth() + 1);
+  const dd = pad(d.getDate());
+  const hh = pad(d.getHours());
+  const mi = pad(d.getMinutes());
+  return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+}
+
+function fromDatetimeLocalValue(v) {
+  if (!v) return null;
+  // datetime-local je bez timezone -> vytvoří Date v lokálním čase
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString(); // do DB jako timestamptz safe
+}
+
+function aucState(a) {
+  const now = new Date();
+  const starts = a.starts_at ? new Date(a.starts_at) : null;
+  const ends = a.ends_at ? new Date(a.ends_at) : null;
+
+  if (!ends || Number.isNaN(ends.getTime())) return 'ended';
+  if (ends <= now) return 'ended';
+  if (starts && !Number.isNaN(starts.getTime()) && starts > now) return 'scheduled';
+  return 'live';
+}
+
+function aucBadgeHtml(a) {
+  const st = aucState(a);
+  if (st === 'live') return `<span class="auc-badge live">LIVE</span>`;
+  if (st === 'scheduled') return `<span class="auc-badge scheduled">Plán</span>`;
+  return `<span class="auc-badge ended">Hotovo</span>`;
+}
+
+function publicAucImgUrl(path) {
+  if (!path) return '';
+  // pokud je bucket public:
+  return `${SUPABASE_URL}/storage/v1/object/public/${AUC_BUCKET}/${encodeURIComponent(path).replaceAll('%2F','/')}`;
+}
+
+async function loadAuctions() {
+  const { data, error } = await sb
+    .from('auctions')
+    .select(`
+      id, created_at, title, description, fb_url, starts_at, ends_at, is_published, sort_order,
+      auction_images:auction_images ( id, path, caption, sort_order )
+    `)
+    .order('ends_at', { ascending: false })
+    .limit(300);
+
+  if (error) throw error;
+
+  (data || []).forEach(a => {
+    if (!Array.isArray(a.auction_images)) a.auction_images = [];
+    a.auction_images.sort((x,y) => (x.sort_order ?? 0) - (y.sort_order ?? 0));
+  });
+
+  AUCTIONS = data || [];
+  els.countAuc.textContent = String(AUCTIONS.length);
+}
+
+function getFilteredAuctions() {
+  const q = String(els.aucSearchInput.value || '').trim().toLowerCase();
+  const pub = els.aucPubFilter.value || 'all';
+  const sort = els.aucSort.value || 'ends_desc';
+
+  let rows = [...AUCTIONS];
+
+  if (pub === 'pub') rows = rows.filter(a => !!a.is_published);
+  if (pub === 'unpub') rows = rows.filter(a => !a.is_published);
+
+  if (q) {
+    rows = rows.filter(a => {
+      const hay = [
+        a.title,
+        a.description,
+        a.fb_url
+      ].filter(Boolean).join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  rows.sort((a,b) => {
+    const Aend = new Date(a.ends_at || 0).getTime();
+    const Bend = new Date(b.ends_at || 0).getTime();
+    const Acrt = new Date(a.created_at || 0).getTime();
+    const Bcrt = new Date(b.created_at || 0).getTime();
+
+    if (sort === 'ends_asc') return Aend - Bend;
+    if (sort === 'newest') return Bcrt - Acrt;
+    if (sort === 'oldest') return Acrt - Bcrt;
+    return Bend - Aend; // ends_desc
+  });
+
+  // secondary sort_order (pokud chceš)
+  rows.sort((a,b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+
+  return rows;
+}
+
+function renderAuctionsTable() {
+  const rows = getFilteredAuctions();
+
+  if (!rows.length) {
+    els.aucBody.innerHTML = `<tr><td colspan="7" class="muted">Nic tu není.</td></tr>`;
+    return;
+  }
+
+  els.aucBody.innerHTML = rows.map(a => {
+    const imgCount = Array.isArray(a.auction_images) ? a.auction_images.length : 0;
+    return `
+      <tr>
+        <td><strong>${escapeHtml(a.title || '—')}</strong><br><span class="muted">${escapeHtml((a.description || '').slice(0, 70))}${(a.description||'').length>70?'…':''}</span></td>
+        <td>${aucBadgeHtml(a)}</td>
+        <td>${fmtDt(a.starts_at)}</td>
+        <td><strong>${fmtDt(a.ends_at)}</strong></td>
+        <td><strong>${a.is_published ? 'ANO' : 'NE'}</strong></td>
+        <td><strong>${imgCount}</strong></td>
+        <td>
+          <div class="actions">
+            <button class="btn-small" data-auc-act="edit" data-auc-id="${a.id}">Upravit</button>
+            <button class="btn-small" data-auc-act="toggle" data-auc-id="${a.id}">${a.is_published ? 'Skrýt' : 'Publikovat'}</button>
+            <a class="btn-small" href="${escapeHtml(a.fb_url || '#')}" target="_blank" rel="noopener">FB</a>
+            <button class="btn-small danger" data-auc-act="delete" data-auc-id="${a.id}">Smazat</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function clearAucEditor() {
+  AUC_EDIT_ID = null;
+  els.aucTitle.value = '';
+  els.aucUrl.value = '';
+  els.aucDesc.value = '';
+  els.aucStarts.value = '';
+  els.aucEnds.value = '';
+  els.aucSortOrder.value = '';
+  els.aucPublished.checked = false;
+  els.aucPhotoGrid.innerHTML = '';
+  els.aucPhotos.value = '';
+  setMsg(els.aucMsg, '', '');
+}
+
+function fillAucEditor(a) {
+  AUC_EDIT_ID = a?.id || null;
+  els.aucTitle.value = a?.title || '';
+  els.aucUrl.value = a?.fb_url || '';
+  els.aucDesc.value = a?.description || '';
+  els.aucStarts.value = toDatetimeLocalValue(a?.starts_at);
+  els.aucEnds.value = toDatetimeLocalValue(a?.ends_at);
+  els.aucSortOrder.value = (a?.sort_order ?? '') === null ? '' : String(a?.sort_order ?? '');
+  els.aucPublished.checked = !!a?.is_published;
+
+  renderAucPhotoGrid(a);
+  setMsg(els.aucMsg, '', '');
+}
+
+function renderAucPhotoGrid(a) {
+  const imgs = Array.isArray(a?.auction_images) ? a.auction_images : [];
+  if (!imgs.length) {
+    els.aucPhotoGrid.innerHTML = `<div class="muted">Zatím žádné fotky. Nahraj je nahoře.</div>`;
+    return;
+  }
+
+  els.aucPhotoGrid.innerHTML = imgs.map(im => {
+    const url = publicAucImgUrl(im.path);
+    const name = baseNameFromPath(im.path);
+    return `
+      <div class="auc-photo">
+        <a href="${url}" target="_blank" rel="noopener"><img src="${url}" alt=""></a>
+        <div class="cap">
+          <div class="name" title="${escapeHtml(name)}">${escapeHtml(name)}</div>
+          <button class="btn-small danger" data-aucimg-act="delete" data-aucimg-id="${im.id}" data-aucimg-path="${escapeHtml(im.path)}">Smazat</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function saveAuction() {
+  setMsg(els.aucMsg, '', '');
+
+  const title = String(els.aucTitle.value || '').trim();
+  const fb_url = String(els.aucUrl.value || '').trim();
+  const description = String(els.aucDesc.value || '').trim();
+
+  const starts_at = fromDatetimeLocalValue(els.aucStarts.value);
+  const ends_at = fromDatetimeLocalValue(els.aucEnds.value);
+  const sort_order_raw = String(els.aucSortOrder.value || '').trim();
+  const sort_order = sort_order_raw === '' ? 0 : Number(sort_order_raw);
+
+  const is_published = !!els.aucPublished.checked;
+
+  if (!title || !fb_url || !ends_at) {
+    setMsg(els.aucMsg, 'err', 'Vyplň Název + FB URL + Konec.');
+    return;
+  }
+  if (!Number.isFinite(sort_order)) {
+    setMsg(els.aucMsg, 'err', 'Řazení musí být číslo.');
+    return;
+  }
+
+  const payload = {
+    title,
+    fb_url,
+    description: description || null,
+    starts_at: starts_at || null,
+    ends_at,
+    sort_order,
+    is_published
+  };
+
+  if (!AUC_EDIT_ID) {
+    const { data, error } = await sb
+      .from('auctions')
+      .insert(payload)
+      .select('*')
+      .single();
+
+    if (error) throw error;
+
+    await loadAuctions();
+    renderAuctionsTable();
+
+    // otevři editor na nově vytvořenou aukci
+    const created = AUCTIONS.find(x => x.id === data.id) || data;
+    fillAucEditor(created);
+
+    setMsg(els.aucMsg, 'ok', 'Aukce vytvořená ✅');
+
+  } else {
+    const { error } = await sb
+      .from('auctions')
+      .update(payload)
+      .eq('id', AUC_EDIT_ID);
+
+    if (error) throw error;
+
+    await loadAuctions();
+    renderAuctionsTable();
+
+    const updated = AUCTIONS.find(x => x.id === AUC_EDIT_ID);
+    if (updated) fillAucEditor(updated);
+
+    setMsg(els.aucMsg, 'ok', 'Uloženo ✅');
+  }
+}
+
+async function toggleAuctionPublish(id) {
+  const a = AUCTIONS.find(x => x.id === id);
+  if (!a) return;
+
+  const { error } = await sb
+    .from('auctions')
+    .update({ is_published: !a.is_published })
+    .eq('id', id);
+
+  if (error) throw error;
+
+  await loadAuctions();
+  renderAuctionsTable();
+
+  if (AUC_EDIT_ID === id) {
+    const updated = AUCTIONS.find(x => x.id === id);
+    if (updated) fillAucEditor(updated);
+  }
+}
+
+async function deleteAuction(id) {
+  const a = AUCTIONS.find(x => x.id === id);
+  if (!a) return;
+
+  const ok = confirm(`Fakt smazat aukci "${a.title}"? (smaže i záznamy fotek v DB)`);
+  if (!ok) return;
+
+  // smaž DB (fotky v bucketu zůstanou – to je OK, nebo můžeme doplnit purge později)
+  const { error } = await sb.from('auctions').delete().eq('id', id);
+  if (error) throw error;
+
+  if (AUC_EDIT_ID === id) clearAucEditor();
+
+  await loadAuctions();
+  renderAuctionsTable();
+}
+
+async function editAuction(id) {
+  const a = AUCTIONS.find(x => x.id === id);
+  if (!a) return;
+  fillAucEditor(a);
+}
+
+async function uploadAuctionPhotos() {
+  setMsg(els.aucMsg, '', '');
+
+  if (!AUC_EDIT_ID) {
+    setMsg(els.aucMsg, 'err', 'Nejdřív ulož aukci (aby měla ID), pak nahraj fotky.');
+    return;
+  }
+
+  const files = Array.from(els.aucPhotos.files || []);
+  if (!files.length) {
+    setMsg(els.aucMsg, 'err', 'Vyber fotky.');
+    return;
+  }
+
+  els.aucUploadBtn.disabled = true;
+  els.aucUploadBtn.textContent = 'Nahrávám…';
+
+  try {
+    // zjisti next sort_order pro fotky
+    const cur = AUCTIONS.find(x => x.id === AUC_EDIT_ID);
+    const base = (cur?.auction_images?.length || 0);
+
+    const inserted = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const f = files[i];
+      const safeName = String(f.name || `photo-${i+1}.jpg`).replaceAll(' ', '_');
+      const path = `${AUC_EDIT_ID}/${Date.now()}-${i+1}-${safeName}`;
+
+      const { error: upErr } = await sb.storage.from(AUC_BUCKET).upload(path, f, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: f.type || 'image/jpeg'
+      });
+      if (upErr) throw upErr;
+
+      inserted.push({
+        auction_id: AUC_EDIT_ID,
+        path,
+        sort_order: base + i
+      });
+    }
+
+    // zapiš do DB
+    const { error: insErr } = await sb.from('auction_images').insert(inserted);
+    if (insErr) throw insErr;
+
+    // refresh
+    await loadAuctions();
+    renderAuctionsTable();
+    const updated = AUCTIONS.find(x => x.id === AUC_EDIT_ID);
+    if (updated) fillAucEditor(updated);
+
+    els.aucPhotos.value = '';
+    setMsg(els.aucMsg, 'ok', `Nahráno: ${files.length} ✅`);
+
+  } catch (e) {
+    console.error(e);
+    setMsg(els.aucMsg, 'err', `Upload fail: ${e?.message || e}`);
+  } finally {
+    els.aucUploadBtn.disabled = false;
+    els.aucUploadBtn.textContent = 'Nahrát fotky';
+  }
+}
+
+async function deleteAuctionImage(imgId, path) {
+  const ok = confirm('Smazat fotku? (smaže z DB, a pokusí se smazat i ze Storage)');
+  if (!ok) return;
+
+  // 1) DB delete
+  const { error: delErr } = await sb.from('auction_images').delete().eq('id', imgId);
+  if (delErr) throw delErr;
+
+  // 2) best-effort storage remove (když nemáš práva, DB už je čistá)
+  try {
+    await sb.storage.from(AUC_BUCKET).remove([path]);
+  } catch (e) {
+    console.warn('Storage remove failed (ignored):', e);
+  }
+
+  await loadAuctions();
+  renderAuctionsTable();
+  const updated = AUCTIONS.find(x => x.id === AUC_EDIT_ID);
+  if (updated) fillAucEditor(updated);
+}
+
+/* ===================== AUTH FLOW ===================== */
 async function refreshAuthUI() {
   const { data: { session } } = await sb.auth.getSession();
 
@@ -585,10 +1008,11 @@ async function refreshAuthUI() {
 
     showView("dash");
 
-    // load both datasets
-    await Promise.all([loadOrders(), loadBuyRequests()]);
+    // load all datasets
+    await Promise.all([loadOrders(), loadBuyRequests(), loadAuctions()]);
     renderOrdersTable();
     renderBuyTable();
+    renderAuctionsTable();
 
   } catch (e) {
     console.error(e);
@@ -597,11 +1021,12 @@ async function refreshAuthUI() {
   }
 }
 
-// ===================== EVENTS =====================
+/* ===================== EVENTS ===================== */
 document.addEventListener("DOMContentLoaded", async () => {
   // Tabs
   els.tabOrders.addEventListener('click', () => setTab('orders'));
   els.tabBuy.addEventListener('click', () => setTab('buy'));
+  els.tabAuc.addEventListener('click', () => setTab('auc'));
 
   // Login
   els.loginForm.addEventListener("submit", async (e) => {
@@ -645,11 +1070,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   els.refreshBtn.addEventListener("click", async () => {
     try {
       setMsg(els.dashMsg, '', '');
-      await Promise.all([loadOrders(), loadBuyRequests()]);
+      await Promise.all([loadOrders(), loadBuyRequests(), loadAuctions()]);
       renderOrdersTable();
       renderBuyTable();
+      renderAuctionsTable();
       setMsg(els.dashMsg, 'ok', 'Reload ✅');
       setTimeout(() => setMsg(els.dashMsg, '', ''), 900);
+
+      // refresh editor if editing
+      if (AUC_EDIT_ID) {
+        const updated = AUCTIONS.find(x => x.id === AUC_EDIT_ID);
+        if (updated) fillAucEditor(updated);
+      }
     } catch (e) {
       console.error(e);
       setMsg(els.dashMsg, 'err', e?.message || String(e));
@@ -708,10 +1140,80 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Modal events
   els.closeModalBtn.addEventListener('click', closeModal);
   els.photoModal.addEventListener('click', (e) => {
-    // klik mimo card = zavřít
     if (e.target === els.photoModal) closeModal();
   });
   els.downloadZipBtn.addEventListener('click', downloadZipCurrent);
+
+  // ===================== AUKCE EVENTS =====================
+  els.aucSearchInput.addEventListener('input', renderAuctionsTable);
+  els.aucPubFilter.addEventListener('change', renderAuctionsTable);
+  els.aucSort.addEventListener('change', renderAuctionsTable);
+
+  els.aucNewBtn.addEventListener('click', () => {
+    clearAucEditor();
+    setTab('auc');
+    setMsg(els.aucMsg, '', '');
+  });
+
+  els.aucClearBtn.addEventListener('click', () => {
+    clearAucEditor();
+    setMsg(els.aucMsg, '', '');
+  });
+
+  els.aucForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+      await saveAuction();
+    } catch (err) {
+      console.error(err);
+      setMsg(els.aucMsg, 'err', err?.message || String(err));
+    }
+  });
+
+  els.aucUploadBtn.addEventListener('click', async () => {
+    try {
+      await uploadAuctionPhotos();
+    } catch (err) {
+      console.error(err);
+      setMsg(els.aucMsg, 'err', err?.message || String(err));
+    }
+  });
+
+  // aukce table actions (delegation)
+  els.aucBody.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-auc-act]');
+    if (!btn) return;
+
+    const act = btn.getAttribute('data-auc-act');
+    const id = btn.getAttribute('data-auc-id');
+    if (!act || !id) return;
+
+    try {
+      if (act === 'edit') await editAuction(id);
+      if (act === 'toggle') await toggleAuctionPublish(id);
+      if (act === 'delete') await deleteAuction(id);
+    } catch (err) {
+      console.error(err);
+      alert('Chyba: ' + (err?.message || err));
+    }
+  });
+
+  // aukce photo actions (delegation)
+  els.aucPhotoGrid.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-aucimg-act]');
+    if (!btn) return;
+
+    const act = btn.getAttribute('data-aucimg-act');
+    const imgId = btn.getAttribute('data-aucimg-id');
+    const path = btn.getAttribute('data-aucimg-path');
+
+    try {
+      if (act === 'delete') await deleteAuctionImage(imgId, path);
+    } catch (err) {
+      console.error(err);
+      alert('Chyba: ' + (err?.message || err));
+    }
+  });
 
   // keep UI updated if session changes
   sb.auth.onAuthStateChange(() => {
@@ -720,5 +1222,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // init
   setTab('orders');
+  clearAucEditor();
   await refreshAuthUI();
 });
