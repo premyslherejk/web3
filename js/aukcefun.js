@@ -16,20 +16,24 @@ const els = {
   currentTitle: $('currentTitle'),
   currentMeta: $('currentMeta'),
   currentList: $('currentList'),
-  historyList: $('historyList'),
-  historyMeta: $('historyMeta'),
   pageMsg: $('pageMsg'),
 
-  // modal
+  // modal (popis)
   descModal: $('descModal'),
   closeModalBtn: $('closeModalBtn'),
   modalTitle: $('modalTitle'),
   modalMeta: $('modalMeta'),
   modalDesc: $('modalDesc'),
   modalGoBtn: $('modalGoBtn'),
+
+  // lightbox (foto)
+  lightbox: $('lightbox'),
+  lightboxImg: $('lightboxImg'),
 };
 
+// ===================== HELPERS =====================
 function setMsg(type, text) {
+  if (!els.pageMsg) return;
   els.pageMsg.className = 'page-msg ' + (type || '');
   els.pageMsg.textContent = text || '';
 }
@@ -57,12 +61,11 @@ function normalizeUrl(url) {
   const u = String(url || '').trim();
   if (!u) return '';
   if (/^https?:\/\//i.test(u)) return u;
-  return 'https://' + u; // ✅ fix relative link issue
+  return 'https://' + u;
 }
 
 function publicImgUrl(path) {
   if (!path) return '';
-  // bucket je public → jde přes /object/public
   const p = encodeURIComponent(path).replaceAll('%2F','/');
   return `${SUPABASE_URL}/storage/v1/object/public/${AUC_BUCKET}/${p}`;
 }
@@ -84,7 +87,7 @@ function badgeHtml(state) {
   return `<span class="badge ended">UKONČENO</span>`;
 }
 
-function clampText(text, limit = 170) {
+function clampText(text, limit = 190) {
   const s = String(text || '');
   if (s.length <= limit) return { short: s, cut: false };
   return { short: s.slice(0, limit).trim() + '…', cut: true };
@@ -111,11 +114,16 @@ function fmtCountdown(ms) {
 let AUCTIONS = [];
 let TICKER = null;
 
-// ===================== MODAL =====================
+let ACTIVE_TAB = 'live'; // live | scheduled | history
+let HISTORY_PAGE = 1;
+const HISTORY_PER_PAGE = 4;
+
+// ===================== MODAL (popis) =====================
 function openModal({ title, meta, desc, url }) {
   els.modalTitle.textContent = title || '—';
   els.modalMeta.textContent = meta || '—';
   els.modalDesc.textContent = desc || '';
+
   const link = normalizeUrl(url);
   els.modalGoBtn.href = link || '#';
   els.modalGoBtn.style.opacity = link ? '1' : '.6';
@@ -123,8 +131,23 @@ function openModal({ title, meta, desc, url }) {
 
   els.descModal.classList.remove('hidden');
 }
+
 function closeModal() {
   els.descModal.classList.add('hidden');
+}
+
+// ===================== LIGHTBOX (foto) =====================
+function openLightbox(src) {
+  if (!els.lightbox || !els.lightboxImg) return;
+  if (!src) return;
+  els.lightboxImg.src = src;
+  els.lightbox.classList.remove('hidden');
+}
+
+function closeLightbox() {
+  if (!els.lightbox) return;
+  els.lightbox.classList.add('hidden');
+  if (els.lightboxImg) els.lightboxImg.src = '';
 }
 
 // ===================== RENDER =====================
@@ -144,10 +167,6 @@ function renderAuctionCard(a) {
   const endsMs = a.ends_at ? new Date(a.ends_at).getTime() : 0;
   const startsMs = a.starts_at ? new Date(a.starts_at).getTime() : 0;
 
-  // countdown target:
-  // - live: ends_at
-  // - scheduled: starts_at (odpočet do startu)
-  // - ended: 0
   let cdLabel = 'Do konce';
   let cdTarget = endsMs;
 
@@ -172,13 +191,12 @@ function renderAuctionCard(a) {
 
           <div class="badges">
             ${badgeHtml(st)}
-            ${a.published ? '' : `<span class="badge ended">SKRYTÉ</span>`}
           </div>
 
           <div class="gallery" data-gallery="${safeId}">
             ${
               main
-                ? `<img class="gallery-main" data-main src="${main}" alt="">`
+                ? `<img class="gallery-main" data-main data-fullsrc="${escapeHtml(main)}" src="${escapeHtml(main)}" alt="">`
                 : `<div class="gallery-main" style="display:flex; align-items:center; justify-content:center; opacity:.7;">
                      Bez fotek
                    </div>`
@@ -188,12 +206,12 @@ function renderAuctionCard(a) {
               imgUrls.length > 1
                 ? `<div class="gallery-thumbs">
                     ${imgUrls.map((u, i) => `
-                      <img class="thumb ${i===0?'active':''}" data-thumb src="${u}" data-full="${u}" alt="">
+                      <img class="thumb ${i===0?'active':''}" data-thumb data-full="${escapeHtml(u)}" src="${escapeHtml(u)}" alt="">
                     `).join('')}
                   </div>`
                 : (imgUrls.length === 1
                     ? `<div class="gallery-thumbs"><span class="muted small">1 fotka</span></div>`
-                    : `<div class="gallery-thumbs"><span class="muted small">Nahraj fotky a bude to tu sexy.</span></div>`
+                    : `<div class="gallery-thumbs"><span class="muted small">Zatím bez fotek.</span></div>`
                   )
             }
           </div>
@@ -227,13 +245,13 @@ function renderAuctionCard(a) {
               Otevřít aukci na FB
             </a>
 
-            <div class="countdown ${st}" data-cd-label="${escapeHtml(cdLabel)}" data-cd-target="${cdTarget}">
+            <div class="countdown ${st}" data-cd-target="${cdTarget}">
               <div class="label">${escapeHtml(cdLabel)}</div>
               <div class="time" data-cd-time>—</div>
             </div>
 
             <div class="muted small">
-              Tip: když jsi na mobilu, otevři to v aplikaci Facebook pro nejlepší UX.
+              Tip: na mobilu otevři v aplikaci Facebook pro nejlepší UX.
             </div>
           </div>
         </aside>
@@ -243,68 +261,81 @@ function renderAuctionCard(a) {
   `;
 }
 
+function renderPagination(totalPages) {
+  if (totalPages <= 1) return '';
+
+  const prevDisabled = HISTORY_PAGE <= 1 ? 'disabled' : '';
+  const nextDisabled = HISTORY_PAGE >= totalPages ? 'disabled' : '';
+
+  return `
+    <div class="pager">
+      <button class="btn-ghost" data-page="prev" ${prevDisabled}>⬅ Předchozí</button>
+      <span class="muted">Strana ${HISTORY_PAGE} / ${totalPages}</span>
+      <button class="btn-ghost" data-page="next" ${nextDisabled}>Další ➡</button>
+    </div>
+  `;
+}
+
 function renderAll() {
-  const now = Date.now();
+  // meta pryč
+  if (els.currentMeta) els.currentMeta.textContent = '';
 
-  const live = AUCTIONS.filter(a => aucState(a) === 'live');
-  const scheduled = AUCTIONS.filter(a => aucState(a) === 'scheduled');
-  const ended = AUCTIONS.filter(a => aucState(a) === 'ended');
+  const live = AUCTIONS.filter(a => aucState(a) === 'live')
+    .sort((a,b) => new Date(a.ends_at).getTime() - new Date(b.ends_at).getTime());
 
-  // CURRENT SECTION: live, else scheduled, else empty
-  let current = [];
-  let title = 'Aktuální aukce';
+  const scheduled = AUCTIONS.filter(a => aucState(a) === 'scheduled')
+    .sort((a,b) => new Date(a.starts_at || a.ends_at).getTime() - new Date(b.starts_at || b.ends_at).getTime());
 
-  if (live.length) {
-    current = live.sort((a,b) => new Date(a.ends_at).getTime() - new Date(b.ends_at).getTime());
-    title = 'Aktuální aukce (LIVE)';
-  } else if (scheduled.length) {
-    current = scheduled.sort((a,b) => new Date(a.starts_at || a.ends_at).getTime() - new Date(b.starts_at || b.ends_at).getTime());
-    title = 'Plánované aukce';
-  } else {
-    current = [];
-    title = 'Aktuální aukce';
+  const ended = AUCTIONS.filter(a => aucState(a) === 'ended')
+    .sort((a,b) => new Date(b.ends_at).getTime() - new Date(a.ends_at).getTime());
+
+  if (ACTIVE_TAB === 'live') {
+    els.currentTitle.textContent = 'Aktuální aukce (LIVE)';
+    els.currentList.innerHTML = live.length
+      ? live.map(renderAuctionCard).join('')
+      : `<div class="muted">Teď nic neběží 😅</div>`;
   }
 
-  els.currentTitle.textContent = title;
-  els.currentMeta.textContent = live.length
-    ? `LIVE: ${live.length} • Plánované: ${scheduled.length} • Historie: ${ended.length}`
-    : scheduled.length
-      ? `Plánované: ${scheduled.length} • Historie: ${ended.length}`
-      : `Zatím nic • Historie: ${ended.length}`;
-
-  if (!current.length) {
-    els.currentList.innerHTML = `<div class="muted">Teď nic neběží ani není naplánované. Sleduj IG/FB, ať ti nic neuteče 👀</div>`;
-  } else {
-    els.currentList.innerHTML = current.map(renderAuctionCard).join('');
+  if (ACTIVE_TAB === 'scheduled') {
+    els.currentTitle.textContent = 'Plánované aukce';
+    els.currentList.innerHTML = scheduled.length
+      ? scheduled.map(renderAuctionCard).join('')
+      : `<div class="muted">Zatím nejsou žádné plánované aukce.</div>`;
   }
 
-  // HISTORY SECTION
-  els.historyMeta.textContent = `Ukončené: ${ended.length}`;
-  if (!ended.length) {
-    els.historyList.innerHTML = `<div class="muted">Zatím žádná historie.</div>`;
-  } else {
-    // historie – nejnovější ukončené nahoře (podle ends_at desc)
-    const hist = ended.sort((a,b) => new Date(b.ends_at).getTime() - new Date(a.ends_at).getTime());
-    els.historyList.innerHTML = hist.map(renderAuctionCard).join('');
+  if (ACTIVE_TAB === 'history') {
+    els.currentTitle.textContent = 'Historie aukcí';
+
+    if (!ended.length) {
+      els.currentList.innerHTML = `<div class="muted">Zatím žádná historie.</div>`;
+    } else {
+      const totalPages = Math.ceil(ended.length / HISTORY_PER_PAGE);
+      // safety clamp
+      HISTORY_PAGE = Math.min(Math.max(1, HISTORY_PAGE), totalPages);
+
+      const start = (HISTORY_PAGE - 1) * HISTORY_PER_PAGE;
+      const slice = ended.slice(start, start + HISTORY_PER_PAGE);
+
+      els.currentList.innerHTML =
+        slice.map(renderAuctionCard).join('') +
+        renderPagination(totalPages);
+    }
   }
 
   restartTicker();
 }
 
+// ===================== COUNTDOWN =====================
 function tickCountdowns() {
   const nodes = document.querySelectorAll('[data-cd-target]');
   const now = Date.now();
 
   nodes.forEach(box => {
     const target = Number(box.getAttribute('data-cd-target') || 0);
-    const stateClass = box.classList.contains('ended') ? 'ended'
-      : box.classList.contains('scheduled') ? 'scheduled'
-      : 'live';
-
     const timeEl = box.querySelector('[data-cd-time]');
     if (!timeEl) return;
 
-    if (!target || stateClass === 'ended') {
+    if (!target) {
       timeEl.textContent = '—';
       return;
     }
@@ -312,7 +343,6 @@ function tickCountdowns() {
     const diff = target - now;
 
     if (diff <= 0) {
-      // přepne text, ale data se refetchnou až na reload (můžeš doplnit auto-refetch)
       timeEl.textContent = '00:00:00';
       return;
     }
@@ -341,8 +371,7 @@ async function loadAuctions() {
 
   if (error) throw error;
 
-  const rows = (data || [])
-    .filter(a => a.published === true); // veřejně jen publikované
+  const rows = (data || []).filter(a => a.published === true);
 
   rows.forEach(a => {
     if (!Array.isArray(a.auction_images)) a.auction_images = [];
@@ -355,14 +384,39 @@ async function loadAuctions() {
 
 // ===================== EVENTS =====================
 document.addEventListener('DOMContentLoaded', async () => {
-  // modal close
-  els.closeModalBtn.addEventListener('click', closeModal);
-  els.descModal.addEventListener('click', (e) => {
+  // MODAL close
+  els.closeModalBtn?.addEventListener('click', closeModal);
+  els.descModal?.addEventListener('click', (e) => {
     if (e.target === els.descModal) closeModal();
   });
 
-  // delegation: thumbs + show more
+  // LIGHTBOX close
+  els.lightbox?.addEventListener('click', closeLightbox);
+
+  // Tabs (LIVE / scheduled / history)
+  document.querySelectorAll('.auc-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.auc-tab').forEach(x => x.classList.remove('active'));
+      btn.classList.add('active');
+
+      ACTIVE_TAB = btn.dataset.tab || 'live';
+      HISTORY_PAGE = 1;
+      renderAll();
+    });
+  });
+
+  // Delegation: thumbs, show more, gallery click, paging
   document.body.addEventListener('click', (e) => {
+    // paging
+    const p = e.target.closest('[data-page]');
+    if (p) {
+      const dir = p.getAttribute('data-page');
+      if (dir === 'prev') HISTORY_PAGE = Math.max(1, HISTORY_PAGE - 1);
+      if (dir === 'next') HISTORY_PAGE = HISTORY_PAGE + 1;
+      renderAll();
+      return;
+    }
+
     // thumbs
     const t = e.target.closest('[data-thumb]');
     if (t) {
@@ -371,14 +425,33 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!main) return;
 
       const url = t.getAttribute('data-full');
-      if (url) main.src = url;
+      if (url) {
+        main.src = url;
+        main.setAttribute('data-fullsrc', url);
+      }
 
       card.querySelectorAll('.thumb').forEach(x => x.classList.remove('active'));
       t.classList.add('active');
       return;
     }
 
-    // show more
+    // open lightbox when clicking main image
+    const mainImg = e.target.closest('img.gallery-main');
+    if (mainImg) {
+      const src = mainImg.getAttribute('data-fullsrc') || mainImg.src;
+      openLightbox(src);
+      return;
+    }
+
+    // also allow clicking thumb to open lightbox (optional)
+    const thumbImg = e.target.closest('img.thumb');
+    if (thumbImg && e.shiftKey) {
+      const src = thumbImg.getAttribute('data-full') || thumbImg.src;
+      openLightbox(src);
+      return;
+    }
+
+    // show more modal
     const more = e.target.closest('[data-act="more"]');
     if (more) {
       const title = more.getAttribute('data-title') || '';
@@ -391,11 +464,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   try {
+    // default tab = LIVE (ať sedí i UI)
+    const liveBtn = document.querySelector('.auc-tab[data-tab="live"]');
+    if (liveBtn) {
+      document.querySelectorAll('.auc-tab').forEach(x => x.classList.remove('active'));
+      liveBtn.classList.add('active');
+      ACTIVE_TAB = 'live';
+    }
+
     await loadAuctions();
   } catch (err) {
     console.error(err);
     setMsg('err', `Nešlo načíst aukce: ${err?.message || err}`);
-    els.currentList.innerHTML = `<div class="muted">Chyba načítání.</div>`;
-    els.historyList.innerHTML = `<div class="muted">Chyba načítání.</div>`;
+    if (els.currentList) els.currentList.innerHTML = `<div class="muted">Chyba načítání.</div>`;
   }
 });
