@@ -233,8 +233,9 @@ function renderAuctionCard(a) {
 
           <div class="cta">
             <div class="desc">
-              ${escapeHtml(short).replaceAll('\n','<br>')}
-            </div>
+  <div class="desc-label" style="font-weight:900; margin-bottom:6px;">Popis:</div>
+  ${escapeHtml(short).replaceAll('\n','<br>')}
+</div>
 
             ${
               cut
