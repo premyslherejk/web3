@@ -18,6 +18,12 @@
     <div class="logo" onclick="location.href='index.html'">PokeKusovky</div>
   </header>
 
+  <div class="auc-tabs">
+  <button class="auc-tab active" data-tab="live">LIVE</button>
+  <button class="auc-tab" data-tab="scheduled">Plánované</button>
+  <button class="auc-tab" data-tab="history">Historie</button>
+</div>
+
   <main class="aukce-wrap">
     <header class="aukce-header">
       <h1>Aukce</h1>
@@ -71,6 +77,11 @@
       </div>
     </div>
   </div>
+
+  <!-- LIGHTBOX -->
+<div class="lightbox hidden" id="lightbox">
+  <img id="lightboxImg" src="" alt="">
+</div>
 
   <script src="js/aukcefun.js"></script>
   <script src="js/footerfun.js"></script>
