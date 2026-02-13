@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aukce | PokeKusovky</title>
+
+  <link rel="stylesheet" href="css/headervis.css" />
+  <link rel="stylesheet" href="css/footervis.css" />
+  <link rel="stylesheet" href="css/aukcevis.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="logo" onclick="location.href='index.html'">PokeKusovky</div>
+  </header>
+
+  <main class="au-page">
+    <header class="au-header">
+      <h1>Aukce</h1>
+      <p class="sub">Aktuální / naplánované aukce a historie. Všechno přehledně, bez drama.</p>
+    </header>
+
+    <!-- LIVE -->
+    <section class="card">
+      <div class="sec-head">
+        <h2>Aktuální aukce</h2>
+        <span class="pill" id="liveCount">—</span>
+      </div>
+      <div id="liveWrap" class="grid">
+        <p class="muted">Načítám…</p>
+      </div>
+    </section>
+
+    <!-- SCHEDULED -->
+    <section class="card">
+      <div class="sec-head">
+        <h2>Naplánované aukce</h2>
+        <span class="pill" id="schedCount">—</span>
+      </div>
+      <div id="schedWrap" class="grid">
+        <p class="muted">Načítám…</p>
+      </div>
+    </section>
+
+    <!-- HISTORY -->
+    <section class="card">
+      <div class="sec-head">
+        <h2>Historie aukcí</h2>
+        <span class="pill" id="histCount">—</span>
+      </div>
+      <div id="histWrap" class="grid">
+        <p class="muted">Načítám…</p>
+      </div>
+    </section>
+
+    <p class="msg" id="pageMsg" aria-live="polite"></p>
+  </main>
+
+  <script src="js/aukcefun.js"></script>
+  <script src="js/footerfun.js"></script>
+</body>
+</html>
