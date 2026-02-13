@@ -302,6 +302,18 @@ body{
 .countdown.ended .time{ color: rgba(255,107,107,.95); }
 
 /* ===================== MODAL ===================== */
+/* ===================== MODAL ===================== */
+.modal{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.65);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 18px;
+  z-index: 9999;
+}
+
 .modal-card{
   width: min(748px, 100%);      /* bylo 880px  -> cca -15% */
   max-height: 80vh;             /* -20% výšky (z typických 100vh) */
@@ -313,6 +325,20 @@ body{
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.modal-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.modal-title{
+  font-weight: 900;
+  font-size: 1.15rem;
+  color:#ff3b3b;
 }
 
 .modal-body{
