@@ -133,6 +133,14 @@ function escapeHtml(s) {
     .replaceAll("'","&#039;");
 }
 
+function normalizeHttpUrl(url) {
+  const s = String(url || '').trim();
+  if (!s) return '';
+  if (/^https?:\/\//i.test(s)) return s;
+  // když někdo dá "www.facebook.com/..."
+  return `https://${s}`;
+}
+
 async function isAdmin() {
   const { data, error } = await sb.rpc('is_admin');
   if (error) throw error;
@@ -599,7 +607,7 @@ async function downloadZipCurrent() {
   }
 }
 
-/* ===================== AUKCE (NEW) ===================== */
+/* ===================== AUKCE (FIXED) ===================== */
 
 let AUC_EDIT_ID = null; // null = nová aukce
 
@@ -618,10 +626,9 @@ function toDatetimeLocalValue(ts) {
 
 function fromDatetimeLocalValue(v) {
   if (!v) return null;
-  // datetime-local je bez timezone -> vytvoří Date v lokálním čase
-  const d = new Date(v);
+  const d = new Date(v); // lokální čas
   if (Number.isNaN(d.getTime())) return null;
-  return d.toISOString(); // do DB jako timestamptz safe
+  return d.toISOString();
 }
 
 function aucState(a) {
@@ -644,7 +651,6 @@ function aucBadgeHtml(a) {
 
 function publicAucImgUrl(path) {
   if (!path) return '';
-  // pokud je bucket public:
   return `${SUPABASE_URL}/storage/v1/object/public/${AUC_BUCKET}/${encodeURIComponent(path).replaceAll('%2F','/')}`;
 }
 
@@ -652,8 +658,8 @@ async function loadAuctions() {
   const { data, error } = await sb
     .from('auctions')
     .select(`
-      id, created_at, title, description, fb_url, starts_at, ends_at, is_published, sort_order,
-      auction_images:auction_images ( id, path, caption, sort_order )
+      id, created_at, title, description, fb_url, starts_at, ends_at, published,
+      auction_images:auction_images ( id, path, sort_order )
     `)
     .order('ends_at', { ascending: false })
     .limit(300);
@@ -676,8 +682,8 @@ function getFilteredAuctions() {
 
   let rows = [...AUCTIONS];
 
-  if (pub === 'pub') rows = rows.filter(a => !!a.is_published);
-  if (pub === 'unpub') rows = rows.filter(a => !a.is_published);
+  if (pub === 'pub') rows = rows.filter(a => !!a.published);
+  if (pub === 'unpub') rows = rows.filter(a => !a.published);
 
   if (q) {
     rows = rows.filter(a => {
@@ -702,9 +708,7 @@ function getFilteredAuctions() {
     return Bend - Aend; // ends_desc
   });
 
-  // secondary sort_order (pokud chceš)
-  rows.sort((a,b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
-
+  // (volitelně) sekundární řazení podle created_at – nechávám v klidu
   return rows;
 }
 
@@ -718,19 +722,20 @@ function renderAuctionsTable() {
 
   els.aucBody.innerHTML = rows.map(a => {
     const imgCount = Array.isArray(a.auction_images) ? a.auction_images.length : 0;
+    const fb = normalizeHttpUrl(a.fb_url || '');
     return `
       <tr>
         <td><strong>${escapeHtml(a.title || '—')}</strong><br><span class="muted">${escapeHtml((a.description || '').slice(0, 70))}${(a.description||'').length>70?'…':''}</span></td>
         <td>${aucBadgeHtml(a)}</td>
         <td>${fmtDt(a.starts_at)}</td>
         <td><strong>${fmtDt(a.ends_at)}</strong></td>
-        <td><strong>${a.is_published ? 'ANO' : 'NE'}</strong></td>
+        <td><strong>${a.published ? 'ANO' : 'NE'}</strong></td>
         <td><strong>${imgCount}</strong></td>
         <td>
           <div class="actions">
             <button class="btn-small" data-auc-act="edit" data-auc-id="${a.id}">Upravit</button>
-            <button class="btn-small" data-auc-act="toggle" data-auc-id="${a.id}">${a.is_published ? 'Skrýt' : 'Publikovat'}</button>
-            <a class="btn-small" href="${escapeHtml(a.fb_url || '#')}" target="_blank" rel="noopener">FB</a>
+            <button class="btn-small" data-auc-act="toggle" data-auc-id="${a.id}">${a.published ? 'Skrýt' : 'Publikovat'}</button>
+            ${fb ? `<a class="btn-small" href="${fb}" target="_blank" rel="noopener">FB</a>` : ''}
             <button class="btn-small danger" data-auc-act="delete" data-auc-id="${a.id}">Smazat</button>
           </div>
         </td>
@@ -760,8 +765,8 @@ function fillAucEditor(a) {
   els.aucDesc.value = a?.description || '';
   els.aucStarts.value = toDatetimeLocalValue(a?.starts_at);
   els.aucEnds.value = toDatetimeLocalValue(a?.ends_at);
-  els.aucSortOrder.value = (a?.sort_order ?? '') === null ? '' : String(a?.sort_order ?? '');
-  els.aucPublished.checked = !!a?.is_published;
+  els.aucSortOrder.value = String(a?.sort_order ?? ''); // pokud sloupec nemáš, nevadí – editor si to drží (a SQL si může ignorovat)
+  els.aucPublished.checked = !!a?.published;
 
   renderAucPhotoGrid(a);
   setMsg(els.aucMsg, '', '');
@@ -793,24 +798,28 @@ async function saveAuction() {
   setMsg(els.aucMsg, '', '');
 
   const title = String(els.aucTitle.value || '').trim();
-  const fb_url = String(els.aucUrl.value || '').trim();
+  let fb_url = String(els.aucUrl.value || '').trim();
   const description = String(els.aucDesc.value || '').trim();
 
   const starts_at = fromDatetimeLocalValue(els.aucStarts.value);
   const ends_at = fromDatetimeLocalValue(els.aucEnds.value);
-  const sort_order_raw = String(els.aucSortOrder.value || '').trim();
-  const sort_order = sort_order_raw === '' ? 0 : Number(sort_order_raw);
 
-  const is_published = !!els.aucPublished.checked;
+  const published = !!els.aucPublished.checked;
+
+  // sort_order držíme v UI, ale pokud ho DB nemá, necháš v SQL ignorovat
+  const sort_order_raw = String(els.aucSortOrder.value || '').trim();
+  const sort_order = sort_order_raw === '' ? null : Number(sort_order_raw);
+  if (sort_order_raw !== '' && !Number.isFinite(sort_order)) {
+    setMsg(els.aucMsg, 'err', 'Řazení musí být číslo.');
+    return;
+  }
 
   if (!title || !fb_url || !ends_at) {
     setMsg(els.aucMsg, 'err', 'Vyplň Název + FB URL + Konec.');
     return;
   }
-  if (!Number.isFinite(sort_order)) {
-    setMsg(els.aucMsg, 'err', 'Řazení musí být číslo.');
-    return;
-  }
+
+  fb_url = normalizeHttpUrl(fb_url);
 
   const payload = {
     title,
@@ -818,44 +827,37 @@ async function saveAuction() {
     description: description || null,
     starts_at: starts_at || null,
     ends_at,
-    sort_order,
-    is_published
+    published,
+    // pokud DB nemá sort_order, SQL si to může ignorovat (nebo si ho klidně přidej do DB)
+    sort_order: sort_order ?? 0
   };
 
+  // CREATE
   if (!AUC_EDIT_ID) {
-    const { data, error } = await sb
-      .from('auctions')
-      .insert(payload)
-      .select('*')
-      .single();
-
+    const { data: newId, error } = await sb.rpc('admin_create_auction', { payload });
     if (error) throw error;
 
     await loadAuctions();
     renderAuctionsTable();
 
-    // otevři editor na nově vytvořenou aukci
-    const created = AUCTIONS.find(x => x.id === data.id) || data;
-    fillAucEditor(created);
+    const created = AUCTIONS.find(x => x.id === newId);
+    if (created) fillAucEditor(created);
 
     setMsg(els.aucMsg, 'ok', 'Aukce vytvořená ✅');
-
-  } else {
-    const { error } = await sb
-      .from('auctions')
-      .update(payload)
-      .eq('id', AUC_EDIT_ID);
-
-    if (error) throw error;
-
-    await loadAuctions();
-    renderAuctionsTable();
-
-    const updated = AUCTIONS.find(x => x.id === AUC_EDIT_ID);
-    if (updated) fillAucEditor(updated);
-
-    setMsg(els.aucMsg, 'ok', 'Uloženo ✅');
+    return;
   }
+
+  // UPDATE
+  const { error } = await sb.rpc('admin_update_auction', { p_id: AUC_EDIT_ID, payload });
+  if (error) throw error;
+
+  await loadAuctions();
+  renderAuctionsTable();
+
+  const updated = AUCTIONS.find(x => x.id === AUC_EDIT_ID);
+  if (updated) fillAucEditor(updated);
+
+  setMsg(els.aucMsg, 'ok', 'Uloženo ✅');
 }
 
 async function toggleAuctionPublish(id) {
@@ -864,7 +866,7 @@ async function toggleAuctionPublish(id) {
 
   const { error } = await sb
     .from('auctions')
-    .update({ is_published: !a.is_published })
+    .update({ published: !a.published })
     .eq('id', id);
 
   if (error) throw error;
@@ -885,7 +887,6 @@ async function deleteAuction(id) {
   const ok = confirm(`Fakt smazat aukci "${a.title}"? (smaže i záznamy fotek v DB)`);
   if (!ok) return;
 
-  // smaž DB (fotky v bucketu zůstanou – to je OK, nebo můžeme doplnit purge později)
   const { error } = await sb.from('auctions').delete().eq('id', id);
   if (error) throw error;
 
@@ -919,11 +920,10 @@ async function uploadAuctionPhotos() {
   els.aucUploadBtn.textContent = 'Nahrávám…';
 
   try {
-    // zjisti next sort_order pro fotky
     const cur = AUCTIONS.find(x => x.id === AUC_EDIT_ID);
     const base = (cur?.auction_images?.length || 0);
 
-    const inserted = [];
+    const rows = [];
 
     for (let i = 0; i < files.length; i++) {
       const f = files[i];
@@ -937,21 +937,20 @@ async function uploadAuctionPhotos() {
       });
       if (upErr) throw upErr;
 
-      inserted.push({
+      rows.push({
         auction_id: AUC_EDIT_ID,
         path,
         sort_order: base + i
       });
     }
 
-    // zapiš do DB
-    const { error: insErr } = await sb.rpc('admin_add_auction_images', { p_rows: inserted });
-if (insErr) throw insErr;
+    // ✅ DB insert přes admin RPC (RLS safe)
+    const { error: insErr } = await sb.rpc('admin_add_auction_images', { p_rows: rows });
+    if (insErr) throw insErr;
 
-
-    // refresh
     await loadAuctions();
     renderAuctionsTable();
+
     const updated = AUCTIONS.find(x => x.id === AUC_EDIT_ID);
     if (updated) fillAucEditor(updated);
 
@@ -971,11 +970,11 @@ async function deleteAuctionImage(imgId, path) {
   const ok = confirm('Smazat fotku? (smaže z DB, a pokusí se smazat i ze Storage)');
   if (!ok) return;
 
-  // 1) DB delete
-  const { error: delErr } = await sb.from('auction_images').delete().eq('id', imgId);
+  // ✅ DB delete přes admin RPC (RLS safe)
+  const { error: delErr } = await sb.rpc('admin_delete_auction_image', { p_image_id: imgId });
   if (delErr) throw delErr;
 
-  // 2) best-effort storage remove (když nemáš práva, DB už je čistá)
+  // best-effort storage remove
   try {
     await sb.storage.from(AUC_BUCKET).remove([path]);
   } catch (e) {
