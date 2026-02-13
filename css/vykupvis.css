@@ -274,30 +274,7 @@ textarea{ resize: vertical; min-height: 92px; line-height: 1.5; }
   gap: 10px;
 }
 
-
-/* ===================== ADD CARD BUTTON (stejný vibe jako file upload) ===================== */
-#addCardBtn,
-.btn-add,
-.add-btn{
-  padding: 10px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(168,85,247,.70);
-  background: linear-gradient(135deg, rgba(168,85,247,.22), rgba(124,58,237,.14));
-  color: #fff;
-  font-weight: 900;
-  cursor: pointer;
-  transition: .15s;
-}
-
-#addCardBtn:hover,
-.btn-add:hover,
-.add-btn:hover{
-  box-shadow: 0 0 0 2px rgba(168,85,247,.18);
-  transform: translateY(-1px);
-}
-
-
-/* ===================== FILE INPUT (konec 90s) ===================== */
+/* ===================== FILE INPUT (modern) ===================== */
 input[type="file"]{
   width: 100%;
   padding: 10px;
@@ -307,7 +284,6 @@ input[type="file"]{
   color: rgba(255,255,255,.78);
 }
 
-/* modern browsers */
 input[type="file"]::file-selector-button{
   margin-right: 10px;
   padding: 10px 12px;
@@ -324,23 +300,50 @@ input[type="file"]::file-selector-button:hover{
   transform: translateY(-1px);
 }
 
-/* ===================== CONSENT TEXT (na střed) ===================== */
-/* chytáme několik variant podle toho jak to máš v HTML */
-.consent,
-.legal,
-.fineprint,
-.form-consent{
-  text-align: center;
-  margin-top: 12px;
-  color: rgba(255,255,255,.58);
-  font-size: .9rem;
-  line-height: 1.45;
+/* ===================== ADD CARD BUTTON (STEJNÝ STYL JAK FILE UPLOAD) ===================== */
+/* v HTML máš id="addRowBtn" */
+#addRowBtn{
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(168,85,247,.70);
+  background: linear-gradient(135deg, rgba(168,85,247,.22), rgba(124,58,237,.14));
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+  transition: .15s;
+}
+#addRowBtn:hover{
+  box-shadow: 0 0 0 2px rgba(168,85,247,.18);
+  transform: translateY(-1px);
 }
 
-/* Když máš poslední větu jako <p class="muted small"> ... */
-.card > .muted.small,
-.card .muted.small{
+/* ===================== CONSENT TEXT (na střed) ===================== */
+/* tvoje poslední věta je <p class="muted small" style="margin-top:10px;">... */
+#buyForm > p.muted.small{
   text-align: center;
+  margin-top: 12px !important;
+  color: rgba(255,255,255,.58);
+}
+
+/* ===================== BULK SPACING (FIX) ===================== */
+/* TADY je hlavní oprava: bulk wrapper je #bulkBlock, ne #bulkForm */
+#bulkBlock label{
+  margin-top: 14px;
+}
+
+/* Počet karet a fotky jsou uvnitř .grid-2 -> přidej prostor shora jen těm labelům */
+#bulkBlock .grid-2{
+  margin-top: 12px;   /* tohle oddělí grid od textarey nahoře */
+}
+
+/* A pokud chceš extra konkrétně: první label v gridu (Počet karet) */
+#bulkBlock .grid-2 > label:first-child{
+  margin-top: 10px;   /* aby to nebylo nalepený ani uvnitř gridu */
+}
+
+/* malá poznámka pod gridem */
+#bulkBlock p.muted.small{
+  margin-top: 10px;
 }
 
 /* ===================== MOBILE ===================== */
@@ -352,33 +355,9 @@ input[type="file"]::file-selector-button:hover{
   .item-grid{ grid-template-columns: 1fr; }
   .row-head{ flex-direction: column; align-items: stretch; }
   .btn-primary{ max-width: 520px; }
-}
 
-
-/* ===================== BULK SPACING FIX ===================== */
-
-/* Bulk inputy potřebují víc vzduchu shora */
-.bulk-block label,
-.bulk-fields label,
-.bulk-row label{
-  margin-top: 14px;
-}
-
-/* fallback – když bulk nemá wrapper, tak aspoň všechny labely pod sebou */
-.form label + label{
-  margin-top: 10px;
-}
-
-/* ===================== BULK TOP SPACING (FINAL FIX) ===================== */
-
-/* Počet karet bývá první label → potřebuje margin shora */
-#bulkForm label{
-  display: grid;
-  gap: 6px;
-  margin-top: 16px;
-}
-
-/* první label v bulku ještě víc */
-#bulkForm label:first-child{
-  margin-top: 22px;
+  /* na mobilu ještě víc dýchat v bulku */
+  #bulkBlock .grid-2{
+    margin-top: 14px;
+  }
 }
