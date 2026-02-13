@@ -302,37 +302,17 @@ body{
 .countdown.ended .time{ color: rgba(255,107,107,.95); }
 
 /* ===================== MODAL ===================== */
-.modal{
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.65);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding: 18px;
-  z-index: 9999;
-}
-
 .modal-card{
-  width: min(880px, 100%);
+  width: min(748px, 100%);      /* bylo 880px  -> cca -15% */
+  max-height: 80vh;             /* -20% výšky (z typických 100vh) */
   background:#15151d;
   border:1px solid #2a2a33;
   border-radius: 20px;
   padding: 16px;
-}
 
-.modal-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
-  margin-bottom: 10px;
-}
-
-.modal-title{
-  font-weight: 900;
-  font-size: 1.15rem;
-  color:#ff3b3b;
 }
 
 .modal-body{
@@ -340,19 +320,28 @@ body{
   border-radius: 16px;
   background:#0f0f14;
   padding: 12px;
+
+  overflow: auto;               /* ✅ scroll když je dlouhej text */
+  flex: 1 1 auto;               /* ✅ zabere zbytek místa a scrolluje */
+  min-height: 0;                /* ✅ fix pro flex scroll v některých prohlížečích */
 }
 
 .modal-desc{
   white-space: pre-wrap;
   line-height: 1.6;
   color: rgba(255,255,255,.85);
+
+  overflow-wrap: anywhere;      /* ✅ dlouhé URL nepřeteče */
+  word-break: break-word;
 }
 
 .modal-actions{
   display:flex;
   justify-content:flex-end;
-  margin-top: 12px;
+  margin-top: 0;                /* už to řídí flex gap */
+  flex: 0 0 auto;
 }
+
 
 .auc-inner{
   align-items: stretch;
