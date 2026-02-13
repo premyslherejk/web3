@@ -316,8 +316,120 @@ tr.is-green td:first-child{ border-left: 4px solid #7dffb2; }
   max-width: 70%;
 }
 
+/* ===================== AUKCE (NEW) ===================== */
+
+.auc-filters{
+  grid-template-columns: 1.2fr .7fr .7fr auto;
+}
+
+.sep-line{
+  height: 1px;
+  background: #2a2a33;
+  margin: 14px 0;
+  opacity: .9;
+}
+
+.auc-editor{
+  border: 1px solid #2a2a33;
+  background:#0f0f14;
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.auc-editor-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.auc-editor-title{
+  font-weight: 900;
+  font-size: 1.05rem;
+}
+
+.auc-form{
+  display:grid;
+  gap: 12px;
+}
+
+.grid-2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.checkline{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  color:#ddd;
+  font-size:.92rem;
+}
+.checkline input{
+  width: 18px;
+  height: 18px;
+}
+
+.auc-images-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.auc-photo-grid{
+  margin-top: 12px;
+  display:grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.auc-photo{
+  border: 1px solid #2a2a33;
+  background:#15151d;
+  border-radius: 16px;
+  overflow:hidden;
+  display:grid;
+}
+
+.auc-photo img{
+  width: 100%;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  display:block;
+  background:#0f0f14;
+}
+
+.auc-photo .cap{
+  padding: 10px;
+  display:flex;
+  justify-content:space-between;
+  gap: 10px;
+  align-items:center;
+}
+
+.auc-badge{
+  display:inline-flex;
+  align-items:center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #2a2a33;
+  font-weight: 900;
+  font-size: .85rem;
+  background:#15151d;
+}
+.auc-badge.live{ border-color: rgba(255,59,59,.55); }
+.auc-badge.scheduled{ border-color: rgba(168,85,247,.55); }
+.auc-badge.ended{ border-color: rgba(125,255,178,.45); opacity:.9; }
+
 @media (max-width: 900px){
   .filters{ grid-template-columns: 1fr; }
   .dash-top{ flex-direction: column; }
   .photo-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .grid-2{ grid-template-columns: 1fr; }
+  .auc-photo-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
