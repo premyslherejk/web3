@@ -58,6 +58,8 @@
             Objednávky: <span id="countAll">0</span>
             <span class="dot">•</span>
             Výkup: <span id="countBuy">0</span>
+            <span class="dot">•</span>
+            Aukce: <span id="countAuc">0</span>
           </div>
         </div>
 
@@ -71,6 +73,7 @@
       <div class="tabs">
         <button class="tab active" id="tabOrders" type="button">Objednávky</button>
         <button class="tab" id="tabBuy" type="button">Výkup</button>
+        <button class="tab" id="tabAuc" type="button">Aukce</button>
       </div>
 
       <!-- ===================== ORDERS VIEW ===================== -->
@@ -152,6 +155,128 @@
             </tbody>
           </table>
         </div>
+      </div>
+
+      <!-- ===================== AUCTIONS VIEW ===================== -->
+      <div id="aucPane" class="hidden">
+
+        <div class="auc-top">
+          <div class="filters auc-filters">
+            <input id="aucSearchInput" class="input" type="text" placeholder="Hledat: název / popis / FB url…" autocomplete="off" />
+            <select id="aucPubFilter" class="input">
+              <option value="all">Publikace: vše</option>
+              <option value="pub">Jen publikované</option>
+              <option value="unpub">Jen skryté</option>
+            </select>
+            <select id="aucSort" class="input">
+              <option value="ends_desc">Konec: nejpozději</option>
+              <option value="ends_asc">Konec: nejdřív</option>
+              <option value="newest">Nejnovější</option>
+              <option value="oldest">Nejstarší</option>
+            </select>
+            <button class="btn-ghost" id="aucNewBtn" type="button">+ Nová aukce</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="table" id="aucTable">
+            <thead>
+              <tr>
+                <th>Název</th>
+                <th>Stav</th>
+                <th>Start</th>
+                <th>Konec</th>
+                <th>Publikováno</th>
+                <th>Fotky</th>
+                <th>Akce</th>
+              </tr>
+            </thead>
+            <tbody id="aucBody">
+              <tr><td colspan="7" class="muted">Načítám…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="sep-line"></div>
+
+        <!-- Editor -->
+        <section class="auc-editor" id="aucEditor">
+          <div class="auc-editor-top">
+            <div>
+              <div class="auc-editor-title">Editor aukce</div>
+              <div class="muted small" id="aucEditorHint">Vytvoř / uprav aukci a nahraj fotky. Vše jde přes Supabase.</div>
+            </div>
+            <div class="actions">
+              <button class="btn-ghost" id="aucClearBtn" type="button">Zrušit edit</button>
+            </div>
+          </div>
+
+          <form class="auc-form" id="aucForm" novalidate>
+            <div class="grid-2">
+              <label>
+                Název aukce*
+                <input id="aucTitle" type="text" required placeholder="Např. Pikachu bundle / kusovky / sealed…" />
+              </label>
+
+              <label>
+                URL aukce (FB)*
+                <input id="aucUrl" type="url" required placeholder="https://www.facebook.com/..." />
+              </label>
+            </div>
+
+            <label>
+              Popis
+              <textarea id="aucDesc" rows="4" placeholder="Co je v aukci, stav, pravidla, atd."></textarea>
+            </label>
+
+            <div class="grid-2">
+              <label>
+                Start (volitelné)
+                <input id="aucStarts" type="datetime-local" />
+              </label>
+
+              <label>
+                Konec*
+                <input id="aucEnds" type="datetime-local" required />
+              </label>
+            </div>
+
+            <div class="grid-2">
+              <label>
+                Řazení (sort_order)
+                <input id="aucSortOrder" type="number" placeholder="0" />
+              </label>
+
+              <label class="checkline">
+                <input id="aucPublished" type="checkbox" />
+                Publikovat (is_published)
+              </label>
+            </div>
+
+            <div class="actions">
+              <button class="btn-primary" id="aucSaveBtn" type="submit">Uložit aukci</button>
+              <p class="msg" id="aucMsg" aria-live="polite"></p>
+            </div>
+          </form>
+
+          <div class="sep-line"></div>
+
+          <div class="auc-images">
+            <div class="auc-images-top">
+              <div>
+                <div class="auc-editor-title">Fotky</div>
+                <div class="muted small">Nahraj víc fotek najednou. Uloží se do bucketu <b>auctions</b> do složky podle ID aukce.</div>
+              </div>
+              <div class="actions">
+                <input id="aucPhotos" type="file" accept="image/*" multiple />
+                <button class="btn-ghost" id="aucUploadBtn" type="button">Nahrát fotky</button>
+              </div>
+            </div>
+
+            <div class="auc-photo-grid" id="aucPhotoGrid"></div>
+          </div>
+
+        </section>
       </div>
 
       <p class="msg" id="dashMsg" aria-live="polite"></p>
