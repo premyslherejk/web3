@@ -3,26 +3,34 @@ const { createClient } = supabase;
 
 const SUPABASE_URL = 'https://hwjbfrhbgeczukcjkmca.supabase.co';
 const SUPABASE_ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3amJmcmhiZ2VjenVrY2prbWNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0NDU5MjQsImV4cCI6MjA4NTAyMTkyNH0.BlgIov7kFq2EUW17hLs6o1YujL1i9elD7wILJP6h-lQ';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3jbfrhbgeczukcjkmcaIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0NDU5MjQsImV4cCI6MjA4NTAyMTkyNH0.BlgIov7kFq2EUW17hLs6o1YujL1i9elD7wILJP6h-lQ';
 
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const AUC_BUCKET = 'auctions';
 
 // ===================== UI =====================
 const $ = (id) => document.getElementById(id);
 
 const els = {
-  liveWrap: $('liveWrap'),
-  schedWrap: $('schedWrap'),
-  histWrap: $('histWrap'),
-  liveCount: $('liveCount'),
-  schedCount: $('schedCount'),
-  histCount: $('histCount'),
+  currentTitle: $('currentTitle'),
+  currentMeta: $('currentMeta'),
+  currentList: $('currentList'),
+  historyList: $('historyList'),
+  historyMeta: $('historyMeta'),
   pageMsg: $('pageMsg'),
+
+  // modal
+  descModal: $('descModal'),
+  closeModalBtn: $('closeModalBtn'),
+  modalTitle: $('modalTitle'),
+  modalMeta: $('modalMeta'),
+  modalDesc: $('modalDesc'),
+  modalGoBtn: $('modalGoBtn'),
 };
 
 function setMsg(type, text) {
-  if (!els.pageMsg) return;
-  els.pageMsg.className = 'msg ' + (type || '');
+  els.pageMsg.className = 'page-msg ' + (type || '');
   els.pageMsg.textContent = text || '';
 }
 
@@ -45,209 +53,349 @@ function fmtDt(ts) {
   });
 }
 
-function msToCountdown(ms) {
-  if (ms <= 0) return '0d 00:00:00';
-  const sec = Math.floor(ms / 1000);
-  const d = Math.floor(sec / 86400);
-  const h = Math.floor((sec % 86400) / 3600);
-  const m = Math.floor((sec % 3600) / 60);
-  const s = sec % 60;
-  const hh = String(h).padStart(2,'0');
-  const mm = String(m).padStart(2,'0');
-  const ss = String(s).padStart(2,'0');
-  return `${d}d ${hh}:${mm}:${ss}`;
+function normalizeUrl(url) {
+  const u = String(url || '').trim();
+  if (!u) return '';
+  if (/^https?:\/\//i.test(u)) return u;
+  return 'https://' + u; // ✅ fix relative link issue
 }
 
-function getPublicImageUrl(path) {
+function publicImgUrl(path) {
   if (!path) return '';
-  // bucket: auctions (pokud je public)
-  // path typicky: "auction-uuid/1.jpg" nebo cokoliv co ukládáš
-  return `${SUPABASE_URL}/storage/v1/object/public/auctions/${encodeURIComponent(path).replaceAll('%2F','/')}`;
+  // bucket je public → jde přes /object/public
+  const p = encodeURIComponent(path).replaceAll('%2F','/');
+  return `${SUPABASE_URL}/storage/v1/object/public/${AUC_BUCKET}/${p}`;
 }
 
-// ===================== FETCH =====================
-async function fetchAuctionsWithImages() {
-  // foreign table select
-  const { data, error } = await sb
-    .from('auctions')
-    .select(`
-      id, created_at, title, description, fb_url, starts_at, ends_at, is_published, sort_order,
-      auction_images:auction_images ( id, path, caption, sort_order )
-    `)
-    .eq('is_published', true)
-    .order('sort_order', { ascending: true })
-    .order('ends_at', { ascending: false });
+function aucState(a) {
+  const now = Date.now();
+  const starts = a.starts_at ? new Date(a.starts_at).getTime() : null;
+  const ends = a.ends_at ? new Date(a.ends_at).getTime() : null;
 
-  if (error) throw error;
+  if (!ends || Number.isNaN(ends)) return 'ended';
+  if (ends <= now) return 'ended';
+  if (starts && !Number.isNaN(starts) && starts > now) return 'scheduled';
+  return 'live';
+}
 
-  // seřadit fotky per aukce
-  (data || []).forEach(a => {
-    if (Array.isArray(a.auction_images)) {
-      a.auction_images.sort((x, y) => (x.sort_order ?? 0) - (y.sort_order ?? 0));
-    } else {
-      a.auction_images = [];
-    }
-  });
+function badgeHtml(state) {
+  if (state === 'live') return `<span class="badge live">LIVE</span>`;
+  if (state === 'scheduled') return `<span class="badge scheduled">PLÁNOVÁNO</span>`;
+  return `<span class="badge ended">UKONČENO</span>`;
+}
 
-  return data || [];
+function clampText(text, limit = 170) {
+  const s = String(text || '');
+  if (s.length <= limit) return { short: s, cut: false };
+  return { short: s.slice(0, limit).trim() + '…', cut: true };
+}
+
+function countdownParts(ms) {
+  const safe = Math.max(0, ms);
+  const totalSec = Math.floor(safe / 1000);
+  const d = Math.floor(totalSec / 86400);
+  const h = Math.floor((totalSec % 86400) / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  return { d, h, m, s };
+}
+
+function fmtCountdown(ms) {
+  const { d, h, m, s } = countdownParts(ms);
+  const pad = (n) => String(n).padStart(2, '0');
+  if (d > 0) return `${d}d ${pad(h)}:${pad(m)}:${pad(s)}`;
+  return `${pad(h)}:${pad(m)}:${pad(s)}`;
+}
+
+// ===================== DATA =====================
+let AUCTIONS = [];
+let TICKER = null;
+
+// ===================== MODAL =====================
+function openModal({ title, meta, desc, url }) {
+  els.modalTitle.textContent = title || '—';
+  els.modalMeta.textContent = meta || '—';
+  els.modalDesc.textContent = desc || '';
+  const link = normalizeUrl(url);
+  els.modalGoBtn.href = link || '#';
+  els.modalGoBtn.style.opacity = link ? '1' : '.6';
+  els.modalGoBtn.style.pointerEvents = link ? 'auto' : 'none';
+
+  els.descModal.classList.remove('hidden');
+}
+function closeModal() {
+  els.descModal.classList.add('hidden');
 }
 
 // ===================== RENDER =====================
-function renderEmpty(wrap, text) {
-  wrap.innerHTML = `<p class="muted">${escapeHtml(text)}</p>`;
-}
+function renderAuctionCard(a) {
+  const st = aucState(a);
+  const images = Array.isArray(a.auction_images) ? a.auction_images : [];
+  const imgUrls = images.map(x => publicImgUrl(x.path)).filter(Boolean);
 
-function auctionCard(a, kind) {
-  const imgs = (a.auction_images || []).map(im => {
-    const url = getPublicImageUrl(im.path);
-    return `<img src="${url}" alt="">`;
-  }).join('');
+  const main = imgUrls[0] || '';
+  const fb = normalizeUrl(a.fb_url);
 
-  const ends = a.ends_at ? new Date(a.ends_at).toISOString() : '';
-  const endsNice = fmtDt(a.ends_at);
+  const { short, cut } = clampText(a.description || '', 190);
 
-  const desc = a.description ? escapeHtml(a.description) : '<span class="muted">—</span>';
+  const startsTxt = a.starts_at ? fmtDt(a.starts_at) : '—';
+  const endsTxt = a.ends_at ? fmtDt(a.ends_at) : '—';
 
-  const statusClass =
-    kind === 'live' ? 'live' :
-    kind === 'scheduled' ? 'scheduled' : 'ended';
+  const endsMs = a.ends_at ? new Date(a.ends_at).getTime() : 0;
+  const startsMs = a.starts_at ? new Date(a.starts_at).getTime() : 0;
 
-  const countdownHtml = kind === 'ended'
-    ? `<strong class="countdown">HOTOVO ✅</strong>`
-    : `<strong class="countdown" data-ends="${escapeHtml(ends)}">—</strong>`;
+  // countdown target:
+  // - live: ends_at
+  // - scheduled: starts_at (odpočet do startu)
+  // - ended: 0
+  let cdLabel = 'Do konce';
+  let cdTarget = endsMs;
 
-  const startsLine = a.starts_at ? fmtDt(a.starts_at) : '—';
+  if (st === 'scheduled') {
+    cdLabel = 'Do startu';
+    cdTarget = startsMs || endsMs;
+  }
+  if (st === 'ended') {
+    cdLabel = 'Ukončeno';
+    cdTarget = 0;
+  }
+
+  const safeId = escapeHtml(a.id);
+  const title = escapeHtml(a.title || '—');
 
   return `
-    <article class="au-card ${statusClass}">
-      <div class="au-images">
-        ${imgs || `<div class="img-empty">Bez fotek (zatím)</div>`}
-      </div>
+    <article class="auc-card" data-auc-id="${safeId}">
+      <div class="auc-inner">
 
-      <div class="au-top">
-        <div class="au-title">${escapeHtml(a.title || 'Aukce')}</div>
-        <div class="au-desc">${desc}</div>
+        <div class="auc-left">
+          <div class="auc-title">${title}</div>
 
-        <div class="au-meta">
-          <div class="meta-row">
-            <span>Start</span>
-            <strong>${escapeHtml(startsLine)}</strong>
+          <div class="badges">
+            ${badgeHtml(st)}
+            ${a.published ? '' : `<span class="badge ended">SKRYTÉ</span>`}
           </div>
-          <div class="meta-row">
-            <span>Konec</span>
-            <strong>${escapeHtml(endsNice)}</strong>
+
+          <div class="gallery" data-gallery="${safeId}">
+            ${
+              main
+                ? `<img class="gallery-main" data-main src="${main}" alt="">`
+                : `<div class="gallery-main" style="display:flex; align-items:center; justify-content:center; opacity:.7;">
+                     Bez fotek
+                   </div>`
+            }
+
+            ${
+              imgUrls.length > 1
+                ? `<div class="gallery-thumbs">
+                    ${imgUrls.map((u, i) => `
+                      <img class="thumb ${i===0?'active':''}" data-thumb src="${u}" data-full="${u}" alt="">
+                    `).join('')}
+                  </div>`
+                : (imgUrls.length === 1
+                    ? `<div class="gallery-thumbs"><span class="muted small">1 fotka</span></div>`
+                    : `<div class="gallery-thumbs"><span class="muted small">Nahraj fotky a bude to tu sexy.</span></div>`
+                  )
+            }
           </div>
-          <div class="meta-row">
-            <span>${kind === 'scheduled' ? 'Do startu' : 'Do konce'}</span>
-            ${countdownHtml}
+
+          <div class="desc">
+            ${escapeHtml(short).replaceAll('\n','<br>')}
+          </div>
+
+          <div class="desc-actions">
+            ${
+              cut
+                ? `<button class="btn-link" type="button" data-act="more"
+                      data-title="${escapeHtml(a.title || '')}"
+                      data-meta="${escapeHtml(`${st.toUpperCase()} • konec: ${endsTxt}`)}"
+                      data-desc="${escapeHtml(a.description || '')}"
+                      data-url="${escapeHtml(fb)}"
+                    >Zobrazit více</button>`
+                : ''
+            }
           </div>
         </div>
-      </div>
 
-      <div class="au-actions">
-        <a class="btn-primary" href="${escapeHtml(a.fb_url)}" target="_blank" rel="noopener">Otevřít aukci na FB</a>
+        <aside class="auc-right">
+          <div class="kv">
+            <div class="kv-row"><span>Start</span><strong>${escapeHtml(startsTxt)}</strong></div>
+            <div class="kv-row"><span>Konec</span><strong>${escapeHtml(endsTxt)}</strong></div>
+          </div>
+
+          <div class="cta">
+            <a class="btn-primary" href="${escapeHtml(fb || '#')}" target="_blank" rel="noopener">
+              Otevřít aukci na FB
+            </a>
+
+            <div class="countdown ${st}" data-cd-label="${escapeHtml(cdLabel)}" data-cd-target="${cdTarget}">
+              <div class="label">${escapeHtml(cdLabel)}</div>
+              <div class="time" data-cd-time>—</div>
+            </div>
+
+            <div class="muted small">
+              Tip: když jsi na mobilu, otevři to v aplikaci Facebook pro nejlepší UX.
+            </div>
+          </div>
+        </aside>
+
       </div>
     </article>
   `;
 }
 
-function splitAuctions(all) {
-  const now = new Date();
+function renderAll() {
+  const now = Date.now();
 
-  const live = [];
-  const scheduled = [];
-  const ended = [];
+  const live = AUCTIONS.filter(a => aucState(a) === 'live');
+  const scheduled = AUCTIONS.filter(a => aucState(a) === 'scheduled');
+  const ended = AUCTIONS.filter(a => aucState(a) === 'ended');
 
-  for (const a of all) {
-    const starts = a.starts_at ? new Date(a.starts_at) : null;
-    const ends = a.ends_at ? new Date(a.ends_at) : null;
+  // CURRENT SECTION: live, else scheduled, else empty
+  let current = [];
+  let title = 'Aktuální aukce';
 
-    if (!ends || Number.isNaN(ends.getTime())) continue;
-
-    const started = !starts || (!Number.isNaN(starts.getTime()) && starts <= now);
-    const notStarted = starts && !Number.isNaN(starts.getTime()) && starts > now;
-
-    if (ends <= now) ended.push(a);
-    else if (notStarted) scheduled.push(a);
-    else if (started) live.push(a);
-    else scheduled.push(a);
+  if (live.length) {
+    current = live.sort((a,b) => new Date(a.ends_at).getTime() - new Date(b.ends_at).getTime());
+    title = 'Aktuální aukce (LIVE)';
+  } else if (scheduled.length) {
+    current = scheduled.sort((a,b) => new Date(a.starts_at || a.ends_at).getTime() - new Date(b.starts_at || b.ends_at).getTime());
+    title = 'Plánované aukce';
+  } else {
+    current = [];
+    title = 'Aktuální aukce';
   }
 
-  // řazení: live nejblíž konci první (urgent)
-  live.sort((a,b) => new Date(a.ends_at) - new Date(b.ends_at));
-  // scheduled nejblíž startu první
-  scheduled.sort((a,b) => new Date(a.starts_at || a.ends_at) - new Date(b.starts_at || b.ends_at));
-  // history nejnovější nahoře (už je většinou podle ends desc)
-  ended.sort((a,b) => new Date(b.ends_at) - new Date(a.ends_at));
+  els.currentTitle.textContent = title;
+  els.currentMeta.textContent = live.length
+    ? `LIVE: ${live.length} • Plánované: ${scheduled.length} • Historie: ${ended.length}`
+    : scheduled.length
+      ? `Plánované: ${scheduled.length} • Historie: ${ended.length}`
+      : `Zatím nic • Historie: ${ended.length}`;
 
-  return { live, scheduled, ended };
+  if (!current.length) {
+    els.currentList.innerHTML = `<div class="muted">Teď nic neběží ani není naplánované. Sleduj IG/FB, ať ti nic neuteče 👀</div>`;
+  } else {
+    els.currentList.innerHTML = current.map(renderAuctionCard).join('');
+  }
+
+  // HISTORY SECTION
+  els.historyMeta.textContent = `Ukončené: ${ended.length}`;
+  if (!ended.length) {
+    els.historyList.innerHTML = `<div class="muted">Zatím žádná historie.</div>`;
+  } else {
+    // historie – nejnovější ukončené nahoře (podle ends_at desc)
+    const hist = ended.sort((a,b) => new Date(b.ends_at).getTime() - new Date(a.ends_at).getTime());
+    els.historyList.innerHTML = hist.map(renderAuctionCard).join('');
+  }
+
+  restartTicker();
 }
 
-// ===================== COUNTDOWN LOOP =====================
-let ticker = null;
+function tickCountdowns() {
+  const nodes = document.querySelectorAll('[data-cd-target]');
+  const now = Date.now();
 
-function startTicker() {
-  if (ticker) clearInterval(ticker);
+  nodes.forEach(box => {
+    const target = Number(box.getAttribute('data-cd-target') || 0);
+    const stateClass = box.classList.contains('ended') ? 'ended'
+      : box.classList.contains('scheduled') ? 'scheduled'
+      : 'live';
 
-  const tick = () => {
-    const now = Date.now();
-    document.querySelectorAll('[data-ends]').forEach(el => {
-      const iso = el.getAttribute('data-ends');
-      const d = iso ? new Date(iso) : null;
-      if (!d || Number.isNaN(d.getTime())) {
-        el.textContent = '—';
-        return;
-      }
-      const ms = d.getTime() - now;
-      el.textContent = msToCountdown(ms);
-      if (ms <= 0) el.textContent = '0d 00:00:00';
-    });
-  };
+    const timeEl = box.querySelector('[data-cd-time]');
+    if (!timeEl) return;
 
-  tick();
-  ticker = setInterval(tick, 1000);
+    if (!target || stateClass === 'ended') {
+      timeEl.textContent = '—';
+      return;
+    }
+
+    const diff = target - now;
+
+    if (diff <= 0) {
+      // přepne text, ale data se refetchnou až na reload (můžeš doplnit auto-refetch)
+      timeEl.textContent = '00:00:00';
+      return;
+    }
+
+    timeEl.textContent = fmtCountdown(diff);
+  });
 }
 
-// ===================== INIT =====================
-document.addEventListener('DOMContentLoaded', async () => {
+function restartTicker() {
+  if (TICKER) clearInterval(TICKER);
+  tickCountdowns();
+  TICKER = setInterval(tickCountdowns, 1000);
+}
+
+// ===================== LOAD =====================
+async function loadAuctions() {
   setMsg('', '');
 
+  const { data, error } = await sb
+    .from('auctions')
+    .select(`
+      id, created_at, title, description, fb_url, starts_at, ends_at, published,
+      auction_images ( id, path, sort_order, created_at )
+    `)
+    .order('ends_at', { ascending: false });
+
+  if (error) throw error;
+
+  const rows = (data || [])
+    .filter(a => a.published === true); // veřejně jen publikované
+
+  rows.forEach(a => {
+    if (!Array.isArray(a.auction_images)) a.auction_images = [];
+    a.auction_images.sort((x,y) => (x.sort_order ?? 0) - (y.sort_order ?? 0));
+  });
+
+  AUCTIONS = rows;
+  renderAll();
+}
+
+// ===================== EVENTS =====================
+document.addEventListener('DOMContentLoaded', async () => {
+  // modal close
+  els.closeModalBtn.addEventListener('click', closeModal);
+  els.descModal.addEventListener('click', (e) => {
+    if (e.target === els.descModal) closeModal();
+  });
+
+  // delegation: thumbs + show more
+  document.body.addEventListener('click', (e) => {
+    // thumbs
+    const t = e.target.closest('[data-thumb]');
+    if (t) {
+      const card = t.closest('[data-gallery]');
+      const main = card?.querySelector('[data-main]');
+      if (!main) return;
+
+      const url = t.getAttribute('data-full');
+      if (url) main.src = url;
+
+      card.querySelectorAll('.thumb').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      return;
+    }
+
+    // show more
+    const more = e.target.closest('[data-act="more"]');
+    if (more) {
+      const title = more.getAttribute('data-title') || '';
+      const meta = more.getAttribute('data-meta') || '';
+      const desc = more.getAttribute('data-desc') || '';
+      const url = more.getAttribute('data-url') || '';
+      openModal({ title, meta, desc, url });
+      return;
+    }
+  });
+
   try {
-    const all = await fetchAuctionsWithImages();
-    const { live, scheduled, ended } = splitAuctions(all);
-
-    els.liveCount.textContent = String(live.length);
-    els.schedCount.textContent = String(scheduled.length);
-    els.histCount.textContent = String(ended.length);
-
-    // LIVE
-    if (!live.length) {
-      renderEmpty(els.liveWrap, 'Teď neběží žádná aukce.');
-    } else {
-      els.liveWrap.innerHTML = live.map(a => auctionCard(a, 'live')).join('');
-    }
-
-    // SCHEDULED
-    if (!scheduled.length) {
-      renderEmpty(els.schedWrap, 'Žádná naplánovaná aukce není.');
-    } else {
-      els.schedWrap.innerHTML = scheduled.map(a => auctionCard(a, 'scheduled')).join('');
-    }
-
-    // HISTORY
-    if (!ended.length) {
-      renderEmpty(els.histWrap, 'Zatím tu není žádná historie.');
-    } else {
-      els.histWrap.innerHTML = ended.map(a => auctionCard(a, 'ended')).join('');
-    }
-
-    startTicker();
-
-  } catch (e) {
-    console.error(e);
-    setMsg('err', `Nešlo načíst aukce: ${e?.message || e}`);
-    renderEmpty(els.liveWrap, 'Chyba načítání.');
-    renderEmpty(els.schedWrap, 'Chyba načítání.');
-    renderEmpty(els.histWrap, 'Chyba načítání.');
+    await loadAuctions();
+  } catch (err) {
+    console.error(err);
+    setMsg('err', `Nešlo načíst aukce: ${err?.message || err}`);
+    els.currentList.innerHTML = `<div class="muted">Chyba načítání.</div>`;
+    els.historyList.innerHTML = `<div class="muted">Chyba načítání.</div>`;
   }
 });
