@@ -398,23 +398,74 @@ body{
   border: 2px solid rgba(168,85,247,.5);
 }
 
+/* ===================== AUC TABS (WOW UPGRADE) ===================== */
+
 .auc-tabs{
   display:flex;
-  gap: 10px;
-  margin: 18px 0;
+  justify-content:center;
+  gap: 14px;
+  margin: 26px 0 10px;
+  flex-wrap: wrap;
 }
 
 .auc-tab{
-  padding: 10px 16px;
+  padding: 16px 26px;
   border-radius: 999px;
-  border: 1px solid #2a2a33;
-  background:#0f0f14;
+  border: 1px solid rgba(168,85,247,.35);
+
+  background: rgba(21,21,29,.75);
+  backdrop-filter: blur(10px);
+
   color:#fff;
   font-weight: 900;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+
   cursor:pointer;
+  transition: .18s ease;
+
+  display:flex;
+  align-items:center;
+  gap: 10px;
+
+  box-shadow: 0 0 0 1px rgba(255,255,255,.04);
+}
+
+.auc-tab:hover{
+  transform: translateY(-2px) scale(1.03);
+  border-color: rgba(168,85,247,.65);
+
+  box-shadow:
+    0 0 0 2px rgba(168,85,247,.15),
+    0 10px 25px rgba(0,0,0,.35);
 }
 
 .auc-tab.active{
-  border-color: rgba(168,85,247,.85);
-  box-shadow: 0 0 0 2px rgba(168,85,247,.18);
+  border-color: rgba(168,85,247,.95);
+
+  background: linear-gradient(
+    135deg,
+    rgba(168,85,247,.35),
+    rgba(124,58,237,.20)
+  );
+
+  box-shadow:
+    0 0 0 2px rgba(168,85,247,.22),
+    0 0 28px rgba(168,85,247,.25);
+
+  transform: scale(1.05);
+}
+
+/* Mobile = full width pills */
+@media (max-width: 600px){
+  .auc-tab{
+    width: 100%;
+    justify-content:center;
+    font-size: 1.1rem;
+    padding: 18px;
+  }
+
+  .auc-tabs{
+    gap: 10px;
+  }
 }
